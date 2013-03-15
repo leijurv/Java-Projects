@@ -5,7 +5,6 @@
 package vector;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import reversepolishnotation.ReversePolishNotation;
 
 /**
