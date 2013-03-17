@@ -20,7 +20,7 @@ import javax.swing.JOptionPane;
  * @author leijurv
  */
 public class TicTacToe3 extends JComponent implements KeyListener {
-//OH HI wazzup
+    
     static int[] x = {1, 0, 0, 0, 0, 0, 0, 0, 0};
     boolean move = false;
     boolean done = false;
