@@ -21,7 +21,7 @@ import javax.swing.JOptionPane;
  */
 public class TicTacToe3 extends JComponent implements KeyListener {
     
-    static int[] x = {1, 0, 0, 0, 0, 0, 0, 0, 0};
+    static int[] x = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     boolean move = false;
     boolean done = false;
     static boolean see = false;
@@ -63,9 +63,9 @@ public class TicTacToe3 extends JComponent implements KeyListener {
         if (m.equals("Y")) {
             see = true;
         }
-        String Mm = JOptionPane.showInputDialog("You go first? (Y/N)");
+        String Mm = JOptionPane.showInputDialog("Computer goes first? (Y/N)");
         if (Mm.equals("Y")) {
-            x[0] = 0;
+            x[0] = 1;
         }
         frame = new JFrame("Tic Tac Toe");
         M.setFocusable(true);
