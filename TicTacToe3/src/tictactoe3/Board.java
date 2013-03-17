@@ -45,21 +45,30 @@ public class Board {
         }
     }
 
+    public boolean full() {
+        for (int i = 0; i < pos.length; i++) {
+            if (pos[i] == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public int[] solve() {
         int n = done();
         if (n != 0) {
-            return new int[]{n, 0};
+            return new int[]{n, -1};
         }
         boolean tie = false;
         boolean possible = false;
         int tiepos = -1;
-        Board[] b=new Board[9];
+        Board[] b = new Board[9];
         for (int i = 0; i < pos.length; i++) {
             if (pos[i] == 0) {
                 possible = true;
                 Board Q = new Board(pos, !move);
                 Q.pos[i] = move ? 1 : -1;
-                b[i]=Q;
+                b[i] = Q;
                 if (Q.done() != 0) {
                     return new int[]{Q.done(), i};
                 }
@@ -73,7 +82,7 @@ public class Board {
                 if (tiepos == -1) {
                     tiepos = i;
                 }
-                Board Q=b[i];
+                Board Q = b[i];
                 int[] m = Q.solve();
                 if (m[0] == (move ? 1 : -1)) {
                     return new int[]{m[0], i};
@@ -90,7 +99,6 @@ public class Board {
         }
         return new int[]{move ? -1 : 1, tiepos};
     }
-
 
     public void render(Graphics g, int x, int y, int size) {
         if (size < 1) {
@@ -110,6 +118,9 @@ public class Board {
                 }
             } else {
                 int[] n = solve();
+                if (n[1] == -1) {
+                    return;
+                }
                 Board Q = new Board(pos, !move);
                 Q.pos[n[1]] = move ? 1 : -1;
                 Q.render(g, x, y, size);
