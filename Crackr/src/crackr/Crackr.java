@@ -207,9 +207,9 @@ public Crackr(){
         System.out.println("3 Threads");
         System.out.println("Alphabet: " + Hard);
         System.out.println("Starting thread checking common passwords...");
-        (new commonChecker(goal, "/Users/leif/Downloads/rockyou.txt")).start();
+        (new commonChecker(goal, "/Users/leijurv/Downloads/rockyou.txt")).start();
         System.out.println("Starting thread checking dictionary...");
-        (new commonChecker(goal, "/Users/leif/Downloads/words.txt")).start();
+        (new commonChecker(goal, "/Users/leijurv/Downloads/words.txt")).start();
 
         for (int i = 1; !f; i++) {
             if (i == 7) {
