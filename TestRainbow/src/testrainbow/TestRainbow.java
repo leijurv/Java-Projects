@@ -116,11 +116,11 @@ public class TestRainbow {
 
         String filePath = "/Users/leijurv/Desktop/chains.txt";
 
-        //gen(k,filePath);
+        gen(k, filePath);
 
 
 
-        byte[] orig = {74, 44, 39};
+        byte[] orig = {18, 103, 56};
         byte[] hash = (new SHA1()).hash(orig);
         print(find(k, filePath, hash));
     }
