@@ -18,7 +18,7 @@ public class TestRainbow {
     public static byte[] get(int len, byte[] hash, int offset) {
         byte[] S = new byte[len];
         for (int j = 0; j < S.length; j++) {
-            S[j] = hash[(j + offset) % hash.length];
+            S[j] = hash[(j + offset+3) % hash.length];
         }
         return S;
     }
@@ -77,11 +77,10 @@ public class TestRainbow {
         System.out.println();
     }
 
-    public static int[] pos(byte[][] end, byte[] p, int k, int size) {
+    public static byte[] pos(byte[][] end, byte[] p, byte[][] start,int k, int size) {
         SHA1 sha1 = new SHA1();
         byte[][] ends = new byte[k][0];
         for (int i = 0; i < k; i++) {
-            System.out.println("Done " + i + " of " + k);
             byte[] S = get(size, p, i);
             for (int n = 1; n + i < k; n++) {
                 byte[] N = sha1.hash(S);
@@ -90,46 +89,48 @@ public class TestRainbow {
             ends[i] = S;
         }
         for (int i = 0; i < ends.length; i++) {
+            System.out.println("Searching "+i+" of "+ends.length+" endpoints.");
             for (int j = 0; j < end.length; j++) {
                 if (eq(ends[i], end[j])) {
-                    return new int[]{i, j};
+                    byte[] x=chain(start[j],k,i-1);
+                    byte[] t=sha1.hash(x);
+                    if (eq(t,p)){
+                        return x;
+                    }else{
+                        System.out.println("False alarm: ");
+                        print(x);
+                    }
                 }
             }
         }
-        return new int[]{-1, -1};
-    }
-
-    public static byte[] test(int k, byte[][] start, byte[][] end, byte[] p, int pwdSize) {
-        int[] P = pos(end, p, k, pwdSize);
-        if (P[1] == -1) {
-            throw new RuntimeException("I don't know");
-        }
-        return chain(start[P[1]], k, P[0] - 1);
+        return new byte[]{-1,-1};
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        int k = 10;
+        int k = 256;
 
 
         String filePath = "/Users/leijurv/Desktop/chains.txt";
 
-        gen(k, filePath);
+        //gen(k, filePath);
 
 
 
-        byte[] orig = {18, 103, 56};
+        byte[] orig = {50,2,1};
         byte[] hash = (new SHA1()).hash(orig);
+        long s=System.currentTimeMillis();
         print(find(k, filePath, hash));
+        System.out.println("Done in "+(System.currentTimeMillis()-s)+" milliseconds.");
     }
 
     public static void gen(int K, String chainPath) throws IOException {
         FileOutputStream Ff = new FileOutputStream(chainPath);
         FileWriter F = new FileWriter("/Users/leijurv/Desktop/pos.txt");
         for (int i = -128; i <= 128; i++) {
-
+            System.out.println(i);
             for (int j = -127; j <= 128; j++) {
                 for (int k = 0; k <= 0; k++) {
                     run(K, new byte[]{(byte) i, (byte) j, (byte) k}, F, Ff);
@@ -148,9 +149,12 @@ public class TestRainbow {
         byte[] raw = new byte[f.available()];
         f.read(raw);
         for (int i = 0; i < raw.length - 6; i += 6) {
+            if (i%100000==0){
+                System.out.println("Loaded "+(i/100000)+" of "+(raw.length/100000)+" chains.");
+            }
             start[i / 6] = new byte[]{raw[i], raw[i + 1], raw[i + 2]};
             end[i / 6] = new byte[]{raw[i + 3], raw[i + 4], raw[i + 5]};
         }
-        return test(k, start, end, hash, end[0].length);
+        return pos( end, hash,start,k, end[0].length);
     }
 }
