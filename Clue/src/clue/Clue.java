@@ -23,9 +23,10 @@ public class Clue {
     static int[][] SmHas=new int[0][0];
     static int[][] KmHas=new int[0][0];
     static int[][] EmHas=new int[0][0];
-    static final int[] meHas={};//Remember to change this!!!
+    static final int[] meHas={20,13,21,14,1,3};//Remember to change this!!!
     static int[] NoneHave=new int[0];
     static int[] have=new int[0];
+    static final String[] names={"Mustard","Plum","Green","Peacock","Scarlet","White","Knife","Candlestick","Pistol","Poison","Trophy","Rope","Bat","Ax","Dumbbell","Hall","Dining Room","Kitchen","Patio","Observatory","Theater","Living Room","Spa","Guest House"};
     public static void main(String[] args) {
         
         Everything();
@@ -33,7 +34,92 @@ public class Clue {
         Everything();
         Everything();
         Everything();
+        Everything();
+        Everything();
+        Everything();
+        Everything();
+        Everything();
         print();
+    }
+    public static void Archive6(){
+        parse("S:1,10,23");
+        parse("K+9");
+        parse("S:1,8,24");
+        parse("K:5,7,17");
+        parse("K-1,10,24");
+        parse("E-1,10,24");
+        parse("S+24");
+        parse("E-1,10,18");
+        parse("S:1,10,18");
+        parse("S-1,16,7");
+        //parse("K:2,19,9");
+        //Gets cancelled anyway and also had errors.
+        parse("K-2,16,14");
+        parse("E+2");
+        parse("E:1,7,19");
+        //parse("S:3,8,24");
+        //Already knew that. Erika was a LITTLE bit stupid.
+        parse("K:2,12,18");
+        parse("S-3,14,19");
+        parse("E-3,14,19");
+        parse("K-3,14,19");
+        parse("E-3,14,18");
+        parse("S-3,14,18");
+        parse("K-4,14,19");
+        parse("E+4");
+        parse("E-3,12,19");
+        parse("S:3,12,19");//GARRRRR I wrote : instead of -
+        parse("K-2,12,23");
+        parse("E:2,12,23");
+        parse("E-1,17,15");
+        parse("S-1,17,15");
+        parse("S:1,10,23");
+        parse("K-5,10,24");
+        parse("E-5,10,24");
+        parse("S+23");
+        parse("E-5,8,18");
+        parse("S-5,8,18");
+        parse("K+8");
+    }
+    public static void Archive5(){
+        parse("S+19");
+        parse("E-18,1,8");
+        parse("K-18,1,8");
+        parse("K:4,8,17");
+        parse("S-1,9,18");
+        parse("K:1,12,18");
+        parse("K:1,15,24");
+        parse("S+7");
+        parse("E:1,13,18");
+        parse("K-1,14,23");
+        parse("S-1,14,23");
+        parse("E-1,14,23");
+    }
+    public static void Archive4(){
+        //Leslie=Karla
+        //Maret=Steve
+        parse("K+5");
+        parse("K:2,21,9");
+        parse("S:2,14,23");
+        parse("K+11");
+        parse("E-6,20,12");
+        parse("S:6,7,19");
+        parse("S+4");
+        parse("K-4,7,21");
+        parse("E:3,10,18");
+        parse("E:3,21,12");
+        parse("K+8");
+        parse("E-6,7,21");
+        parse("S-6,7,21");
+        parse("K-6,7,21");
+        
+        parse("E+13");
+        parse("S+14");//Because I already know the weapon.
+        parse("K+15");
+        
+        parse("S+19");
+        parse("E+22");
+        parse("E+16");
     }
     public static void Archive1(){
         parse("S:2,8,14");
@@ -113,6 +199,7 @@ public class Clue {
     public static void Everything(){
         InferHave();
         InferNotHave();
+        //removeMight();
         calcHave();
         calcNoneHave();
     }
@@ -158,15 +245,15 @@ public class Clue {
         System.out.println("√ in X column means someone has that, O in X column means no-one has that.");
         System.out.println("√ in any other column means that that person has that, O means they don't");
         System.out.println("Blank means not known");
-        System.out.println("     X    M    K    S    E");
+        System.out.println("             X    M    K    S    E");
         char Has='√';
         char NoHas='O';
         for (int i=1; i<=possibilities; i++){
-            System.out.print(i);
-            System.out.print("   ");
-            if (i<10){
-                System.out.print(" ");
+            String name=names[i-1];
+            while(name.length()<13){
+                name=name+" ";
             }
+            System.out.print(name);
             if (contains(have,i)){
                 System.out.print(Has);
             }else{
@@ -221,28 +308,49 @@ public class Clue {
                 
             }
             System.out.println();
+            if (i==6){
+            System.out.println();
         }
+            if(i==15){
+                System.out.println();
+            }
+        }
+        System.out.println();
         for (int i=0; i<EmHas.length; i++){
             System.out.print("E:");
             for (int n=0; n<EmHas[i].length; n++){
-                System.out.print(EmHas[i][n]+" ");
+                System.out.print(names[EmHas[i][n]-1]+" ");
             }
             System.out.println();
         }
         for (int i=0; i<SmHas.length; i++){
             System.out.print("S:");
             for (int n=0; n<SmHas[i].length; n++){
-                System.out.print(SmHas[i][n]+" ");
+                System.out.print(names[SmHas[i][n]-1]+" ");
             }
             System.out.println();
         }
         for (int i=0; i<KmHas.length; i++){
             System.out.print("K:");
             for (int n=0; n<KmHas[i].length; n++){
-                System.out.print(KmHas[i][n]+" ");
+                System.out.print(names[KmHas[i][n]-1]+" ");
             }
             System.out.println();
         }
+        System.out.println();
+        for (int i=0; i<NoneHave.length; i++){
+            if (NoneHave[i]<7){
+                System.out.println("Person is "+names[NoneHave[i]-1]);
+            }else{
+            if (NoneHave[i]>15){
+                System.out.println("Room is "+names[NoneHave[i]-1]);
+            }else{
+                System.out.println("Weapon is "+names[NoneHave[i]-1]);
+            }
+                  
+            }
+        }
+        
     }
     public static void calcHave(){
         have=meHas;
@@ -258,8 +366,34 @@ public class Clue {
     }
     public static void calcNoneHave(){
         for (int i=1; i<=possibilities; i++){
-            if (contains(SNhas,i) && contains(ENhas,i) && contains(KNhas,i) && !contains(meHas,i)){
+            if (contains(SNhas,i) && contains(ENhas,i) && contains(KNhas,i) && !contains(meHas,i) && !contains(NoneHave,i)){
                 NoneHave=add(i,NoneHave);
+            }
+        }
+    }
+    public static void removeMight(){
+        for (int i=0; i<KmHas.length; i++){
+            for (int n=0; n<KmHas[i].length; n++){
+                if (contains(Khas,KmHas[i][n])){
+                    KmHas=removehas(i,KmHas);
+                    break;
+                }
+            }
+        }
+        for (int i=0; i<EmHas.length; i++){
+            for (int n=0; n<EmHas[i].length; n++){
+                if (contains(Ehas,EmHas[i][n])){
+                    EmHas=removehas(i,EmHas);
+                    break;
+                }
+            }
+        }
+        for (int i=0; i<SmHas.length; i++){
+            for (int n=0; n<SmHas[i].length; n++){
+                if (contains(Shas,SmHas[i][n])){
+                    SmHas=removehas(i,SmHas);
+                    break;
+                }
             }
         }
     }
@@ -278,7 +412,7 @@ public class Clue {
                 if (!contains(Ehas,EmHas[i][0])){
                     Ehas=add(EmHas[i][0],Ehas);
                 }
-                
+                EmHas=removehas(i,EmHas);
             }
         }
         for (int i=0; i<SmHas.length; i++){
@@ -286,7 +420,7 @@ public class Clue {
                 if (!contains(Shas,SmHas[i][0])){
                     Shas=add(SmHas[i][0],Shas);
                 }
-                
+                SmHas=removehas(i,SmHas);
             }
         }
         for (int i=0; i<KmHas.length; i++){
@@ -294,7 +428,7 @@ public class Clue {
                 if (!contains(Khas,KmHas[i][0])){
                     Khas=add(KmHas[i][0],Khas);
                 }
-                
+                KmHas=removehas(i,KmHas);
             }
         }
     }
@@ -394,6 +528,19 @@ public class Clue {
                 break;
             }
         }
+    }
+    public static int[][] removehas(int a, int[][] b){
+        int[][] N=new int[b.length-1][0];
+        int n=0;
+        for (int i=0; i<b.length; i++){
+            if (i==a){
+                n--;
+            }else{
+                N[n]=b[i];
+            }
+            n++;
+        }
+        return N;
     }
     public static int[][] addhas(int[] a, int[][] b){
         int[][] res=new int[b.length+1][0];

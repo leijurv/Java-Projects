@@ -56,7 +56,7 @@ public class Ghost {
             load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
             //Change to "/Users/USERNAME/Downloads/Java-Projects-master/Ghost/Ghostwords.txt" or whereever you downloaded it to.
         } catch (Exception e) {
-            System.out.println("There was an error. Maybe you didn't change the path on line 62?");
+            System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
         Scanner scan = new Scanner(System.in);
