@@ -7,6 +7,7 @@ package polynomial;
 import fraction.Fraction;
 import gaussian_elimination.Gaussian_Elimination;
 import gaussian_elimination.Gaussian_Elimination.Matrix;
+import java.util.Random;
 
 /**
  *
@@ -263,9 +264,7 @@ public static Polynomial interpolate(Fraction[] xVal, Fraction[] yVal){
             matr[matr.length-i-1][xVal.length]=yVal[i];
         }
         Matrix m=new Matrix(matr);
-        System.out.println(m);
         Gaussian_Elimination.Gaussian(m);
-        System.out.println(m);
         Fraction[] coef=new Fraction[xVal.length];
         for (int i=0; i<xVal.length; i++){
             coef[coef.length-i-1]=m.values[i][xVal.length].simplify();
@@ -276,19 +275,34 @@ public static Polynomial interpolate(Fraction[] xVal, Fraction[] yVal){
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Fraction[] xVal=new Fraction[5];
+        Random r=new Random();
+        int secret=521;
+        Fraction[] points=new Fraction[3];
+        points[0]=new Fraction(secret);
+        points[1]=new Fraction(r.nextInt(500)+10);//Random
+        points[2]=new Fraction(r.nextInt(500)+10);//Random
+        Polynomial P=new Polynomial(points);
+        System.out.println("Secret polynomial is "+P);
+        System.out.println("Secret 1 is "+P.eval(new Fraction(1)));
+        System.out.println("Secret 2 is "+P.eval(new Fraction(2)));
+        System.out.println("Secret 3 is "+P.eval(new Fraction(3)));
+        System.out.println("Secret 4 is "+P.eval(new Fraction(4)));
+        
+        
+        System.out.println("Using 3 of 4 secrets");
+        Fraction[] xVal=new Fraction[3];
         Fraction[] yVal=new Fraction[xVal.length];
         xVal[0]=new Fraction(1);
         xVal[1]=new Fraction(2);
-        xVal[2]=new Fraction(3);
-        xVal[3]=new Fraction(4);
-        xVal[4]=new Fraction(5);
+        xVal[2]=new Fraction(4);
         
-        yVal[0]=new Fraction(0);
-        yVal[1]=new Fraction(1);
-        yVal[2]=new Fraction(0);
-        yVal[3]=new Fraction(0);
-        yVal[4]=new Fraction(0);
-        System.out.println(interpolate(xVal,yVal));
+        yVal[0]=P.eval(xVal[0]);
+        yVal[1]=P.eval(xVal[1]);
+        yVal[2]=P.eval(xVal[2]);
+        for (int i=0; i<xVal.length; i++){
+            System.out.println("Using secret "+xVal[i]+", it is "+yVal[i]);
+        }
+        Polynomial p=interpolate(xVal,yVal);
+        System.out.println("Calculates polynomial is "+p);
     }
 }
