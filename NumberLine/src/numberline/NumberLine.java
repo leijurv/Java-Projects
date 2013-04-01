@@ -4,6 +4,7 @@
  */
 package numberline;
 
+import fraction.Fraction;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Random;
  * @author leijurv
  */
 public class NumberLine {
-
+/*
     public static class Fraction {
 
         int Num;
@@ -61,7 +62,7 @@ public class NumberLine {
         /*
         public Fraction subtract(Fraction f){
         return new Fraction(Num-f.Num,Den-f.Den);
-        }*/
+        }
 
         
 
@@ -125,7 +126,7 @@ public class NumberLine {
             return Num + "/" + Den;
         }
     }
-
+*/
     /**
      * @param args the command line arguments
      */

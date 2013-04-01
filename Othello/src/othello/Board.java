@@ -5,13 +5,14 @@
 package othello;
 
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author leijurv
  */
 public class Board {
-    static int depth = 6;//How many moves each one looks ahead
+    static int depth = Integer.parseInt(JOptionPane.showInputDialog("How many moves should I look ahead?"));//How many moves each one looks ahead
     static final int size=8;
     byte[][] board = new byte[size][size];
     int sofar;

@@ -73,10 +73,13 @@ public class MyPwnageWebServer {
             
             int n;
             byte[] buf=new byte[is.available()];
+            is.read(buf);
+            ps.write(buf);
+            /*
             while ((n = is.read(buf)) > 0) {
                 System.out.println(n);
                 ps.write(buf, 0, n);
-            }
+            }*/
         } finally {
             is.close();
         }
@@ -86,12 +89,12 @@ public class MyPwnageWebServer {
         boolean running=true;
         while(running){
             Socket s=S.accept();
-            s.setTcpNoDelay(true);
-            
             PrintStream ps = new PrintStream(s.getOutputStream());
             InputStream is = new BufferedInputStream(s.getInputStream());
             byte[] b=new byte[is.available()];
             is.read(b);
+            
+            /*
             String r="";
             int i=4;
             while(i<b.length && (char)b[i]!='\n'){
@@ -102,19 +105,20 @@ public class MyPwnageWebServer {
             while(q<b.length-3){
                 x=x+(char)b[q++];
             }
-            if (!x.contains("favicon.ico"))
-            System.out.println(x);
             String t="";
             int index=0;
             while(index<r.length() && r.toCharArray()[index]!=' '){
                 t=t+r.toCharArray()[index++];
+            }*/
+            if (b.length>20){
+            String x=new String(b);
+            System.out.println("MEOW"+b.length+x);
+            String t="";
+            for (int i=4; x.charAt(i)!=' '; i++){
+                t=t+x.charAt(i);
             }
-            //ps.print(t);
             String fname = t.replace('/', File.separatorChar);
             fname=fname.replace("%20"," ");
-            /*if (fname.startsWith(File.separator)) {
-                fname = fname.substring(1);
-            }*/
             File targ = new File(fname);
             if (targ.isDirectory()) {
                 File ind = new File(targ, "index.html");
@@ -124,13 +128,19 @@ public class MyPwnageWebServer {
             }
             sendFile(targ,ps,s);
             InetAddress ia=s.getInetAddress();
-            String Ss="Request from: "+ia+"  "+ia.getHostName()+" Local: "+ia.isSiteLocalAddress()+fname;
+            String Ss="Request from: "+ia+"  "+ia.getHostName()+","+ia.getHostAddress()+" Local: "+ia.isSiteLocalAddress()+fname;
+            
             ps.print(Ss);
+            /*
             if (!x.contains("favicon.ico") && !x.equals("")){
             System.out.println(Ss);
             System.out.println();
             System.out.println();
+            }*/
+            }else{
+                System.out.println("OH NO"+new String(b));
             }
+            ps.write(("n").getBytes());
             ps.close();
             is.close();
             

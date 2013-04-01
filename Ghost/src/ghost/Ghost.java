@@ -121,6 +121,7 @@ public class Ghost {
             System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
+        words.remove("dnieper");
         Scanner scan=new Scanner(System.in);
         System.out.print("Overall strategy or just one? (1/2) >");
         String s=scan.nextLine();

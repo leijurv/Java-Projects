@@ -59,7 +59,7 @@ public void paintComponent(Graphics g){
         b[4][3]=-1;
         b[4][4]=1;
         updateScreen(new Board(b, 0, false), 0);
-        frame = new JFrame("Connect Four");
+        frame = new JFrame("Othello");
         M.setFocusable(true);
         (frame).setContentPane(M);
         frame.setLayout(new FlowLayout());
