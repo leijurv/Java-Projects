@@ -27,7 +27,7 @@ public class MyPwnageWebServer {
     /**
      * @param args the command line arguments
      */
-    public static  void listDirectory(File dir, PrintStream ps) throws IOException {
+    public static  void listDirectory(File dir, PrintStream ps, String info) throws IOException {
         ps.println("<HTML><HEAD>\n");
         ps.println("<TITLE>Directory listing</TITLE><P>\n");
         ps.println("</HEAD><BODY>");
@@ -41,15 +41,16 @@ public class MyPwnageWebServer {
                 ps.println("<A HREF=\""+list[i]+"\">"+list[i]+"</A><BR>");
             }
         }
-        ps.println("<P><HR><BR><I>" + (new Date()) + "</I>");
+        ps.println("<P><HR><BR><I>" + (new Date()) + "</I>"+info);
+        
         ps.println("</BODY></HTML>");
     }
-    public static void sendFile(File targ, PrintStream ps,Socket s) throws IOException {
+    public static void sendFile(File targ, PrintStream ps,Socket s,String info) throws IOException {
         InputStream is = null;
         ps.write('\n');
         if (targ.isDirectory()) {
             System.out.println("Listing directory: "+targ.getAbsolutePath());
-            listDirectory(targ, ps);
+            listDirectory(targ, ps, info);
             
             
             
@@ -84,13 +85,15 @@ public class MyPwnageWebServer {
             is.close();
         }
     }
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         ServerSocket S=new ServerSocket(5020);
+        String info="HELLO MOMMY! WHAT'S UP?";
         boolean running=true;
         while(running){
             Socket s=S.accept();
             PrintStream ps = new PrintStream(s.getOutputStream());
             InputStream is = new BufferedInputStream(s.getInputStream());
+            Thread.sleep(1000L);
             byte[] b=new byte[is.available()];
             is.read(b);
             
@@ -112,7 +115,7 @@ public class MyPwnageWebServer {
             }*/
             if (b.length>20){
             String x=new String(b);
-            System.out.println("MEOW"+b.length+x);
+            System.out.println("Recieved request:\n"+x);
             String t="";
             for (int i=4; x.charAt(i)!=' '; i++){
                 t=t+x.charAt(i);
@@ -126,11 +129,11 @@ public class MyPwnageWebServer {
                     targ = ind;
                 }
             }
-            sendFile(targ,ps,s);
+            sendFile(targ,ps,s,info);
             InetAddress ia=s.getInetAddress();
             String Ss="Request from: "+ia+"  "+ia.getHostName()+","+ia.getHostAddress()+" Local: "+ia.isSiteLocalAddress()+fname;
             
-            ps.print(Ss);
+            System.out.println(Ss);
             /*
             if (!x.contains("favicon.ico") && !x.equals("")){
             System.out.println(Ss);
@@ -138,9 +141,8 @@ public class MyPwnageWebServer {
             System.out.println();
             }*/
             }else{
-                System.out.println("OH NO"+new String(b));
+                System.out.println("OH NO, an invalid request"+new String(b));
             }
-            ps.write(("n").getBytes());
             ps.close();
             is.close();
             
