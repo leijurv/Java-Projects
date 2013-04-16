@@ -119,7 +119,7 @@ public class Main extends JPanel
 		current.clear();
 		
 		//Initial state here
-		makeFPentomino();//Default
+		makeGliderGun();//Default
 		
 		new Main();
 	}
@@ -155,5 +155,6 @@ public class Main extends JPanel
 		System.exit(0);
 	  }
 	  });
+          
 }
 }

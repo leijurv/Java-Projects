@@ -14,6 +14,7 @@ public class Euler122MARK {
 
     static ArrayList<Integer> binary = new ArrayList<Integer>();
     public static void main(String[] args){
+        long l=System.currentTimeMillis();
         int[] lengths=new int[201];
         for (int i=0; i<lengths.length; i++){
             lengths[i]=99999;
@@ -23,10 +24,11 @@ public class Euler122MARK {
         Gen1(chain,lengths);
         int sum=0;
         for (int i=1; i<lengths.length; i++){
-            System.out.println((i)+":"+(lengths[i]-1));
+            //System.out.println((i)+":"+(lengths[i]-1));
             sum+=lengths[i]-1;
         }
         System.out.println(sum);
+        System.out.println(System.currentTimeMillis()-l);
     }
     public static void Gen1(ArrayList<Integer> chain,int[] lengths){
         int largest=chain.get(chain.size()-1);

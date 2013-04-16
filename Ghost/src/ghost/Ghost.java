@@ -113,14 +113,7 @@ public class Ghost {
         System.out.println();
         print(sofar);
     }
-    public static void main(String[] args) {
-        try {
-            load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
-            //Change to "/Users/USERNAME/Downloads/Java-Projects-master/Ghost/Ghostwords.txt" or whereever you downloaded it to.
-        } catch (Exception e) {
-            System.out.println("There was an error. Maybe you didn't change the path on line 56?");
-            return;
-        }
+    public static void DO(){
         words.remove("dnieper");
         Scanner scan=new Scanner(System.in);
         System.out.print("Overall strategy or just one? (1/2) >");
@@ -136,4 +129,36 @@ if (b){
 }else{
     Print(sofar);
 }
+    }
+    public static boolean test(String s){
+        for (int i=0; i<s.length(); i++){
+            if (s.indexOf(s.substring(i,i+1))!=i){
+                return false;
+            }
+        }
+        return true;
+    }
+           
+    public static void main(String[] args) {
+        try {
+            load("/Users/leijurv/Downloads/mword10/CROSSWD.TXT");
+            //load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
+            //Change to "/Users/USERNAME/Downloads/Java-Projects-master/Ghost/Ghostwords.txt" or whereever you downloaded it to.
+        } catch (Exception e) {
+            System.out.println("There was an error. Maybe you didn't change the path on line 56?");
+            return;
+        }
+        int maxlen=0;
+        String s="";
+        for (int i=0; i<words.size(); i++){
+            if (words.get(i).length()>=maxlen){
+                if (test(words.get(i))){
+                    System.out.println(words.get(i));
+                    s=words.get(i);
+                    maxlen=s.length();
+                }
+            }
+        }
+        System.out.println(s);
+        //DO();
 }}
