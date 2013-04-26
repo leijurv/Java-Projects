@@ -20,41 +20,61 @@ public class Main extends JPanel
 	static int minRow=0;
 	static int rowPadding=5;
 	static int colPadding=5;
-	
 	public static void calcNext(){
 		synchronized(current){
 			ArrayList<Location> temp=new ArrayList<Location>();
 			
 		gen++;
-		System.out.println("Calculating generation "+gen);
+		//System.out.println("Calculating generation "+gen);
 		temp.clear();
 		ArrayList<Location> possibles=new ArrayList<Location>();
-		for (Location l:current){
-			Location[] adj=l.adjacent();
+                ArrayList<Location> ones=new ArrayList<Location>();
+                ArrayList<Location> twos=new ArrayList<Location>();
+                ArrayList<Location> threes=new ArrayList<Location>();
+                Location[][] adja=new Location[current.size()][0];
+                int i=0;
+                for (Location l : current){
+                    adja[i++]=l.adjacent();
+                }
+		for (Location[] adj : adja){
 			for (Location ll:adj){
-				if (!possibles.contains(ll) && !current.contains(ll)){
+				if (!possibles.contains(ll)){
 					possibles.add(ll);
 				}
 			}
 		}
 		
-		for(Location l:current){
-			if (l.shouldBeOnNext()){
-				temp.add(l);
-			}
+		for(Location[] adj : adja){
+                    for (Location ll : adj){
+                        if (threes.contains(ll)){
+                            threes.remove(ll);
+                        }
+                        if (twos.contains(ll)){
+                            twos.remove(ll);
+                            threes.add(ll);
+                        }
+                        if (ones.contains(ll)){
+                            ones.remove(ll);
+                            twos.add(ll);
+                        }
+                        if (possibles.contains(ll)){
+                            possibles.remove(ll);
+                            ones.add(ll);
+                        }
+                        
+                    }
 		}
-		for (Location l:possibles){
-			if (!temp.contains(l) && l.shouldBeOnNext()){
-				temp.add(l);
-			}
-		}
+                for (Location l : twos){
+                    if (current.contains(l) && !threes.contains(l)){
+                        threes.add(l);
+                    }
+                }
 		current.clear();
-		for (Location l : temp){
+		for (Location l : threes){
 			current.add(l);
 		}
 	}}
 	public static void makeGliderGun(){
-		current.add(new Location(4,35));
 		current.add(new Location(5,1));
 		current.add(new Location(5,2));
 		current.add(new Location(6,1));

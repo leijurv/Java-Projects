@@ -18,6 +18,7 @@ public class Multiply extends Function{
     public Function derivitive(){
         return new Add(new Multiply(a,b.derivitive()),new Multiply(b,a.derivitive()));
     }
+    
     public String toString(){
         String result="";
         boolean needs=true;
@@ -43,8 +44,8 @@ public class Multiply extends Function{
             return result+"("+b+")";
         }
         return result+b;
-    }
-    /*public String toString(){
+    }/*
+    public String toString(){
         return "("+a+")*("+b+")";
     }*/
     public Function simplify(){
@@ -93,10 +94,10 @@ public class Multiply extends Function{
         if (b instanceof Multiply){
             Function base=((ToThePower)a).base;
             if (((Multiply)b).b.equal(base)){
-                return new Multiply(((Multiply)b).a,new ToThePower(base,new Constant(((ToThePower)a).pow.val+1))).simplify();
+                return new Multiply(((Multiply)b).a,new ToThePower(base,new Add(new Constant(1),((ToThePower)a).pow))).simplify();
             }
             if (((Multiply)b).a.equal(base)){
-                return new Multiply(((Multiply)b).b,new ToThePower(base,new Constant(((ToThePower)a).pow.val+1))).simplify();
+                return new Multiply(((Multiply)b).b,new ToThePower(base,new Add(new Constant(1),((ToThePower)a).pow))).simplify();
             }
             /*
             if (((Multiply)b).b instanceof ToThePower){
@@ -111,10 +112,11 @@ public class Multiply extends Function{
             if (b instanceof ToThePower){
                 Function base=((ToThePower)b).base;
                 if (((Multiply)a).a.equal(base)){
-                    return new Multiply(((Multiply)a).b,new ToThePower(base,new Constant(((ToThePower)b).pow.val+1))).simplify();
-                }
+                    return new Multiply(((Multiply)a).b,new ToThePower(base,new Add(new Constant(1),((ToThePower)b).pow))).simplify();
+            
+                } 
                 if (((Multiply)a).b.equal(base)){
-                    return new Multiply(((Multiply)a).a,new ToThePower(base,new Constant(((ToThePower)b).pow.val+1))).simplify();
+                    return new Multiply(((Multiply)a).a,new ToThePower(base,new Add(new Constant(1),((ToThePower)b).pow))).simplify();
                 }/*
                 if (((Multiply)a).b instanceof ToThePower){
                         return new Multiply(((Multiply)a).a,new Multiply(((Multiply)a).b,b)).simplify();
@@ -127,18 +129,18 @@ public class Multiply extends Function{
         if (a instanceof ToThePower){
             if (b instanceof ToThePower){
                 if (((ToThePower)a).base.equal(((ToThePower)b).base)){
-                    return (new ToThePower(((ToThePower)a).base,new Constant(((ToThePower)a).pow.val+((ToThePower)b).pow.val))).simplify();
+                    return (new ToThePower(((ToThePower)a).base,new Add(((ToThePower)a).pow,((ToThePower)b).pow))).simplify();
                 }
             }
         }
         if (b instanceof ToThePower){
             if (a.equal(((ToThePower)b).base)){
-                return (new ToThePower(a,new Constant(((ToThePower)b).pow.val+1))).simplify();
+                return (new ToThePower(a,new Add(new Constant(1),((ToThePower)b).pow))).simplify();
             }
         }
         if (a instanceof ToThePower){
             if (b.equal(((ToThePower)a).base)){
-                return (new ToThePower(b,new Constant(((ToThePower)a).pow.val+1))).simplify();
+                return (new ToThePower(b,new Add(new Constant(1),((ToThePower)a).pow))).simplify();
             }
         }
         if (a instanceof Multiply){
@@ -167,13 +169,13 @@ public class Multiply extends Function{
             if (A.b instanceof ToThePower){
                 ToThePower AB=(ToThePower)A.b;
                 if (AB.base.equal(b)){
-                    return new Multiply(A.a,new ToThePower(AB.base,new Constant(AB.pow.val+1)));
+                    return new Multiply(A.a,new ToThePower(AB.base,new Add(AB.pow,new Constant(1))));
                 }
             }
             if (A.a instanceof ToThePower){
                 ToThePower AB=(ToThePower)A.a;
                 if (AB.base.equal(b)){
-                    return new Multiply(A.b,new ToThePower(AB.base,new Constant(AB.pow.val+1)));
+                    return new Multiply(A.b,new ToThePower(AB.base,new Add(AB.pow,new Constant(1))));
                 }
             }
         }

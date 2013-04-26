@@ -47,7 +47,7 @@ ChangeListener,ItemListener{
 	}
 	public void createSpeedSlider(){
 		JPanel sliderPanel = new JPanel(new BorderLayout(5,5));
-		mySlider = new JSlider(10,1000,500);
+		mySlider = new JSlider(0,1000,500);
 		mySlider.setInverted(false);
 		mySlider.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {

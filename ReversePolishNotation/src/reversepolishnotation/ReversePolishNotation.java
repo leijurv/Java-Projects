@@ -40,6 +40,13 @@ public class ReversePolishNotation {
 		OPERATORS.put(".", new int[] { 5, LEFT_ASSOC });//For vectors
                 OPERATORS.put("%", new int[] { 5, LEFT_ASSOC });
                 OPERATORS.put("^", new int[] { 10, RIGHT_ASSOC });
+                OPERATORS.put("sin", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("cos", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("tan", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("sec", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("log", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("csc", new int[] { 15, RIGHT_ASSOC });
+                OPERATORS.put("cot", new int[] { 15, RIGHT_ASSOC });
 	}
 
 	/**

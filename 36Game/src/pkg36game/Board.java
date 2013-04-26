@@ -113,6 +113,7 @@ static int solutions=0;
         }
         return result;
     }
+    
     static {
         heights=new ArrayList<Integer>();
         heights.add(1);

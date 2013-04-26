@@ -19,6 +19,12 @@ public class Subtract extends Function{
         return new Subtract(a.derivitive(),b.derivitive());
     }
     public String toString(){
+        if (a instanceof Constant){
+            return a+"-("+b+")";
+        }
+        if (b instanceof Constant){
+            return "("+a+")-"+b;
+        }
         return "("+a+")-("+b+")";
     }
     public Function simplify(){
@@ -47,6 +53,13 @@ public class Subtract extends Function{
         }
         if (b instanceof Subtract){
             return (new Subtract(new Add(a,((Subtract)b).b),((Subtract)b).a)).simplify();
+        }
+        if (a instanceof Add){
+            if (((Add)a).a instanceof Constant){
+                if (b instanceof Constant){
+                    return new Add(new Subtract(((Add)a).a,b),((Add)a).b).simplify();
+                }
+            }
         }
         return this;
     }

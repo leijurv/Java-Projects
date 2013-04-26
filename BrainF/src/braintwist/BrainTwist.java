@@ -23,18 +23,18 @@ public class BrainTwist {
     static final String gameoflife = getFile("/Users/leif/Documents/gameoflife.b");
     static final String myquineepicfaildonteventry = " >++ a ton  >>++++++++[>++++>++++++<<-]>-[<++>-]>-----<<[->+>>+<<<]>>>[-<<<+>>>]<<-->[->+>+<<]>>[-<<+>>]<-- <[->>++>+>++<<<<]>>>[-<<<+>>>] >[<+>-] <+++++<+++++++ <++++[->>>+>+<<<<]>>>>[-<<<<+>>>>]<+ begin copy [<]>[[>>>>>>>>+>>>>>>>+<<<<<<<<<<<<<<<-]>]>>>>>>>>[[-<<<<<<<<<<<<<<<+>>>>>>>>>>>>>>>]>]<<<<<<<<  [<]<[<]<[<][[>]>[>]>[>]+ [<]<[<]<[<]-] [>]>[>]>[>]  -<[-]+[>]<[-<<<<<<<<-[+>-]+<[-]+[>]<]-[+<-]+<.";//0:62>,1:60<,2:43+,3:45-,4:93:],5:94:],6:46.
     static final String mymultiplyepidfaildonteventry = ">+++++>++++++   -<[->>+>+<<<] >>>[-<<<+>>>]    [[>]<<[->>+>+<<<]>>>[-<<<+>>>]<<<>><[->+>+<<]>>[-<<+>>]<  [<+>-]<  [<]>>-]    <<<<.>.>.>.>.>.";
-    static final String derp="<[<]<<++++++++[->++++++++<]>--..[-]>>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>-[>]>[>]+[<]<[<]>[[>]>[>]<+[<]<[<]>-]>]>[.>]";
-    static final String myquinebase = ">>  >+++++>+++++>   <[<]++[<<++++++++[->++++++++<]>--.[-]>-]>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>-[>]>[>]+[<]<[<]>[[>]>[>]<+[<]<[<]>-]>]>[.>]";
-    static String c = ">>"+get()+derp;
-    static ArrayList<Byte> mem = new ArrayList<Byte>();
-    static int pointer = 0;
+    static final String myfirstquine="<[<]<<++++++++[->++++++++<]>--..[-]>>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>-[>]>[>]+[<]<[<]>[[>]>[>]<+[<]<[<]>-]>]>[.>]";
+    static final String myquine="[<]>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>[-<<<+>>>]>]<<<<[<]>[.>]";
+    static final String myFinalQuine = get(myquine)+myquine;
+    static String c=myFinalQuine;
+    static DLL<Byte> mem=new DLL<Byte>((byte)0);
     static int loc = 0;
     static boolean a = false;
     static boolean done = false;
-public static String get(){
+public static String get(String Derp){
     String result="";
-    for (int i=0; i<derp.length(); i++){
-        int x=(int)(byte)derp.charAt(i);
+    for (int i=0; i<Derp.length(); i++){
+        int x=(int)(byte)Derp.charAt(i);
         result=result+">";
         for (int n=1; n<=x;n++){
             result=result+"+";
@@ -47,28 +47,43 @@ public static String get(){
             done = true;
             return;
         }
-        if (pointer >= mem.size()) {
-            mem.add((byte) 0);
-        }
-        while (pointer < 0) {
-            mem.add(0, (byte) 0);
-            pointer++;
-        }
         String cur = c.substring(loc, loc + 1);
         if (cur.equals("+")) {
-            mem.set(pointer, (byte) (mem.get(pointer) + 1));
+            mem.current++;
         }
         if (cur.equals("-")) {
-            mem.set(pointer, (byte) (mem.get(pointer) - 1));
+            mem.current--;
         }
         if (cur.equals(">")) {
-            pointer++;
+            if (mem.next==null){
+                mem.next=new DLL<Byte>((byte)0);
+                mem.next.prev=mem;
+            }
+            boolean del=false;
+            if (mem.prev==null && mem.current==0){
+                del=true;
+            }
+            mem=mem.next;
+            if (del){
+                mem.prev=null;
+            }
         }
         if (cur.equals("<")) {
-            pointer--;
+            if (mem.prev==null){
+                mem.prev=new DLL<Byte>((byte)0);
+                mem.prev.next=mem;
+            }
+            boolean del=false;
+            if (mem.next==null && mem.current==0){
+                del=true;
+            }
+            mem=mem.prev;
+            if (del){
+                mem.next=null;
+            }
         }
         if (cur.equals("[")) {
-            if (mem.get(pointer) == 0) {
+            if (mem.current == 0) {
                 int alr = 1;
                 loc++;
                 while (alr != 0) {
@@ -85,7 +100,7 @@ public static String get(){
             }
         }
         if (cur.equals("]")) {
-            if (mem.get(pointer) != 0) {
+            if (mem.current != 0) {
                 int alr = -1;
                 loc--;
                 while (alr != 0) {
@@ -113,18 +128,19 @@ public static String get(){
                 e.printStackTrace();
             }
             if (b.length == 0) {
-                mem.set(pointer, EOF);//EOF
+                mem.current=EOF;//EOF
             } else {
-                mem.set(pointer, b[0]);
+                mem.current=b[0];
             }
         }
         if (cur.equals(".")) {
             if (!ASCIIoutput) {
-                System.out.println(((int) (byte) mem.get(pointer)));
+                System.out.println(((int)  mem.current.byteValue()));
             } else {
-                System.out.print(((char) (byte) mem.get(pointer)));
+                System.out.print(((char) mem.current.byteValue()));
             }
-            output = output + (char) (byte) mem.get(pointer);
+            output = output + (char) mem.current.byteValue();
+            
         }
         loc++;
     }
@@ -151,6 +167,7 @@ public static String get(){
         //System.out.println(System.currentTimeMillis()-t);
         System.out.println(c);
         System.out.println(c.equals(output));
+        System.out.println(c.length());
     }
 
     public static String getFile(String filename) {

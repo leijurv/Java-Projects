@@ -46,7 +46,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static JComboBox W;
     static double X = 4;
     static final String[] Y = {"Zooms in", "Zooms out", "Shows orbit", "Shows julia set", "Does nothing"};
-    static final String[] Z = {"Hue", "Black and white", "Rotating scheme"};
+    static final String[] Z = {"Hue", "Black and white", "Rotating scheme","BAD"};
     static double AA = 0;
     static JButton AB;
     static double AC = 0;
@@ -283,12 +283,19 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 c = new Color(H(its));
                 break;
             case 1:
-                int color = Math.round((float) its * 256F / (100F));
-                color = color > 255 ? 0 : color;
-                c = new Color(color, color, color);
+                
+                
+                Color x=new Color(H(its));
+                int xx=(x.getRed()+x.getBlue()+x.getGreen())/3;
+                c=new Color(xx,xx,xx);
                 break;
             case 2:
                 c = C.get((its - 1) % C.size());
+                break;
+            case 3:
+                int color = Math.round((float) its * 256F / (100F));
+                color = color > 255 ? 0 : color;
+                c = new Color(color, color, color);
                 break;
         }
         return c;

@@ -34,26 +34,6 @@ public class Location{
 		new Location(Row-1,Col-1)};//NORTHWEST
 		return result;
 	}
-	public int adjacentOnCells(){
-		Location[] adj=adjacent();
-		int count=0;
-		for (Location a:adj){
-			if (Main.current.contains(a)){
-				count++;
-			}
-		}
-		return count;
-	}
-	public boolean shouldBeOnNext(){
-		int a=adjacentOnCells();
-		if (a==3){
-			return true;
-		}
-		if (!Main.current.contains(this)){
-			return false;
-		}
-		return (a==2);
-	}
 	public String toString(){
 		return "("+Row+","+Col+")";
 	}

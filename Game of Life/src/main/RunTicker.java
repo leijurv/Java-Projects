@@ -11,11 +11,13 @@ public class RunTicker extends Thread{
 	public void run(){
 		running=true;
 		while(running){
+                    if (delay>=10){
 		try {
 			Thread.sleep(delay);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+                    }
 		Main.calcNext();
 		Main.M.painting=true;
 		

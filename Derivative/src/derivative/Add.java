@@ -42,6 +42,7 @@ public class Add extends Function{
             if (bval==0){
                 return a;
             }
+            return new Add(b,a).simplify();
         }
         if (b instanceof Subtract){
             Subtract B=(Subtract)b;
