@@ -31,16 +31,16 @@ ChangeListener,ItemListener{
 	public static JSlider mySlider;
 	private static final long serialVersionUID = 1L;
 	JCheckBox unbounded;
-	static boolean unbounded1=false;
-	boolean showGrid=true;
+	static boolean unbounded1=true;
+	boolean showGrid=false;
 	JCheckBox showgrid;
 	boolean painting=true;
 	public void createCheckBoxes(){
 		unbounded=new JCheckBox("Unbounded");
+                unbounded.setSelected(true);
 		unbounded.addItemListener(this);
 		add(unbounded);
 		showgrid=new JCheckBox("Show Grid");
-		showgrid.setSelected(true);
 		showgrid.addItemListener(this);
 		
 		add(showgrid);
