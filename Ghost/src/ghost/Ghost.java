@@ -148,17 +148,5 @@ if (b){
             System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
-        int maxlen=0;
-        String s="";
-        for (int i=0; i<words.size(); i++){
-            if (words.get(i).length()>=maxlen){
-                if (test(words.get(i))){
-                    System.out.println(words.get(i));
-                    s=words.get(i);
-                    maxlen=s.length();
-                }
-            }
-        }
-        System.out.println(s);
-        //DO();
+        DO();
 }}
