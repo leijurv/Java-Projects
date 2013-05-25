@@ -27,7 +27,7 @@ public class CardTrick extends JComponent implements ItemListener{
     static JCheckBox[] y=new JCheckBox[5];
     static int[] T={0,0,0,0,0};
     static int[] seq={0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1};
-        static boolean done=false;
+    static boolean done=false;
     public void paintComponent(Graphics g){
         String[] r=get(T,seq);
         for (int i=0; i<5; i++){
@@ -47,7 +47,7 @@ public class CardTrick extends JComponent implements ItemListener{
             if (i%8==0){
                 result[i/8]="";
             }
-            result[i/8]=result[i/8]+(rep(cards[(4*x[(i+2)%l])+(2*x[(i+3)%l])+x[(i+4)%l]]+" of "+suits[(2*x[i%l])+x[(i+1)%l]]))+",";
+            result[i/8]=result[i/8]+g(i,x)+",";
             
         }
         return result;

@@ -138,15 +138,116 @@ if (b){
         }
         return true;
     }
-           
+    public static boolean OnlyOneConsonant(String s){
+        int q=0;
+        char[] n=s.toCharArray();
+        for (int i=0; i<s.length(); i++){
+            char c=n[i];
+            if (c=='a'||c=='e'||c=='i'||c=='o'||c=='u'||c=='y'){
+                
+            }else{
+                q++;
+                if (q>1){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public static boolean repeatedLetters(String s){
+        for (int i=0; i<s.length()-1; i++){
+            if (s.substring(i+1).contains(s.substring(i,i+1))){
+                return true;
+            }
+        }
+        return false;
+    }
+    public static boolean InOrder(String s, boolean A){
+        int pos=0;
+        char[] x={
+            'a','e','i','o','u'
+        };
+        if (A){
+            x=new char[]{
+            'a','e','i','o','u','y'
+        };
+        }
+        for (int i=0; i<s.length(); i++){
+            if (pos<x.length && x[pos]==s.charAt(i)){
+                pos++;
+            }else{
+                for (char n : x){
+                    if (s.charAt(i)==n){
+                        return false;
+                    }
+                }
+            }
+        }
+        if (pos==x.length){
+            return true;
+        }
+        return false;
+    }
+    public static int inarow(String s){
+        int sf=0;
+        for (int i=0; i<s.length(); i++){
+            char c=s.charAt(i);
+            if (c=='a'||c=='e'||c=='i'||c=='o'||c=='u'||c=='y'){
+                int x=0;
+                boolean R=true;
+                for (int n=i; R; n++){
+                    char C=s.charAt(n);
+                    if (C=='a'||C=='e'||C=='i'||C=='o'||C=='u'||C=='y'){
+                        x++;
+                    }else{
+                        R=false;
+                    }
+                    if (n>=s.length()-1){
+                        R=false;
+                    }
+                }
+                if (x>sf){
+                    sf=x;
+                }
+            }
+        }
+        return sf;
+    }
     public static void main(String[] args) {
         try {
-            load("/Users/leijurv/Downloads/mword10/CROSSWD.TXT");
+            load("/Users/leijurv/Downloads/mword10/SINGLE.TXT");
             //load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
             //Change to "/Users/USERNAME/Downloads/Java-Projects-master/Ghost/Ghostwords.txt" or whereever you downloaded it to.
         } catch (Exception e) {
             System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
-        DO();
+        int longest=0;
+        String q="";
+        for (String s : words){
+            if (inarow(s)>4){
+                System.out.println(inarow(s)+" vowels in a row: "+s);
+            }
+            if (s.length()>longest){
+                q=s;
+                longest=s.length();
+            }
+            if (OnlyOneConsonant(s)){
+                if (s.length()>4){
+                    System.out.println("Only one consonant: "+s);
+                }
+            }
+            if (s.length()>13 && !repeatedLetters(s)){
+                System.out.println("No repeated letters: "+s);
+            }
+            if (InOrder(s,true)){
+                System.out.println("All the vowels, in order, including y: "+s);
+            }else{
+            if (InOrder(s,false)){
+                System.out.println("All the vowels, in order, not including y: "+s);
+            }
+            }
+        }
+        System.out.println("Longest word in this dictionary: "+q);
+        //DO();
 }}
