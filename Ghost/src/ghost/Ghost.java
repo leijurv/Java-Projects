@@ -213,7 +213,7 @@ if (b){
         }
         return sf;
     }
-    public static void main(String[] args) {
+    public static void main(String[] args){
         try {
             load("/Users/leijurv/Downloads/mword10/SINGLE.TXT");
             //load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
@@ -222,6 +222,11 @@ if (b){
             System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
+        DO();
+    }
+    public static void cool() {
+        
+        
         int longest=0;
         String q="";
         for (String s : words){

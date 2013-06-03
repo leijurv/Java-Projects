@@ -8,7 +8,7 @@ public class RSAKeyPair {
     BigInteger two = new BigInteger("2");
     BigInteger one = BigInteger.ONE;
     BigInteger zero = BigInteger.ZERO;
-    BigInteger modulus = zero;
+    public BigInteger modulus = zero;
     BigInteger pub = zero;
     BigInteger pri = zero;
     public String toString(){
