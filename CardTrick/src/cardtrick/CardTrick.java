@@ -7,14 +7,18 @@ package cardtrick;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Scanner;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -28,6 +32,7 @@ public class CardTrick extends JComponent implements ItemListener{
     static int[] T={0,0,0,0,0};
     static int[] seq={0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1};
     static boolean done=false;
+    static String theAnswer="Enter the secret number to find out their card!";
     public void paintComponent(Graphics g){
         String[] r=get(T,seq);
         for (int i=0; i<5; i++){
@@ -39,6 +44,12 @@ public class CardTrick extends JComponent implements ItemListener{
         for (int i=0; i<n.length; i++){
             g.drawString(n[i],10,150+15*i);
         }
+        g.drawString("Two Left",y[0].getX(),y[0].getY()+50);
+        g.drawString("One Left",y[1].getX(),y[1].getY()+50);
+        g.drawString("One Right",y[2].getX(),y[2].getY()+50);
+        g.drawString("Two Right",y[3].getX(),y[3].getY()+50);
+        g.drawString("Top",y[4].getX(),y[4].getY()+50);
+        g.drawString(theAnswer,10,10);
     }
     public static String[] p(int[] x){
         int l=x.length;
@@ -53,7 +64,7 @@ public class CardTrick extends JComponent implements ItemListener{
         return result;
     }
     public static String g(int i, int[] x){
-        int l=x.length-1;
+        int l=x.length;
         
         return (rep(cards[(4*x[(i+2)%l])+(2*x[(i+3)%l])+x[(i+4)%l]]+" of "+suits[(2*x[i%l])+x[(i+1)%l]]));
     }
@@ -120,8 +131,31 @@ public class CardTrick extends JComponent implements ItemListener{
               
               M.add(y[i]);
           }
+          JButton DD=new JButton("Enter Secret Number");
+          DD.addActionListener(new ActionListener(){public void actionPerformed(ActionEvent ae){
+          int pos=Integer.parseInt(JOptionPane.showInputDialog("What is the secret number?"));
+          
+          int[] q={0,0,0,0,0,0,0,0,0,0};
+        int n=0;
+        for (int i : T){
+            q[n]=i;
+            n++;
+        }
+        int l=seq.length;
+        n=0;
+        while((seq[(n+0)%l]!=q[0]) || (seq[(n+1)%l]!=q[1]) || (seq[(n+2)%l]!=q[2]) || (seq[(n+3)%l]!=q[3]) || (seq[(n+4)%l]!=q[4])){
+        n=n+1;
+        }
+        int indexOffset=n+5;
+        
+        theAnswer="The Secret Card is"+g(indexOffset+pos,seq);
+        M.repaint();
+          }});
+          M.add(DD);
           done=true;
           M.repaint();
+          
+          
     }
 
     @Override

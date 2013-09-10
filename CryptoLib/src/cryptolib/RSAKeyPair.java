@@ -9,8 +9,8 @@ public class RSAKeyPair {
     BigInteger one = BigInteger.ONE;
     BigInteger zero = BigInteger.ZERO;
     public BigInteger modulus = zero;
-    BigInteger pub = zero;
-    BigInteger pri = zero;
+    public BigInteger pub = zero;
+    public BigInteger pri = zero;
     public String toString(){
         return "N:"+modulus+", E:"+pub+", D:"+pri;
     }
