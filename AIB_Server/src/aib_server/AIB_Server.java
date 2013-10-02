@@ -4,8 +4,6 @@
  */
 package aib_server;
 
-import cryptolib.Hex;
-import cryptolib.RSAKeyPair;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -74,7 +72,7 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
     public static String processRPrime(String s){
         byte[] b=Hex.decodeHex(s.toCharArray());
         int num=(int)b[0];
-        System.out.println(num+" R' values requested");
+        System.out.print(num+" R' values requested. ");
         ArrayList<Integer> denomIDs=new ArrayList<Integer>();
         for (int i=0; i<num; i++){
             denomIDs.add(new Integer(b[i+1]));
@@ -84,7 +82,9 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
             pubKey[i]=b[i+1+num];
         }
         BigInteger PubKey=new BigInteger(pubKey);
-        //System.out.println(b[1+num]+"MOD"+PubKey);
+        System.out.print("pubkey is");
+        snip(PubKey);
+        
         ArrayList<BigInteger> RPrimeValues=new ArrayList<BigInteger>();
         for (int i=0; i<num; i++){
             BigInteger X=new BigInteger(1000,new SecureRandom());
@@ -92,13 +92,22 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
                 r.RPrimeValues.add(X);
                 r.denomIDs.add(denomIDs.get(i));
             }
-            //System.out.println(X);
-            RPrimeValues.add(X.modPow(e,PubKey));
+            
+            BigInteger RPrimeValue=X.modPow(e,PubKey);
+            System.out.print(",");
+            snip(X);
+            String S=RPrimeValue.toString(16);
+            
+            RPrimeValues.add(RPrimeValue);
+            
         }
+        //System.out.println(RPrimeValues);
         String result="";
         for (int i=0; i<num; i++){
             result+=Hex.encodeHexString(to128(RPrimeValues.get(i).toByteArray()));
         }
+        System.out.println();
+        //System.out.println(result);
         new Thread(){
             public void run(){
                 synchronized(r){
@@ -121,5 +130,8 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
             X[i+offset]=x[i];
         }
         return X;
+    }
+    public static void snip(BigInteger x){
+        System.out.print(x.toString(16).substring(0,8)+"..."+x.toString(16).substring(x.toString(16).length()-8,x.toString(16).length()));
     }
 }

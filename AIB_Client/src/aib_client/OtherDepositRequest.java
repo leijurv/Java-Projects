@@ -4,7 +4,6 @@
  */
 package aib_client;
 
-import cryptolib.Hex;
 import java.math.BigInteger;
 import java.util.ArrayList;
 

@@ -4,8 +4,6 @@
  */
 package aib_client;
 
-import cryptolib.Hex;
-import cryptolib.RSAKeyPair;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -29,7 +27,8 @@ public class Transaction {
         for (int i : values){
             nums[i]++;
         }
-        ArrayList<Integer> W=DepositRequestsPane.getDValues(value);
+        //ArrayList<Integer> W=DepositRequestsPane.getDValues(value);
+        ArrayList<Integer> W=to.denomIDs;
         //System.out.println(W);
         int[] w=new int[nums.length];
         for (int i : W){
@@ -78,20 +77,21 @@ public class Transaction {
         int numOutputToThem=values.size();
         int numInput=BeingSent.size();
         int numOutputToMe=BeingSentBack.size();
-        System.out.println("Amount being taken from R values.  Amount being sent to them.  Amount being sent back to me.");
-        System.out.println("Number of R values "+numInput+","+numOutputToThem+","+numOutputToMe);
-        System.out.println("Value in bitcoins "+fix(totalValue)+","+fix(value)+","+fix(dif));
-        System.out.println("Value of R values "+FIX(BeingSent)+","+FIX(W)+","+FIX(BeingSentBack));
+        //System.out.println("Amount being taken from R values.  Amount being sent to them.  Amount being sent back to me.");
+        //System.out.println("Number of R values "+numInput+","+numOutputToThem+","+numOutputToMe);
+        //System.out.println("Value in bitcoins "+fix(totalValue)+","+fix(value)+","+fix(dif));
+        //System.out.println("Value of R values "+FIX(BeingSent)+","+FIX(W)+","+FIX(BeingSentBack));
         //Requesting R' values for the amount being sent back
         ArrayList<BigInteger> RPrimeValues=requestRPrimeValues(BeingSentBack);
+        //System.out.println(RPrimeValues);
         ArrayList<Integer> dValues=new ArrayList<Integer>();
         dValues.addAll(BeingSent);
         ArrayList<Integer> storageLocations=new ArrayList<Integer>();
         ArrayList<BigInteger> RValuesBeingUsed=new ArrayList<BigInteger>();//Getting R values to be used as input
         for (int i=0; i<dValues.size(); i++){
-            System.out.println(dValues.get(i));
+            //System.out.println(dValues.get(i));
            for (int n=0; n<from.denomIDs.size(); n++){
-               System.out.println(from.denomIDs.get(n));
+               //System.out.println(from.denomIDs.get(n));
                if (from.denomIDs.get(n).intValue()==dValues.get(i).intValue() && !storageLocations.contains(n)){
                    storageLocations.add(n);
                    RValuesBeingUsed.add(from.RValues.get(n));
@@ -107,12 +107,12 @@ public class Transaction {
         int unpaddedsize=RValuesBeingUsed.size()*129+to.R2PrimeValues.size()*129+RPrimeValues.size()*129+2;//129 because dValue is 1 byte
         //+2 because 1 byte for # of inputs, 1 byte for # of outputs
         int paddedsize=unpaddedsize+10;//Ten bytes of padding
-        System.out.println(unpaddedsize);
+        //System.out.println(unpaddedsize);
         byte[] notencnotpad=new byte[unpaddedsize];
-        System.out.println(notencnotpad.length);
+        //System.out.println(notencnotpad.length);
         notencnotpad[0]=(byte) RValuesBeingUsed.size();
         for (int i=0; i<RValuesBeingUsed.size(); i++){
-            notencnotpad[i*129+1]=dValues.get(i).byteValue();
+            notencnotpad[i*129+1]=BeingSent.get(i).byteValue();
             byte[] c=DepositRequest.to128(RValuesBeingUsed.get(i).toByteArray());
             for (int n=0; n<128; n++){
                 notencnotpad[i*129+2+n]=c[n];
@@ -138,22 +138,28 @@ public class Transaction {
     }
     public static ArrayList<BigInteger> requestRPrimeValues(ArrayList<Integer> dValues){
         RSAKeyPair R=new RSAKeyPair();
-            R.generate(new BigInteger(500,100,new SecureRandom()),new BigInteger(500,100,new SecureRandom()),AIB_Client.e,false);
+            R.generate(new BigInteger(512,100,new SecureRandom()),new BigInteger(511,100,new SecureRandom()),AIB_Client.e,false);
             String S="";
+            System.out.print("Requesting "+dValues.size()+" rprimes. pubkey ");
+            AIB_Client.snip(R.modulus);
             
                     S=S+Hex.encodeHexString(new byte[] {new Integer(dValues.size()).byteValue()});
             for (int i=0; i<dValues.size(); i++){
                 S=S+Hex.encodeHexString(new byte[] {dValues.get(i).byteValue()});
             }
             //System.out.println(S.length()/2);
+            //System.out.println(R.modulus);
             S=S+Hex.encodeHexString(DepositRequest.to128(R.modulus.toByteArray()));
             S=AIB_Client.webpage+"getRPrime/"+S;
+            //System.out.println(S);
             String r="";
             try {
                 r=AIB_Client.load(S);
             } catch (Exception ex) {
                 Logger.getLogger(DepositRequestsPane.class.getName()).log(Level.SEVERE, null, ex);
             }
+            
+           // System.out.println(r);
             ArrayList<BigInteger> rPrimeValues=new ArrayList<BigInteger>();
             byte[] WWW=Hex.decodeHex(r.toCharArray());
             for (int i=0; i<WWW.length/128; i++){
@@ -162,7 +168,10 @@ public class Transaction {
                     X[n]=WWW[n+i*128];
                 }
                 rPrimeValues.add(R.decode(new BigInteger(X)));
+                System.out.print(", ");
+                AIB_Client.snip(R.decode(new BigInteger(X)));
             }
+            System.out.println();
             return rPrimeValues;
     }
     public static String fix(BigInteger dif){

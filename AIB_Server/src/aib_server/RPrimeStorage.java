@@ -54,7 +54,11 @@ public class RPrimeStorage {
             X.read(RValue);
             denomIDs.add(new Integer(denomID[0]));
             RPrimeValues.add(new BigInteger(RValue));
+            System.out.print(",");
+            AIB_Server.snip(new BigInteger(RValue));
+            //System.out.println(new BigInteger(RValue).toString(16));
         }
+        
         System.out.println(path);
     }
     public void save(){
@@ -73,9 +77,13 @@ public class RPrimeStorage {
             X.write(denominationID);
             byte[] RValue=new byte[128];
             byte[] temp=RPrimeValues.get(i).toByteArray();//Might be less than 128 bytes. Pad with 0s at the beginning.
-            
+            //for (int n=128-temp.length; n<128; n++){
+            //    RValue[n]=
+            //}
             int offset=128-temp.length;
             System.arraycopy(temp, 0, RValue, offset, temp.length);
+            //System.out.println(temp.length);
+            //System.out.println(new BigInteger(temp).toString(16)+"."+RPrimeValues.get(i).toString(16));
             X.write(RValue);
         }
         X.close();

@@ -4,8 +4,6 @@
  */
 package aib_client;
 
-import cryptolib.Hex;
-import cryptolib.RSAKeyPair;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -87,6 +85,9 @@ return buf.toString();
             W.write(depositRequests.get(i).export());
         }
         W.close();
+    }
+    public static void snip(BigInteger x){
+        System.out.print(x.toString(16).substring(0,8)+"..."+x.toString(16).substring(x.toString(16).length()-8,x.toString(16).length()));
     }
     /**
      * @param args the command line arguments

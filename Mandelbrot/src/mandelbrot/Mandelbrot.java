@@ -51,11 +51,13 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static double lastClickedY = 0;
     static JComboBox orbitLimitCombo;
     static JComboBox iterationLimitCombo;
+    static JComboBox Smooth;
     static long redrawTime = System.currentTimeMillis();
     static final int MinRedrawTimeMillis = 50;
     static int exponent = 2;
     static JButton IncExponentButton;
     static boolean drawThreadRunning = false;
+    static boolean smooth = true;
         static final int[] iterationCombs=new int[]{100, 500, 1000, 5000, 10000};
 
     public static void main(String[] args) throws InterruptedException {
@@ -79,6 +81,15 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         M.setFocusable(true);
         (frame).setContentPane(M);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 10));
+        Smooth = new JComboBox(new String[] {"Smooth","Jagged"});
+        Smooth.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+                smooth=!smooth;
+                (new redraw()).start();
+            }
+        });
+        frame.add(Smooth);
         orbitLimitCombo = new JComboBox(new String[]{"0", "1", "2", "3", "4", "5"});
         orbitLimitCombo.addActionListener(new ActionListener() {
 
@@ -106,7 +117,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 (new redraw()).start();
             }
         });
-
+        
         leftClickCombo = new JComboBox(ClickOptions);
         rightClickCombo = new JComboBox(ClickOptions);
         leftClickCombo.addActionListener(new ActionListener() {
@@ -221,13 +232,20 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 if (its == iterationLimit) {
                     ImageBuffer.setRGB(x + xWidth, y + yWidth, Color.BLACK.getRGB());
                 } else {
-                    ImageBuffer.setRGB(x + xWidth, y + yWidth, colorFromIts(its).getRGB());
+                    double R=0;
+                    if (smooth){
+                        double d=Math.sqrt(zY*zY+zX*zX);
+                        R=(double)its-Math.log(Math.log(d))/Math.log(2.0);
+                    }else{
+                        R=(double)its;
+                    }
+                    ImageBuffer.setRGB(x + xWidth, y + yWidth, colorFromIts(R).getRGB());
                 }
             }
         }
     }
 
-    public static Color colorFromIts(int its) {
+    public static Color colorFromIts(double its) {
         Color c = Color.black;
         switch (colorScheme) {
             case 0:
@@ -241,14 +259,14 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 c=new Color(RGBAverage,RGBAverage,RGBAverage);
                 break;
             case 2:
-                c = colors.get((its - 1) % colors.size());
+                c = colors.get(((int)its - 1) % colors.size());
                 break;
         }
         return c;
     }
 
-    public static int getHue(int its) {
-        return Color.HSBtoRGB((float) its / (float) 100, 1F, 1F);
+    public static int getHue(double its) {
+        return Color.HSBtoRGB((float)(its / 100), 1F, 1F);
     }
 
     @Override

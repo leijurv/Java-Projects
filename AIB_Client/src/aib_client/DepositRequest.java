@@ -4,7 +4,7 @@
  */
 package aib_client;
 
-import cryptolib.Hex;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ public class DepositRequest {
     ArrayList<BigInteger> R2PrimeValues;
     ArrayList<Integer> denominationIDs;
     public DepositRequest(ArrayList<BigInteger> RPrimeValues, ArrayList<Integer> denominations){
+        
         R1PrimeValues=RPrimeValues;
         denominationIDs=denominations;
         if (RPrimeValues.size()!=denominations.size()){
@@ -47,6 +48,7 @@ public class DepositRequest {
         }
     }
     public DepositRequest(int len, byte[] X){
+        System.out.print("Loading deposit request ");
         if (X.length%257!=0){
             throw new IllegalArgumentException("BAD LENGTH");
         }
@@ -65,7 +67,9 @@ public class DepositRequest {
                 W[n]=X[n+i*257+129];
             }
             wValues.add(decode(new BigInteger(W)));
+            AIB_Client.snip(R1PrimeValues.get(i));
         }
+        System.out.println();
         calculateValue();
         calculateR2();
     }

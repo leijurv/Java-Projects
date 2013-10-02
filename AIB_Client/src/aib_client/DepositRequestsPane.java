@@ -4,8 +4,6 @@
  */
 package aib_client;
 
-import cryptolib.Hex;
-import cryptolib.RSAKeyPair;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -79,15 +77,16 @@ public class DepositRequestsPane extends JComponent implements ActionListener{
             I=I.multiply(new BigDecimal("100000000"));
             BigInteger x=new BigInteger(I.toString().contains(".")?I.toString().substring(0,I.toString().indexOf(".")):I.toString());
             ArrayList<Integer> dValues=getDValues(x);
-            System.out.println(dValues);
+            //System.out.println(dValues);
             ArrayList<BigInteger> rPrimeValues=Transaction.requestRPrimeValues(dValues);
+            //System.out.println(rPrimeValues.get(0).toString(16));
             AIB_Client.depositRequests.add(new DepositRequest(rPrimeValues,dValues));
             try {
                 AIB_Client.saveDepositRequests();
             } catch (Exception ex) {
                 Logger.getLogger(DepositRequestsPane.class.getName()).log(Level.SEVERE, null, ex);
             }
-            System.out.println(rPrimeValues);
+            //System.out.println(rPrimeValues.get(0).toString(16));
         }
         if (ae.getActionCommand().equals("Copy")){
             W w=new W();

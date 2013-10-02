@@ -5,10 +5,12 @@
 package aib_server;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,10 +24,15 @@ public class RequestThread extends Thread{
         s=S;
         
     }
+      private static void sendHeader(BufferedOutputStream paramBufferedOutputStream, int paramInt, String paramString, long paramLong1, long paramLong2)
+    throws IOException
+  {
+    paramBufferedOutputStream.write(("HTTP/1.0 " + paramInt + " OK\r\n" + "Date: " + new Date().toString() + "\r\n" + "Server: JibbleWebServer/1.0\r\n" + "Content-Type: " + paramString + "\r\n" + "Expires: Thu, 01 Dec 1994 16:00:00 GMT\r\n" + (paramLong1 != -1L ? "Content-Length: " + paramLong1 + "\r\n" : "") + "Last-modified: " + new Date(paramLong2).toString() + "\r\n" + "\r\n").getBytes());
+  }
     public void run(){
-        PrintStream ps = null;
+        BufferedOutputStream ps = null;
         try {
-            ps = new PrintStream(s.getOutputStream());
+            ps = new BufferedOutputStream(s.getOutputStream());
             BufferedInputStream is = new BufferedInputStream(s.getInputStream());
             //Thread.sleep(2000L);
             
@@ -33,31 +40,33 @@ public class RequestThread extends Thread{
             is.read(b);
             
             if (b.length==0){
-                ps.append("Airor");
+                ps.write("Airor".getBytes());
+                
                 ps.close();
                 return;
             }
+            sendHeader(ps, 200, "text/html", -1L, System.currentTimeMillis());
             //ps.append("HELLO");
             String request=new String(b);
             request=request.split("\n")[0];
             request=request.substring(4,request.length()-10);
             if (request.startsWith("/getRPrime/")){
-                ps.append(AIB_Server.processRPrime(request.substring(11,request.length())));
+                ps.write(AIB_Server.processRPrime(request.substring(11,request.length())).getBytes());
             }
             if (request.startsWith("/getPubKeys")){
                 System.out.println("Public Keys Requests");
                 for (int i=0; i<AIB_Server.KeyPairs.size(); i++){
-                    ps.append(AIB_Server.KeyPairs.get(i).modulus.toString(16));
+                    ps.write(AIB_Server.KeyPairs.get(i).modulus.toString(16).getBytes());
                     if (i!=AIB_Server.KeyPairs.size()-1){
-                        ps.append(",");
+                        ps.write(",".getBytes());
                     }
                 }
             }
             if (request.startsWith("/getComPubKey")){
-                ps.append(AIB_Server.comKeyPair.modulus.toString(16));
+                ps.write(AIB_Server.comKeyPair.modulus.toString(16).getBytes());
             }
             if (request.startsWith("/tx")){
-                ps.append(AIB_Server.processTx(request.substring(3,request.length())));
+                ps.write(AIB_Server.processTx(request.substring(3,request.length())).getBytes());
             }
             System.out.println(request);
             ps.close();
@@ -65,7 +74,7 @@ public class RequestThread extends Thread{
         } catch (Exception ex) {
             Logger.getLogger(RequestThread.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            ps.close();
+            
         }
     }
     
