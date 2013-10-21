@@ -41,6 +41,42 @@ public class Board {
                     boolean upleft=(y!=size-1)&&(x!=0)&&(board[x-1][y+1]==(move?-1:1));
                     boolean downright=(y!=0)&&(x!=size-1)&&(board[x+1][y-1]==(move?-1:1));
                     boolean downleft=(y!=0)&&(x!=0)&&(board[x-1][y-1]==(move?-1:1));
+                    /*
+                    int X=x;
+                        int Y=y;
+                        if (up||upright||upleft){
+                            Y++;
+                        }
+                        if (down||downleft||downright){
+                            Y--;
+                        }
+                        if (left||upleft||downleft){
+                            X--;
+                        }
+                        if (right||upright||downright){
+                            X++;
+                        }
+                        Board b=new Board(board,sofar+1,!move);
+                        while(X<size && Y<size && X>-1 && Y>-1 && board[X][Y]==(move?-1:1)){
+                            b.board[X][Y]=(byte) (move?1:-1);
+                            if (up||upright||upleft){
+                            Y++;
+                        }
+                        if (down||downleft||downright){
+                            Y--;
+                        }
+                        if (left||upleft||downleft){
+                            X--;
+                        }
+                        if (right||upright||downright){
+                            X++;
+                        }
+                        }
+                        if (X<size && Y<size && X>-1 && Y>-1 && board[X][Y]==(move?1:-1)){
+                            b.board[x][y]=(byte)(move?1:-1);
+                            result.add(new Move(b,x,y));
+                        }*/
+                    
                     if (up){
                         int X=x;
                         int Y=y+1;

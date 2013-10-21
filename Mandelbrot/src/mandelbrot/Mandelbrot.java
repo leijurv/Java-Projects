@@ -12,7 +12,13 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -58,6 +64,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static JButton IncExponentButton;
     static boolean drawThreadRunning = false;
     static boolean smooth = true;
+    static BufferedImage export;
         static final int[] iterationCombs=new int[]{100, 500, 1000, 5000, 10000};
 
     public static void main(String[] args) throws InterruptedException {
@@ -178,6 +185,15 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         });
         frame.add(IncExponentButton);
         frame.add(DecExponentButton);
+        JButton j=new JButton("Export");
+        j.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae){
+                export();
+            }
+        });
+        frame.add(j);
+        
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
         frame.setVisible(true);
         frame.addWindowListener(new WindowAdapter() {
@@ -190,6 +206,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         xWidth = frame.getWidth() / 2;
         yWidth = frame.getHeight() / 2 - 10;
         ImageBuffer = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+        export=new BufferedImage(frame.getWidth()*4,frame.getHeight()*4,BufferedImage.TYPE_INT_RGB);
         (new redraw()).start();
     }
 
@@ -199,7 +216,62 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             redrawTime = System.currentTimeMillis();
         }
     }
-
+    public static void export(){
+        System.out.println("CATS");
+        for (int x = -xWidth*4; x < xWidth*4; x++) {
+            showTempResult();
+            for (int y = -yWidth*4; y < yWidth*4; y++) {
+                double cX = ((double) x) * xScale/4 + centerX;
+                double cY = ((double) y) * yScale/4 + centerY;
+                double zX = cX;
+                double zY = cY;
+                int its = 0;
+                boolean done = false;
+                while (!done) {
+                    double c = zX * zX;
+                    double d = zY * zY;
+                    double xt = zX;
+                    double yt = zY;
+                    for (int i = 0; i < exponent - 1; i++) {
+                        double xx = xt * zX - yt * zY;
+                        yt = xt * zY + yt * zX;
+                        xt = xx;
+                    }
+                    xt += (julia?juliaX:cX);
+                    yt += (julia?juliaY:cY);
+                    zX = xt;
+                    zY = yt;
+                    its++;
+                    if (!(c + d < orbitLimit && its < Mandelbrot.iterationLimit)) {
+                        done = true;
+                    }
+                }
+                if (its == iterationLimit) {
+                    export.setRGB(x + xWidth*4, y + yWidth*4, Color.BLACK.getRGB());
+                } else {
+                    double R=0;
+                    if (smooth){
+                        double d=Math.sqrt(zY*zY+zX*zX);
+                        R=(double)its-Math.log(Math.log(d))/Math.log(2.0);
+                    }else{
+                        R=(double)its;
+                    }
+                    export.setRGB(x + xWidth*4, y + yWidth*4, colorFromIts(R).getRGB());
+                }
+            }
+        }
+        try {
+            String[] s=ImageIO.getWriterFormatNames();
+            for (String S : s){
+                System.out.println(S);
+            }
+            System.out.println(ImageIO.write(export,"jpg",new File("/Users/leijurv/Desktop/cat.jpg")));
+            
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+        
+    }
     public static void drawMandelbrot() {
         for (int x = -xWidth; x < xWidth && drawThreadRunning; x++) {
             showTempResult();

@@ -11,7 +11,6 @@ import java.util.Random;
  * @author leijurv
  */
 public class Bunny {
-    static final boolean OriginalTraitIsDominant=true;
     boolean Trait1;
     boolean Trait2;
     public Bunny(boolean a, boolean b, Random r){
@@ -30,7 +29,7 @@ public class Bunny {
         }else{
             Trait2=b.Trait2;
         }
-        //mutate(r);
+        mutatelittle(r);
     }
     public boolean SHOULDDIE(){
         return (!Trait1)&&(!Trait2);
@@ -41,6 +40,14 @@ public class Bunny {
         }
         if (r.nextInt(2000)==0){
             Trait2=true;
+        }
+    }
+    public void mutatelittle(Random r){
+        if (r.nextInt(1000000)==0){
+            Trait1=!Trait1;
+        }
+        if (r.nextInt(1000000)==0){
+            Trait2=!Trait2;
         }
     }
 }

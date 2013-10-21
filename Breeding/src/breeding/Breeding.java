@@ -7,6 +7,7 @@ package breeding;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Polygon;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -75,11 +76,11 @@ public class Breeding extends JComponent implements KeyListener{
         for (int i=0; i<=498; i++){
             start=breed(start,r);
             KILLSOMEBUNNIES(start,r);
-            //if (i%10==8 || i<=18){
+            if (i%10==8 || i<=18){
             output.add("Generation "+(i+2)+", there are ");
             print(start);
             M.repaint();
-            //}
+            }
         }
     }
     public static ArrayList<Bunny> breed(ArrayList<Bunny> bunnies, Random r){

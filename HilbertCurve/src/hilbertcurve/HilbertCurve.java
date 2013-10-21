@@ -427,20 +427,20 @@ public class HilbertCurve extends JComponent implements ActionListener {
 
     public HilbertCurve() {
         JButton b1 = new JButton("Next");
-        b1.setVerticalTextPosition(AbstractButton.TOP);
-        b1.setHorizontalTextPosition(AbstractButton.LEADING);
+        //b1.setVerticalTextPosition(AbstractButton.TOP);
+        //b1.setHorizontalTextPosition(AbstractButton.LEADING);
         b1.setActionCommand("Next");
         b1.addActionListener(this);
         add(b1);
         JButton b2 = new JButton("Prev");
-        b2.setVerticalTextPosition(AbstractButton.TOP);
-        b2.setHorizontalTextPosition(AbstractButton.CENTER);
+        //b2.setVerticalTextPosition(AbstractButton.TOP);
+        //b2.setHorizontalTextPosition(AbstractButton.CENTER);
         b2.setActionCommand("Prev");
         b2.addActionListener(this);
         add(b2);
         JButton b3 = new JButton("Toggle Curves");
-        b3.setVerticalTextPosition(AbstractButton.TOP);
-        b3.setHorizontalTextPosition(AbstractButton.CENTER);
+        //b3.setVerticalTextPosition(AbstractButton.TOP);
+        //b3.setHorizontalTextPosition(AbstractButton.CENTER);
         b3.setActionCommand("Toggle");
         b3.addActionListener(this);
         add(b3);

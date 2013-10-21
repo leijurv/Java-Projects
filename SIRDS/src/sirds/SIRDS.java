@@ -16,16 +16,15 @@ public class SIRDS extends JComponent {
     public static void main(String[] args) {
         BufferedImage base = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         Graphics c = base.getGraphics();
-        c.setColor(Color.RED);
         c.setFont(new Font("Comic Sans", Font.BOLD, 90));
         String[] R = JOptionPane.showInputDialog("Message? (7 letter words, max, seperated by commas)").split(",");
         for (int i = 0; i < R.length; i++)
             c.drawString(R[i], 20, (i + 1) * 80);
         Random r = new Random();
-        for (int j = 0; j < size; j++) {
-            for (int i = 0; i < size; i++) 
+        for (int j = 0; j < size; j++) 
+            for (int i = 0; i < size; i++) {
                 left.setRGB(i, j, r.nextBoolean() ? -1 : left.getRGB(i, j));
-            for (int i = 0; i < size; i++) 
+            //for (int i = 0; i < size; i++) 
                 if (base.getRGB(i, j) != base.getRGB(0, 0)) 
                     right.setRGB(i, j, left.getRGB(i - pixelOffset, j));
                 else if (i < size - pixelOffset && base.getRGB(i + pixelOffset, j) != base.getRGB(0, 0)) 
