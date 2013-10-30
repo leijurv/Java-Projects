@@ -67,7 +67,10 @@ public class DepositRequest {
                 W[n]=X[n+i*257+129];
             }
             wValues.add(decode(new BigInteger(W)));
+            System.out.print(",");
             AIB_Client.snip(R1PrimeValues.get(i));
+            System.out.print(":");
+            System.out.print(new Integer(X[i*257]));
         }
         System.out.println();
         calculateValue();

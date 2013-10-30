@@ -56,7 +56,8 @@ public class RPrimeStorage {
             RPrimeValues.add(new BigInteger(RValue));
             System.out.print(",");
             AIB_Server.snip(new BigInteger(RValue));
-            //System.out.println(new BigInteger(RValue).toString(16));
+            System.out.print(":");
+            System.out.print(new Integer(denomID[0]));
         }
         
         System.out.println(path);

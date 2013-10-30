@@ -96,6 +96,9 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
             BigInteger RPrimeValue=X.modPow(e,PubKey);
             System.out.print(",");
             snip(X);
+            System.out.print(":");
+            //snip(X.modPow(privKeys.get(denomIDs.get(i)),modulus.get(denomIDs.get(i))));
+            snip(KeyPairs.get(denomIDs.get(i)).decode(X));
             String S=RPrimeValue.toString(16);
             
             RPrimeValues.add(RPrimeValue);
