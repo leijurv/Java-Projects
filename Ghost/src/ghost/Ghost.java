@@ -214,15 +214,75 @@ if (b){
         return sf;
     }
     public static void main(String[] args){
+        ArrayList<String> r=new ArrayList<String>();
         try {
-            load("/Users/leijurv/Downloads/mword10/SINGLE.TXT");
-            //load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
+            //load("/Users/leijurv/Downloads/mword10/SINGLE.TXT");
+            //
+            load("/Users/leijurv/Documents/Portfolio/Quetzalcoatl.txt");
+            r=words;
+            words=new ArrayList<String>();
+            load("/Users/leijurv/Dropbox/Java-Projects/Ghost/Ghostwords.txt");
             //Change to "/Users/USERNAME/Downloads/Java-Projects-master/Ghost/Ghostwords.txt" or whereever you downloaded it to.
         } catch (Exception e) {
             System.out.println("There was an error. Maybe you didn't change the path on line 56?");
             return;
         }
-        DO();
+        /*
+        ArrayList<String> word=new ArrayList<String>();
+        ArrayList<String> total=new ArrayList<String>();
+        int len=0;
+        for (int i=0; i<words.size(); i++){
+            if (possible(words.get(i),false)){
+                total.add(words.get(i));
+                System.out.println(words.get(i));
+                if (words.get(i).length()>len){
+                    word=new ArrayList<String>();
+                    len=words.get(i).length();
+                }
+                if (words.get(i).length()==len){
+                    word.add(words.get(i));
+                }
+            }
+        }
+        System.out.println(word);
+        System.out.println(total);*/
+        for (String R : r){
+            if (R.length()>7){
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println();
+                System.out.println(R);
+                possible(R,true);
+            }
+        }
+        //System.out.println(words.contains("cats"));
+        //possible("sheathers",true);
+        //DO();
+    }
+    public static boolean possible(String s,boolean print){
+        if (!words.contains(s)){
+            return false;
+        }
+        if (s.length()==1){
+            if (print)
+            System.out.println(s);
+            return words.contains(s);
+        }
+        if (s.length()==0){
+            return false;
+        }
+        if (possible(s.substring(1,s.length()),print)){
+            if (print)
+            System.out.println(s);
+            return true;
+        }
+        if (possible(s.substring(0,s.length()-1),print)){
+            if (print)
+            System.out.println(s);
+            return true;
+        }
+        return false;
     }
     public static void cool() {
         

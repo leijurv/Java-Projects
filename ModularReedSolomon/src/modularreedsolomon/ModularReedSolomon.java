@@ -4,15 +4,57 @@
  */
 package modularreedsolomon;
 
+import java.awt.Graphics;
 import java.math.BigInteger;
 import java.util.Scanner;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 /**
  *
  * @author leif
  */
-public class ModularReedSolomon {
+public class ModularReedSolomon extends JComponent{
     static final int modulus=251;//THIS ABSOLUTELY HAS TO BE PRIME
+    static int[][] dat;
+    static int[] q;
+    static int[] lambda;
+    
+    static int[] synd;
+    static int[] Yk;
+    static BigInteger[][] XkMat;
+    static ModularReedSolomon M=new ModularReedSolomon();
+    static long time=Long.MAX_VALUE-2000;
+    public void paintComponent(Graphics g){
+        if (System.currentTimeMillis()>time+100){
+            BigInteger m=new BigInteger(modulus+"");
+            int xkwidth=XkMat.length;
+            for (int i=0; i<XkMat.length; i++){
+                for (int j=0; j<XkMat[i].length; j++){
+                    g.drawString(XkMat[i][j].mod(m).toString(),j*30+40,i*20+40);
+                }
+            }
+            for (int i=0; i<Yk.length; i++){
+                g.drawString(Yk[i]+"",xkwidth*30+80,i*20+40);
+            }
+            for (int i=0; i<synd.length; i++){
+                g.drawString(synd[i]+"",xkwidth*30+200,i*20+40);
+            }
+            
+            int xwidth=dat.length;
+            for (int i=0; i<dat.length; i++){
+                for (int j=0; j<dat[i].length; j++){
+                    g.drawString(dat[i][j]+"",j*30+40,i*20+400);
+                }
+            }
+            for (int i=1; i<lambda.length; i++){
+                g.drawString(lambda[i]+"",xkwidth*30+80,i*20+380);
+            }
+            for (int i=0; i<q.length; i++){
+                g.drawString(q[i]+"",xkwidth*30+200,i*20+400);
+            }
+        }
+    }
     public static Polynomial messup(Polynomial s){
         Polynomial e=new Polynomial(new int[] {0,3,0,0,200,0,8,0,3,0,0,0,0,0,0,0,3},modulus);
         System.out.println("Corrupting coefficients like this:"+e);
@@ -20,44 +62,48 @@ public class ModularReedSolomon {
         Polynomial r=e.add(s);
         return r;
     }
-    public static void main(String[] args){
-        Polynomial p=new Polynomial(new int[] {248,1},251);
-        Polynomial q=new Polynomial(new int[] {247,1},251);
-        Polynomial g=p.multiply(q);
-        System.out.println(g.divide(p));
-    }
-    /**
-     * @param args the command line arguments
-     */
-    public static void man(String[] args) throws Exception{
-        int A=6;//This ABSOLUTELY HAS TO BE a primitive root mod *modulus*
-        //Examples: mod=251,A=6  mod=241,A=7
-        Scanner scan=new Scanner(System.in);
-        System.out.print("Encode,fix errors in encoded message (do this before decoding), or decode (e/f/d) >");
-        
-        String S=scan.nextLine();
-        if (S.equals("d")){
-            System.out.print("How many errors was the message able to correct when it was first encoded? >");
-        }else{
-            System.out.print("How many errors should it be able to correct? >");
-        }
-        int v=Integer.parseInt(scan.nextLine());//Total errors that can be corrected
-        System.out.println("Able to correct "+v+" errors, g polynomial has degree "+(2*v));
+    public static Polynomial calcG(int A,int v){
         Polynomial G=new Polynomial(new int[] {1},modulus);
         for (int i=0; i<2*v; i++){
             int I=new BigInteger(A+"").modPow(new BigInteger((i+1)+""), new BigInteger(modulus+"")).intValue();
             G=G.multiply(new Polynomial(new int[] {modulus-I,1},modulus));
         }
-        Polynomial g=G;
-        System.out.println("g:"+g);
+        return G;
+    }
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws Exception{
+        int A=6;//This ABSOLUTELY HAS TO BE a primitive root mod *modulus*
+        //Examples: mod=251,A=6  mod=241,A=7
+        
+        JFrame frame=new JFrame("Reed Solomon");
+        frame.setContentPane(M);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        frame.setVisible(true);
+        Scanner scan=new Scanner(System.in);
+        System.out.print("Encode or decode? (e/d) >");
+        
+        String S=scan.nextLine();
+        if (S.equals("d")){
+            System.out.print("How many errors was the message able to correct when it was first encoded? This has to be exact. >");
+        }else{
+            System.out.print("How many errors should it be able to correct? >");
+        }
+        int v=Integer.parseInt(scan.nextLine());//Total errors that can be corrected
+        System.out.println("Able to correct "+v+" errors, g polynomial has degree "+(2*v));
+        
+        
         
         if (S.equals("e")){
             System.out.print("Message? >");
             String[] ss=scan.nextLine().split(" ");
             int[] sss=new int[ss.length];
             for (int i=0; i<ss.length; i++){
-                sss[i]=Integer.parseInt(ss[i]);
+                sss[i]=Integer.parseInt(ss[sss.length-i-1]);
             }
+            Polynomial g=calcG(A,v);
+            System.out.println("g:"+g);
             
         Polynomial p = new Polynomial(sss,modulus);//Random message
         Polynomial s=g.multiply(p);
@@ -65,37 +111,64 @@ public class ModularReedSolomon {
         System.out.println("Encoded message: "+s);
         return;
         }
-        if (S.equals("f")){
         System.out.print("Encoded Message? >");
             String[] ss;ss = scan.nextLine().split(" ");
+            time=System.currentTimeMillis();
             int[] sss=new int[ss.length];
             for (int i=0; i<ss.length; i++){
-                sss[i]=Integer.parseInt(ss[i]);
+                sss[i]=Integer.parseInt(ss[sss.length-i-1]);
             }
         Polynomial r=new Polynomial(sss,modulus);
-        for (int i=0; i<=v; i++){
+        Polynomial s=null;
+        for (int i=v; i>=1; i--){
             try{
             fixR(r,A,i,false);
-            fixR(r,A,i,true);
+            System.out.println(i+" errors.");
+            s=fixR(r,A,i,true);
             break;
             }catch(Exception e){
                 System.out.println("Trying "+i+" errors: "+e);
             }
         }
-        System.out.println();
-        System.out.println();
+        if (s!=null){
+            Polynomial g=calcG(A,v);
+            System.out.println("g:"+g);
+        Polynomial[] om=s.divide(g);
+        String Y=om[0].toString();
+        if (Y.length()!=0){
+            System.out.println("BIG ERROR "+Y);
         }
+        System.out.println("Result: "+om[1]);
+        M.repaint();
+        }
+        
+        /*
+        if (S.equals("d")){
+            System.out.print("Message? >");
+            String[] ss;ss = scan.nextLine().split(" ");
+            int[] sss=new int[ss.length];
+            for (int i=0; i<ss.length; i++){
+                sss[i]=Integer.parseInt(ss[sss.length-i-1]);
+            }
+            Polynomial g=calcG(A,v);
+            System.out.println("g:"+g);
+            Polynomial p=new Polynomial(sss,modulus);
+            System.out.println(p.divide(g)[1]);
+            
+            System.out.println("Remainder, this really should be zero: "+p.divide(g)[0]);
+            
+        }*/
         //4System.out.println("Original: "+s);
     }
-    public static void fixR(Polynomial r,int A,int v, boolean verbose) throws Exception{
+    public static Polynomial fixR(Polynomial r,int A,int v, boolean verbose) throws Exception{
         if (verbose){
-        System.out.println("Received (corrupted) message: "+r);
-        System.out.println();
-        System.out.println();
-        System.out.println("Decoding assuming that there are "+v+" errors...");
-        System.out.println();
+        //System.out.println("Received (corrupted) message: "+r);
+        //System.out.println();
+        //System.out.println();
+        System.out.println("Decoding...");
+        //System.out.println();
         }
-        int[] synd=new int[v*2];
+        synd=new int[v*2];
         if (verbose)
         System.out.print("APow: ");
         for (int i=0; i<v*2; i++){
@@ -114,8 +187,8 @@ public class ModularReedSolomon {
         }
         
         //Calculating Sj square and rectancular matricies
-        int[] q=new int[v];
-        int[][] dat=new int[v][v];
+        q=new int[v];
+        dat=new int[v][v];
         for (int i=0; i<v; i++){
             for (int j=0; j<v; j++){
                 dat[i][j]=synd[i+j];
@@ -128,7 +201,7 @@ public class ModularReedSolomon {
         MAYTRIX M=MAYTRIX.inverse(m,modulus);
         int[][] SS=M.data;
         //Multiplying by rectangular to get Lambda coefficients
-        int[] lambda=new int[v+1];//Note: In the wikipedia article, the upside down capital V is the lambda
+        lambda=new int[v+1];//Note: In the wikipedia article, the upside down capital V is the lambda
         for (int i=0; i<v; i++){
             int sum=0;
             for (int j=0; j<v; j++){
@@ -161,7 +234,8 @@ public class ModularReedSolomon {
         //Inverting roots to get Xk
         int[] invroots=new int[v];
         for (int i=0; i<v; i++){
-            invroots[i]=new BigInteger(roots[i]+"").modPow(new BigInteger("-1"),new BigInteger(modulus+"")).intValue();
+            invroots[i]=MAYTRIX.invert(roots[i],modulus);
+            //invroots[i]=new BigInteger(roots[i]+"").modPow(new BigInteger("-1"),new BigInteger(modulus+"")).intValue();
         }
         if (verbose){
         System.out.println();
@@ -188,20 +262,15 @@ public class ModularReedSolomon {
         
         int[] Xk=invroots;
         if (verbose){
-        System.out.print("Sorted invroots: ");
+        System.out.print("Sorted invroots, Xk: ");
         for (int i : invroots){
-            System.out.print(i+",");
-        }
-        System.out.println();
-        System.out.print("Xk: ");
-        for (int i : Xk){
             System.out.print(i+",");
         }
         System.out.println();
         }
         
         //Taking modular pseudoinverse of rectangular matrix, Xk
-        BigInteger[][] XkMat=new BigInteger[synd.length][v];
+        XkMat=new BigInteger[synd.length][v];
         BigInteger[][] XkMatTransposed=new BigInteger[v][synd.length];
         if (verbose)
         System.out.print("XkMatrix: {{");
@@ -250,7 +319,7 @@ public class ModularReedSolomon {
         
         //Multiplying inverted XkMat by Sj to get Yk
         System.out.println();
-        int[] Yk=new int[v];
+        Yk=new int[v];
         for (int c=0; c<Yk.length; c++){
             int[] C=XkInv[c];
             int n=0;
@@ -277,7 +346,9 @@ public class ModularReedSolomon {
             }
         }
         if (verbose){
-        System.out.print("Ik: ");
+            System.out.println();
+            System.out.println();
+        System.out.print("Error locations: ");
         for (int i : ik){
             System.out.print(i+",");
         }
@@ -291,12 +362,13 @@ public class ModularReedSolomon {
             Q[Q.length-1]=Yk[i];
             e=e.add(new Polynomial(Q,modulus));
         }
+        Polynomial calcS=r.subtract(e);
         if (verbose){
         System.out.println("Calcualted Error:"+e);
-        Polynomial calcS=r.subtract(e);
         System.out.println("Decoding Finished.");
         System.out.println("Original (encoded) message  : "+calcS);
         }
+        return calcS;
     }
     public static int invert(int A, int X){
         for (int j=0; j<modulus; j++){

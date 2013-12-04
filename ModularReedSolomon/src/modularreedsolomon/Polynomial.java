@@ -56,8 +56,13 @@ public class Polynomial {
         }
         return new Polynomial(r,mod);
     }
-    public Polynomial divide(Polynomial p){
-        System.out.println(this+","+p);
+    public Polynomial[] divide(Polynomial p){
+        /*System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        
+        System.out.println(this+","+p);*/
         /*
         if (p.c.length==1){
             int C=MAYTRIX.invert(p.c[0], mod);
@@ -67,20 +72,7 @@ public class Polynomial {
             }
             return new Polynomial(result,mod);
         }*/
-        if (c.length==0){
-            return new Polynomial(new int[] {0},mod);
-        }
-        Polynomial R=new Polynomial(c,mod);
-            int a=R.c[R.c.length-1];
-            int b=p.c[p.c.length-1];
-            System.out.println(a+":"+b);
-            System.out.println(c[2]);
-            System.out.println(c.length);
-            int C=MAYTRIX.invert(b,mod);
-            int d=(C*a)%mod;
-            System.out.println(d);
-            int[] Q=new int[c.length];
-          int zeros=0;
+        int zeros=0;
         for (int i=c.length-1; i>=0; i--){
             if (c[i]==0){
                 zeros++;
@@ -88,21 +80,70 @@ public class Polynomial {
                 break;
             }
         }
+        if (c.length==0 || c.length==zeros){
+            return new Polynomial[] {new Polynomial(new int[] {0},mod),new Polynomial(new int[] {0},mod)};
+        }
+        if (c.length-zeros<p.c.length){
+            return new Polynomial[] {this,new Polynomial(new int[] {0},mod)};
+        }
+        Polynomial R=new Polynomial(c,mod);
+            int a=R.c[R.c.length-1];
+            int b=p.c[p.c.length-1];
+            //System.out.println(a+":"+b);
+            //System.out.println(c[2]);
+            //System.out.println(c.length);
+            int C=MAYTRIX.invert(b,mod);
+            int d=(C*a)%mod;
+            //System.out.println(d);
+            
+          
+        //System.out.println("MEOW"+zeros);
+       // zeros=0;
+        int[] Q=new int[c.length-zeros];
             for (int i=Q.length-1; i>=Q.length-p.c.length; i--){
-                Q[i+zeros]=(p.c[p.c.length-(Q.length-i-1)-1])*d;
+                int A=(p.c[p.c.length-(Q.length-i-1)-1]);
+                /*System.out.println(A);
+                System.out.println(A*d);
+                System.out.println((A*d)%mod);
+                System.out.println("pos"+(i-zeros));*/
+                Q[i]=(A*d)%mod;
             }
+            /*
+            System.out.print("Q: ");
+            for (int i : Q){
+                System.out.print(i+",");
+            }
+            
+            System.out.println();
             System.out.println(p.c.length);
             System.out.println(this);
             System.out.println(c[c.length-1]);
             System.out.println(new Polynomial(Q,mod));
-            System.out.println("Cat"+subtract(new Polynomial(Q,mod)));
-            Polynomial X=(subtract(new Polynomial(Q,mod))).divide(p);
-            int[] S=new int[X.c.length+1];
+            System.out.println("Cat"+subtract(new Polynomial(Q,mod)));*/
+            Polynomial QQ=subtract(new Polynomial(Q,mod));
+            Polynomial[] XX=QQ.divide(p);
+            Polynomial X=XX[1];
+            int numz=0;
+            for (int i=QQ.c.length-1; i>=0; i--){
+                if (QQ.c[i]==0){
+                    numz++;
+                }else{
+                    break;
+                }
+            }
+            if (numz==QQ.c.length){
+                numz=1;
+            }
+            int[] S=new int[X.c.length+numz];
             for (int i=0; i<X.c.length; i++){
                 S[i]=X.c[i];
             }
             S[S.length-1]=d;
-            return new Polynomial(S,mod);
+            for (int i=0; i<numz; i++){
+                //S[S.length-i-1]=0;
+            }
+            
+            return new Polynomial[] {XX[0],new Polynomial(S,mod)};
     }
     public String toString(){
         String s="";
