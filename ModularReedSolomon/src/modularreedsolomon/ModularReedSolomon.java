@@ -77,10 +77,10 @@ public class ModularReedSolomon extends JComponent{
         int A=6;//This ABSOLUTELY HAS TO BE a primitive root mod *modulus*
         //Examples: mod=251,A=6  mod=241,A=7
         
-        JFrame frame=new JFrame("Reed Solomon");
-        frame.setContentPane(M);
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        frame.setVisible(true);
+        //JFrame frame=new JFrame("Reed Solomon");
+        //frame.setContentPane(M);
+        //frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        //frame.setVisible(true);
         Scanner scan=new Scanner(System.in);
         System.out.print("Encode or decode? (e/d) >");
         
@@ -122,7 +122,7 @@ public class ModularReedSolomon extends JComponent{
         Polynomial s=null;
         for (int i=v; i>=1; i--){
             try{
-            fixR(r,A,i,false);
+            fixR(r,A,i,true);
             System.out.println(i+" errors.");
             s=fixR(r,A,i,true);
             break;

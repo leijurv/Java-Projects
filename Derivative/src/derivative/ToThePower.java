@@ -11,7 +11,6 @@ package derivative;
 public class ToThePower extends Function{
     Function base;
     Function pow;
-    static final private boolean Expand=false;
     public ToThePower(Function Base, Function Pow){
         base=Base;
         pow=Pow;
@@ -62,9 +61,9 @@ public class ToThePower extends Function{
                 return new Constant((int)Math.pow(((Constant)base).val,((Constant)pow).val));
             }
         }
-        if (Expand){
+        //if (Expand){
         //return (new Multiply(base,new ToThePower(base,new Constant(pow.val-1)))).simplify();
-        }
+        //}
         return this;
     }
     public boolean equal(Function f){

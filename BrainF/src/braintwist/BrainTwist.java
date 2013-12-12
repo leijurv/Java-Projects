@@ -26,6 +26,9 @@ public class BrainTwist {
     static final String myfirstquine="<[<]<<++++++++[->++++++++<]>--..[-]>>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>-[>]>[>]+[<]<[<]>[[>]>[>]<+[<]<[<]>-]>]>[.>]";
     static final String myquine="[<]>[<<++++++++[->++++++++<]>--.[-]>[-<+<+>>]<<[->>+<<]<+++++++[->++++++<]>+>[<.>-]<[-]>>[-<<<+>>>]>]<<<<[<]>[.>]";
     static final String myFinalQuine = get(myquine)+myquine;
+    static final String JEN="++++++++++[>++++++++++<-]" +
+">--.++++++++++++++++.-----------------.++++++++.+++++." +
+"--------.+++++++++++++++.------------------.++++++++.";
     static String c=myFinalQuine;
     static DLL<Byte> mem=new DLL<Byte>((byte)0);
     static int loc = 0;

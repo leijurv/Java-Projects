@@ -9,6 +9,7 @@ package derivative;
  * @author leijurv
  */
 public abstract class Function {
+    public static boolean exp=true;
     public abstract Function derivitive();
     @Override
     public abstract String toString();

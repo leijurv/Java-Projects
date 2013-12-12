@@ -28,18 +28,25 @@ public class Subtract extends Function{
         return "("+a+")-("+b+")";
     }
     public Function simplify(){
+        System.out.println("d"+this);
         a=a.simplify();
         b=b.simplify();
+                System.out.println("c"+this);
+                System.out.println();
+                if (a.equal(b)){
+                    return new Constant(0);
+                }
         if (a instanceof Constant){
             int aval=((Constant)a).val;
             if (b instanceof Constant){
                 int bval=((Constant)b).val;
+                
                 if (bval==0){
                     return a;
                 }
-                if (aval!=0){
+                //if (aval!=0){
                     return new Constant(aval-bval).simplify();
-                }
+                //}
             }
         }
         if (b instanceof Constant){
@@ -49,7 +56,11 @@ public class Subtract extends Function{
             }
         }
         if (a instanceof Subtract){
-            return (new Subtract(((Subtract)a).a,new Add(((Subtract)a).b,b))).simplify();
+            Subtract A=(Subtract)a;
+            if (A.a.equal(b)){
+                return new Subtract(new Constant(0),A.b).simplify();
+            }
+            //return (new Subtract(((Subtract)a).a,new Add(((Subtract)a).b,b))).simplify();
         }
         if (b instanceof Subtract){
             return (new Subtract(new Add(a,((Subtract)b).b),((Subtract)b).a)).simplify();
@@ -60,6 +71,15 @@ public class Subtract extends Function{
                     return new Add(new Subtract(((Add)a).a,b),((Add)a).b).simplify();
                 }
             }
+        }
+        if (a instanceof Add){
+            if (((Add)a).b.equal(b)){
+                return ((Add)a).a;
+            }
+        }
+        if (b instanceof Add){
+            Add B=(Add)b;
+            return new Subtract(new Subtract(a,B.a),B.b).simplify();
         }
         return this;
     }

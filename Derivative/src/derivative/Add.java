@@ -42,7 +42,15 @@ public class Add extends Function{
             if (bval==0){
                 return a;
             }
-            return new Add(b,a).simplify();
+            return new Add(b,a).simplify();//Always reorder f(x)+constant to constant+f(x)
+        }
+        if (a instanceof Subtract){
+            Subtract A=(Subtract)a;
+            if (A.a instanceof Constant){
+                if (((Constant)A.a).val==0){
+                    return new Subtract(b,A.b).simplify();
+                }
+            }
         }
         if (b instanceof Subtract){
             Subtract B=(Subtract)b;
@@ -56,6 +64,8 @@ public class Add extends Function{
                 if (A.a instanceof Constant){
                     if (B.a instanceof Constant){
                         return new Multiply(new Add(A.a,B.a),A.b).simplify();
+                        //I know it's bad, but I add things like this for special cases where this
+                        //would make it simplify a certain function perfectly
                     }
                 }
                 }
@@ -80,6 +90,23 @@ public class Add extends Function{
             }
             if (A.b.equal(b)){
                 return new Add(A.a,new Add(A.b,b)).simplify();
+            }
+        }
+        if (a instanceof Divide){
+            if (b instanceof Divide){
+                if (((Divide)a).bottom.equal(((Divide)b).bottom)){
+                    return new Divide(new Add(((Divide)b).top,((Divide)a).top).simplify(),((Divide)a).bottom);
+                }
+                
+            }
+        }
+        if (a instanceof Divide){
+            if (((Divide)a).bottom instanceof X){
+                if (b instanceof Multiply){
+                    if (((Multiply)b).divByX()){
+                        return new Divide(new Add(((Divide)a).top,new Multiply(((Multiply)b),new X())),new X());
+                    }
+                }
             }
         }
         return this;

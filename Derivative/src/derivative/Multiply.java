@@ -178,6 +178,7 @@ public class Multiply extends Function{
                     return new Multiply(A.b,new ToThePower(AB.base,new Add(AB.pow,new Constant(1))));
                 }
             }
+            
         }
         if (a instanceof Multiply){
             Multiply A=(Multiply)a;
@@ -214,7 +215,213 @@ public class Multiply extends Function{
             }
             return new Divide(new Multiply(A.top,b),A.bottom).simplify();
         }
+        if (b instanceof Divide){
+        Divide B=(Divide)b;
+        return new Divide(new Multiply(B.top,a),B.bottom).simplify();
+    }
+        
+        if (b instanceof Multiply && a instanceof X){
+            if (((Multiply)b).divByX()){
+                Multiply T=(Multiply)b;
+                if (T.a instanceof ToThePower){
+                    ToThePower ta=(ToThePower)T.a;
+                    if (ta.base instanceof X){
+                        return new Multiply(new ToThePower(new X(),new Subtract(ta.pow,new Constant(1))),T.b);
+                    }
+                }
+                if (T.b instanceof ToThePower){
+                    ToThePower ta=(ToThePower)T.b;
+                    if (ta.base instanceof X){
+                        return new Multiply(new ToThePower(new X(),new Subtract(ta.pow,new Constant(1))),T.a);
+                    }
+                }
+                if (T.a instanceof Multiply){
+                    if (((Multiply)T.a).divByX()){
+                        return new Multiply(T.b,new Multiply(new X(),T.a).simplify());
+                    }
+                }
+                if (T.b instanceof Multiply){
+                    if (((Multiply)T.b).divByX()){
+                        return new Multiply(T.a,new Multiply(new X(),T.b).simplify());
+                    }
+                }
+                
+            }
+        }
+        if ((a instanceof Tan && b instanceof Cos)){
+            Tan A=(Tan)a;
+            Cos B=(Cos)b;
+            if (A.of.equal(B.of)){
+                return new Sin(A.of).simplify();
+            }
+        }
+        if ((a instanceof Sin && b instanceof Csc)){
+            Sin A=(Sin)a;
+            Csc B=(Csc)b;
+            if (A.of.equal(B.of)){
+                return new Constant(1);
+            }
+        }
+        if ((a instanceof Cos && b instanceof Sec)){
+            Cos A=(Cos)a;
+            Sec B=(Sec)b;
+            if (A.of.equal(B.of)){
+                return new Constant(1);
+            }
+        }
+        if (b instanceof ToThePower && (!(a instanceof Constant) && !(a instanceof ToThePower))){
+            return new Multiply(b,a).simplify();
+        }
+        if (b instanceof Multiply){
+            Multiply B=(Multiply)b;
+            if (B.a instanceof ToThePower){
+                if (!(a instanceof ToThePower) && !(a instanceof Constant)){
+                    return new Multiply(B.a,new Multiply(B.b,a)).simplify();
+                }
+            }
+        }
+        if (b instanceof Csc){
+            Sin s=new Sin(((Csc)b).of);
+            if (a instanceof ToThePower){
+                if (((ToThePower)a).base.equal(s)){
+                    return new ToThePower(((ToThePower)a).base,new Subtract(((ToThePower)a).pow,new Constant(1))).simplify();
+                }
+            }
+            if (a instanceof Multiply){
+                Multiply A=(Multiply)a;
+                if (A.divBy(s)){
+                    
+                if (A.a.equal(s)){
+                    return A.b;
+                }
+                if (A.b.equal(s)){
+                    return A.a;
+                }
+                if (A.a instanceof Multiply){
+                    if (((Multiply)A.a).divBy(s)){
+                        return new Multiply(A.b,new Multiply(A.a,b)).simplify();
+                    }
+                }
+                if (A.b instanceof Multiply){
+                    if (((Multiply)A.b).divBy(s)){
+                        return new Multiply(A.a,new Multiply(A.b,b)).simplify();
+                    }
+                }
+                }
+            }
+        }
+        if (b instanceof Csc){
+            Cos s=new Cos(((Csc)b).of);
+            Cot co=new Cot(((Csc)b).of);
+            if (a instanceof ToThePower){
+                if (((ToThePower)a).base.equal(s)){
+                    return new Multiply(new Cot(((Csc)b).of),new ToThePower(((ToThePower)a).base,new Subtract(((ToThePower)a).pow,new Constant(1)))).simplify();
+                }
+            }
+            if (a instanceof Multiply){
+                Multiply A=(Multiply)a;
+                if (A.divBy(s)){
+                if (A.a.equal(s)){
+                    return new Multiply(co,A.b);
+                }
+                if (A.b.equal(s)){
+                    return new Multiply(co,A.a);
+                }
+                if (A.a instanceof Multiply){
+                    if (((Multiply)A.a).divBy(s)){
+                        return new Multiply(A.b,new Multiply(A.a,b)).simplify();
+                    }
+                }
+                if (A.b instanceof Multiply){
+                    if (((Multiply)A.b).divBy(s)){
+                        return new Multiply(A.a,new Multiply(A.b,b)).simplify();
+                    }
+                }
+                }
+            }
+        }
+        if (a instanceof ToThePower && b instanceof Cos){
+            ToThePower A=(ToThePower)a;
+            Cos B=(Cos)b;
+            if (A.base instanceof Sin){
+                if (((Sin)A.base).of.equal(B.of)){
+            if (A.pow instanceof Subtract){
+                Subtract s=(Subtract)A.pow;
+                if (s.b instanceof Constant){
+                    if (((Constant)s.b).val==1){
+                        return new Multiply(new ToThePower(A.base,s.a),new Cot(B.of)).simplify();
+                    }
+                }
+            }
+                }
+            }
+        }
         return this;
+    }
+    public boolean divBy(Function f){
+        if (a.equal(f) || b.equal(f)){
+            return true;
+        }
+        if (a instanceof Multiply){
+            if (((Multiply)a).divBy(f)){
+                return true;
+            }
+        }
+        if (b instanceof Multiply){
+            if (((Multiply)b).divBy(f)){
+                return true;
+            }
+        }
+        if (a instanceof ToThePower){
+            if (((ToThePower)a).base.equal(f)){
+                return true;
+            }
+        }
+        if (b instanceof ToThePower){
+            if (((ToThePower)b).base.equal(f)){
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean divByX(){
+        //This silly functions basically checks if a multiply has a power of x somewhere in it. Heuristic.
+        if (a instanceof X || b instanceof X){
+            //return true;
+        }
+        if (a instanceof ToThePower){
+            ToThePower A=(ToThePower)a;
+            if (A.base instanceof X){
+                return true;
+            }
+            if (A.base instanceof Multiply){
+                if (((Multiply)A.base).divByX()){
+                    return true;
+                }
+            }
+        }
+        if (b instanceof ToThePower){
+            ToThePower B=(ToThePower)b;
+            if (B.base instanceof X){
+                return true;
+            }
+            if (B.base instanceof Multiply){
+                if (((Multiply)B.base).divByX()){
+                    return true;
+                }
+            }
+        }
+        if (a instanceof Multiply){
+            if (((Multiply)a).divByX()){
+                return true;
+            }
+        }
+        if (b instanceof Multiply){
+            if (((Multiply)b).divByX()){
+                return true;
+            }
+        }
+        return false;
     }
     public boolean equal(Function f){
         if (f instanceof Multiply){
