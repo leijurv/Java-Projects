@@ -21,7 +21,7 @@ static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","
      * @param args the command line arguments
      */
     public static void main(String[] args){
-        String r="sec(sin(cosx)^tanx)";
+        String r="sec(sin(cosx)^tan(ln(x))";
         
         Function f=preparse(r);
         
