@@ -20,15 +20,17 @@ public class Gooey {
     JFrame frame;
     JTabbedPane t;
     EncodePane e=new EncodePane();
+    DecodePane d=new DecodePane();
     public Gooey(){
         t=new JTabbedPane();
         t.add("Encode",e);
+        t.add("Decode",d);
         frame=new JFrame("RS error correction!");
         frame.setContentPane(t);
           
 	  //frame.setUndecorated(true);
      frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-	  //frame.setVisible(true);
+	  frame.setVisible(true);
 	  frame.addWindowListener(new WindowAdapter(){
 	  public void windowClosing(WindowEvent e){
 		System.exit(0);

@@ -15,17 +15,12 @@ import javax.swing.JFrame;
  * @author leif
  */
 public class ModularReedSolomon extends JComponent{
-    static final int modulus=251;//THIS ABSOLUTELY HAS TO BE PRIME
+    static final int modulus=83;//THIS ABSOLUTELY HAS TO BE PRIME
+    static final int A=2;//This ABSOLUTELY HAS TO BE a primitive root mod *modulus*
+        //Examples: mod=251,A=6  mod=241,A=7
     static long time=Long.MAX_VALUE-2000;
     static int[] inv=new int[modulus];
-    
-    public static Polynomial messup(Polynomial s){
-        Polynomial e=new Polynomial(new int[] {0,3,0,0,200,0,8,0,3,0,0,0,0,0,0,0,3},modulus);
-        System.out.println("Corrupting coefficients like this:"+e);
-        //System.out.println(e.eval(6)+","+e.eval(36)+","+e.eval(216)+","+e.eval(41));
-        Polynomial r=e.add(s);
-        return r;
-    }
+    static char[] asdf={'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9','.',',',':','?',';','!','(',')','=','+','-',' ','@','#','$','%','^','&','*','"','/'};
     public static Polynomial calcG(int A,int v){
         Polynomial G=new Polynomial(new int[] {1},modulus);
         for (int i=0; i<2*v; i++){
@@ -34,12 +29,64 @@ public class ModularReedSolomon extends JComponent{
         }
         return G;
     }
+    public static String decode(int v, int[] sss){
+        Polynomial r=new Polynomial(sss,modulus);
+        Polynomial s=null;
+        for (int i=v; i>=1; i--){
+            try{
+                if (i==1){
+            fixR(r,A,i,false);
+                }else{
+                    fixR(r,A,i,false);
+                }
+            System.out.println(i+" errors.");
+            s=fixR(r,A,i,true);
+            break;
+            }catch(Exception e){
+                System.out.println("Trying "+i+" errors: "+e);
+            }
+        }
+        if (s!=null){
+            Polynomial g=calcG(A,v);
+            //int q=g.c.length;
+            int q=1;
+            int[] qq=new int[s.c.length-q+1];
+            for (int i=0; i<qq.length; i++){
+                qq[i]=s.c[i+q-1];
+            }
+            String result="";
+            for (int i=qq.length-1; i>=0; i--){
+                result+=(asdf[qq[i]]);
+            }
+            System.out.println(result);
+            return result;
+        }
+        return "Error";
+    }
+    public static String encode(int v, int[] sss){
+        Polynomial g=calcG(A,v);
+            int[] qq=new int[g.c.length];
+            for (int i=0; i<qq.length; i++){
+                qq[i]=0;
+            }
+            qq[qq.length-1]=1;
+            
+            System.out.println("g:"+g);
+            
+        Polynomial p = new Polynomial(sss,modulus);
+        Polynomial tempS=p.multiply(new Polynomial(qq,modulus));
+        Polynomial tempSS=tempS.divide(g)[0];
+        Polynomial s=tempS.subtract(tempSS);
+        
+        System.out.println("Your Message: "+p);
+        System.out.println("Encoded message: "+s);
+        return s.toString();
+    }
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception{
-        int A=5;//This ABSOLUTELY HAS TO BE a primitive root mod *modulus*
-        //Examples: mod=251,A=6  mod=241,A=7
+        System.out.println(asdf.length);
         for (int i=1; i<modulus; i++){
             inv[i]=MAYTRIX.invert(i,modulus);
         }
@@ -65,22 +112,7 @@ public class ModularReedSolomon extends JComponent{
             for (int i=0; i<ss.length; i++){
                 sss[i]=Integer.parseInt(ss[sss.length-i-1]);
             }
-            Polynomial g=calcG(A,v);
-            int[] qq=new int[g.c.length];
-            for (int i=0; i<qq.length; i++){
-                qq[i]=0;
-            }
-            qq[qq.length-1]=1;
-            
-            System.out.println("g:"+g);
-            
-        Polynomial p = new Polynomial(sss,modulus);
-        Polynomial tempS=p.multiply(new Polynomial(qq,modulus));
-        Polynomial tempSS=tempS.divide(g)[0];
-        Polynomial s=tempS.subtract(tempSS);
-        
-        System.out.println("Your Message: "+p);
-        System.out.println("Encoded message: "+s);
+            encode(v,sss);
         return;
         }
         System.out.print("Encoded Message? >");
@@ -90,31 +122,8 @@ public class ModularReedSolomon extends JComponent{
             for (int i=0; i<ss.length; i++){
                 sss[i]=Integer.parseInt(ss[sss.length-i-1]);
             }
-        Polynomial r=new Polynomial(sss,modulus);
-        Polynomial s=null;
-        for (int i=v; i>=1; i--){
-            try{
-                if (i==1){
-            fixR(r,A,i,true);
-                }else{
-                    fixR(r,A,i,false);
-                }
-            System.out.println(i+" errors.");
-            s=fixR(r,A,i,true);
-            break;
-            }catch(Exception e){
-                System.out.println("Trying "+i+" errors: "+e);
-            }
-        }
-        if (s!=null){
-            Polynomial g=calcG(A,v);
-            int q=g.c.length;
-            int[] qq=new int[s.c.length-q+1];
-            for (int i=0; i<qq.length; i++){
-                qq[i]=s.c[i+q-1];
-            }
-            System.out.println(new Polynomial(qq,modulus));
-            /*
+        decode(v,sss);
+        /*
             
             System.out.println("g:"+g);
         Polynomial[] om=s.divide(g);
@@ -123,10 +132,7 @@ public class ModularReedSolomon extends JComponent{
             System.out.println("BIG ERROR "+Y);
         }
         System.out.println("Result: "+om[1]);
-        M.repaint();*/
-        }
-        
-        /*
+        M.repaint();
         if (S.equals("d")){
             System.out.print("Message? >");
             String[] ss;ss = scan.nextLine().split(" ");
