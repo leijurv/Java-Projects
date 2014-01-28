@@ -54,7 +54,8 @@ public class Address {
             if (verify(B) && new BigInteger(a).compareTo(address.modulus)==0){
                    return new BigInteger(b);
             }
-                throw new RuntimeException("YOUR MOTHER");
+            //return BigInteger.ZERO;
+               throw new RuntimeException("YOUR MOTHER");
     }
     public static String fetchAddr(RSAKeyPair address) throws Exception{
             String s= AIB_Client.load(AIB_Client.web+"getaddr/"+address.modulus.toString(16));
@@ -85,6 +86,9 @@ public class Address {
         }
         tries++;
         }
+        if (tries==10){
+            value=BigInteger.TEN;
+        }
         System.out.println("Took "+tries+" tries to fetch Value for "+(address.modulus.toString(16)));
         finished=false;
         tries=0;
@@ -96,6 +100,9 @@ public class Address {
             finished=false;
         }
         tries++;
+        }
+        if (tries==10){
+            addr="";
         }
         System.out.println("Took "+tries+" tries to fetch Addr for "+(address.modulus.toString(16)));
         System.out.println(address.modulus+addr);

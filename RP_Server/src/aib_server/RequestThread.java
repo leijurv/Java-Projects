@@ -51,8 +51,12 @@ public class RequestThread extends Thread{
             request=request.split("\n")[0];
             request=request.substring(4,request.length()-10);
             if (request.startsWith("/getbal/")){
+                //try{
                 ps.write(AIB_Server.processGetBal(request.substring(8,request.length())).getBytes());
-            }
+                //}catch(Exception e){
+                 //   ps.write(("0").getBytes());
+                //}
+                }
             if (request.startsWith("/getaddr/")){
                 ps.write(AIB_Server.processGetAddr(request.substring(9,request.length())).getBytes());
             }

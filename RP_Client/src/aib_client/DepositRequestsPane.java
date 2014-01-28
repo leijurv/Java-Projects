@@ -73,7 +73,7 @@ public class DepositRequestsPane extends JComponent implements ActionListener{
     public void actionPerformed(ActionEvent ae) {
         if (ae.getActionCommand().equals("New")){
             RSAKeyPair R=new RSAKeyPair();
-            R.generate(new BigInteger(512,100,new SecureRandom()),new BigInteger(511,100,new SecureRandom()),AIB_Client.e,false);
+            R.generate(new BigInteger(200,20,new SecureRandom()),new BigInteger(200,20,new SecureRandom()),new BigInteger("17"),true);
             AIB_Client.addresses.add(new Address(R));
             System.out.println(R.modulus.toByteArray().length);
             try {

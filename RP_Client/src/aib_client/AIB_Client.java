@@ -65,9 +65,12 @@ return buf.toString();
         R.pub=new BigInteger("17");
         RSAKeyPair S=new RSAKeyPair();
         S.generate(new BigInteger("101"), new BigInteger("107"), new BigInteger("17"), false);
+RSAKeyPair T=new RSAKeyPair();
+        T.generate(new BigInteger("11"), new BigInteger("13"), new BigInteger("17"), false);
 
         addresses.add(new Address(R));
         addresses.add(new Address(S));
+        //addresses.add(new Address(T));
 gooey=new Gooey();
     }
     
