@@ -4,36 +4,118 @@
  */
 package aib_server;
 
+import com.google.bitcoin.core.BlockChain;
+import com.google.bitcoin.core.NetworkParameters;
+import com.google.bitcoin.core.PeerGroup;
+import com.google.bitcoin.core.Wallet;
+import com.google.bitcoin.discovery.DnsDiscovery;
+import com.google.bitcoin.store.BlockStoreException;
+import com.google.bitcoin.store.SPVBlockStore;
+import com.google.bitcoin.store.WalletProtobufSerializer;
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 /**
  *
  * @author leif
  */
 public class AIB_Server {
     static final BigInteger e=new BigInteger("65537");
-    static final String Addresses=System.getProperty("user.home")+"/Dropbox/AIB_server/Addresses";
+    static final String Addresses=System.getProperty("user.home")+"/Dropbox/RP_server/Addresses";
     static ArrayList<Address> addresses=new ArrayList<Address>();
     static RSAKeyPair comKeyPair=new RSAKeyPair();
+    static ArrayList<LogEvent> Log=new ArrayList<LogEvent>();
     public static void setup(){
-        addresses.add(new Address(new BigInteger("3233"),new BigInteger("5021"),"YOURFACE"));
-        addresses.add(new Address(new BigInteger("10807"),new BigInteger("12340000"),"YOURLIFE"));
-comKeyPair.pri=new BigInteger("83374156446774429873694550481645812108834138335187533508679883506841478344454653407583462002728379160005936010232152845900203607261418110281030190618566505266984514447967618960101472648126527225429103019628649092001207451156000110046429132143123004788038578362511400808819284172666518163971226737327430819985");
-comKeyPair.pub=e;
-comKeyPair.modulus=new BigInteger("95812518035600410503994805360704581672073207036300573104181267870519734981509839211152174319605986165096863495810633205242273997599318920084305802356152031410095278243554997838911172683159778396002043381602230364061683476559432122157675368167117435777718607888823487551080217245394174274812214070625155618899");
+        
+        
+        addresses.add(new Address(new BigInteger("24020791567495045215642065098106976790718580862353753650273116703458638404109145341712527426373897746399520171943504496355138983511621038572113831301549097251604814930086307353245172517660389318908257398118671272810218206810306586747566519936154692410187626160745255451982459450427003693146228840518387841101"),new BigInteger("12340000"),"YOURLIFE"));
+   
+        
+        
+        comKeyPair.pri=new BigInteger("21237045006372166362343735671067154651005240837175711672036432501367744380726761523099917307895886222611348141610156734035441374189102166814928011873966331620177069811864633392634727116725767267394440079044576074261644881084359423298636982612361207340331894984808401184717391810830519841114676118399154603777");
+   comKeyPair.pub=e;
+   comKeyPair.modulus=new BigInteger("30544972536158817251655212322229910774764747152393991481592671659617650517484303426664602567870181612853441670471510377880014074973251738281831565513412018318239736924037011987096211978883338308643969623592748817141184518938883172148789404470797180317762752846760841810232802667272390174890293292561296762453");
+
     }
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception{
+        String filePrefix="cat";
+        File directory=new File("/Users/leijurv/Desktop");
+        
+    BlockChain vChain;
+    SPVBlockStore vStore;
+    Wallet vWallet;
+    PeerGroup vPeerGroup;
+    boolean vUseAutoSave = true;
+InetAddress[] vPeerAddresses=null;
+    
+   File vChainFile, vWalletFile;
+        NetworkParameters params=new NetworkParameters(1);
+        if (!directory.exists()) {
+            if (!directory.mkdir()) {
+                throw new Exception("Could not create named directory.");
+            }
+        }
+        FileInputStream walletStream = null;
+        try {
+            vChainFile = new File(directory, filePrefix + ".spvchain");
+            vWalletFile = new File(directory, filePrefix + ".wallet");
+            boolean shouldReplayWallet = vWalletFile.exists() && !vChainFile.exists();
+            if (vWalletFile.exists()) {
+                walletStream = new FileInputStream(vWalletFile);
+                vWallet = new WalletProtobufSerializer().readWallet(walletStream);
+                if (shouldReplayWallet)
+                    vWallet.clearTransactions(0);
+            } else {
+                vWallet = new Wallet(params);
+            }
+            if (vUseAutoSave) vWallet.autosaveToFile(vWalletFile, 1, TimeUnit.SECONDS, null);
+            vStore = new SPVBlockStore(params, vChainFile);
+            vChain = new BlockChain(params, vWallet, vStore);
+            vPeerGroup = new PeerGroup(params, vChain);
+            vPeerGroup.addWallet(vWallet);
+            if (vPeerAddresses != null) {
+                for (InetAddress addr : vPeerAddresses) vPeerGroup.addAddress(addr);
+                vPeerAddresses = null;
+            } else {
+                vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
+            }
+            vPeerGroup.startAndWait();
+            vPeerGroup.downloadBlockChain();
+            // Make sure we shut down cleanly.
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override public void run() {
+                    try {
+                        WalletAppKit.this.stopAndWait();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+        } catch (BlockStoreException e) {
+            throw new IOException(e);
+        } finally {
+            if (walletStream != null) walletStream.close();
+        }
+        
+        
+        
+        
+        
+        
+        
         setup();
         ServerSocket S=new ServerSocket(5020);
         boolean running=true;
@@ -47,7 +129,7 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
 
         RSAKeyPair comPubKey=new RSAKeyPair();
             comPubKey.modulus=modulus;
-            comPubKey.pub=new BigInteger("17");
+            comPubKey.pub=new BigInteger("65537");
                 MessageDigest m=MessageDigest.getInstance("SHA1");
                 m.reset();
                 m.update(b);
@@ -70,166 +152,8 @@ comKeyPair.modulus=new BigInteger("958125180356004105039948053607045816720732070
         return null;
     }
     public static String processTx(String s){
-        System.out.println("Processing SendTX");
-        if (s.length()!=0){
-            byte[] total=Hex.decodeHex(s.toCharArray());
-            int inputs=total[0];
-            System.out.println(inputs+" inputs");
-            System.out.println("Query length "+total.length);
-            byte[] sigs=new byte[inputs*128];
-            byte[] toats=new byte[total.length-sigs.length];
-            for (int i=0; i<toats.length; i++){
-                toats[i]=total[i];
-            }
-            for (int i=0; i<128*inputs; i++){
-                sigs[i]=total[i+toats.length];
-            }
-            
-            
-            byte[][] input=new byte[inputs][128];
-            for (int i=0; i<128; i++){
-                for (int j=0; j<inputs; j++){
-                    byte r=total[1+i+j*138];
-                    //System.out.println(j+","+i);
-                    input[j][i]=r;
-                }
-            }
-            byte[][] inAmts=new byte[inputs][10];
-            for (int i=0; i<10; i++){
-                for (int j=0; j<inputs; j++){
-                    inAmts[j][i]=total[129+i+j*138];
-                }
-            }
-            BigInteger[] inAmt=new BigInteger[inputs];
-            for (int i=0; i<inputs; i++){
-                inAmt[i]=new BigInteger(inAmts[i]);
-            }
-            BigInteger toatInput=BigInteger.ZERO;
-            for (int i=0; i<inputs; i++){
-                toatInput=toatInput.add(inAmt[i]);
-            }
-            for (int i=0; i<inputs; i++){
-                System.out.println("Input from "+new BigInteger(input[i]).toString(16)+" with value "+inAmt[i]);
-            }
-            System.out.println("Total input value "+toatInput);
-            
-            
-            byte[] out=slice(total,138*inputs+1);
-            int outputs=out[0];
-            System.out.println(outputs+" outputs");
-            byte[][] output=new byte[outputs][128];
-            for (int i=0; i<128; i++){
-                for (int j=0; j<outputs; j++){
-                    byte r=out[1+i+j*138];
-                    //System.out.println(j+","+i);
-                    output[j][i]=r;
-                }
-            }
-            byte[][] outAmts=new byte[outputs][10];
-            for (int i=0; i<10; i++){
-                for (int j=0; j<outputs; j++){
-                    outAmts[j][i]=out[129+i+j*138];
-                }
-            }
-            BigInteger[] outAmt=new BigInteger[outputs];
-            for (int i=0; i<outputs; i++){
-                outAmt[i]=new BigInteger(outAmts[i]);
-            }
-            for (int i=0; i<outputs; i++){
-                System.out.println("Output to "+new BigInteger(output[i])+" with value "+outAmt[i]);
-            }
-            BigInteger toatOutput=BigInteger.ZERO;
-            for (int i=0; i<outputs; i++){
-                toatOutput=toatOutput.add(outAmt[i]);
-            }
-            System.out.println("Total output value "+toatOutput);
-            
-            if (toatOutput.compareTo(toatInput)==0){
-                System.out.println("Total input equal to total output YAY");
-            }else{
-                System.out.println("Input value unequal to output value!! NO");
-            }
-            
-            System.out.println("Verifying inputs");
-            byte[][] sig=new byte[inputs][128];
-            for (int i=0; i<128; i++){
-                for (int j=0; j<inputs; j++){
-                    sig[j][i]=total[toats.length+i+j*128];
-                }
-            }
-            byte[] hash=hash(toats);
-            System.out.println("Hash: "+Hex.encodeHexString(hash));
-            boolean valid=true;
-            for (int i=0; i<inputs; i++){
-            try {
-                System.out.println("Sig "+i+" has sig "+new BigInteger(sigs).toString(16));
-                if (!verify(toats,sig[i],new BigInteger(input[i]))){
-                    System.out.println("Invalid signature for input #"+i);
-                    valid=false;
-                    break;
-                }
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            }
-            if (!valid){
-                return "Your mom";
-            }
-            BigInteger[] inputAddr=new BigInteger[inputs];
-            for (int i=0; i<inputs; i++){
-                inputAddr[i]=new BigInteger(input[i]);
-            }
-            BigInteger[] outputAddr=new BigInteger[outputs];
-            for (int i=0; i<outputs; i++){
-                outputAddr[i]=new BigInteger(output[i]);
-            }
-            Address[] inputA=new Address[inputs];
-            Address[] outputA=new Address[outputs];
-            for (Address a : addresses){
-                for (int i=0; i<inputs; i++){
-                    if (a.address.compareTo(inputAddr[i])==0){
-                        inputA[i]=a;
-                    }
-                }
-                for (int i=0; i<outputs; i++){
-                    if (a.address.compareTo(outputAddr[i])==0){
-                        outputA[i]=a;
-                    }
-                }
-            }
-            BigInteger[] inputAddrValues=new BigInteger[inputs];
-            for (int i=0; i<inputs; i++){
-                if (inputA[i]!=null){
-                    System.out.println("Input "+i+" matched to address "+inputA[i].address+" with value "+inputA[i].value);
-                    inputAddrValues[i]=inputA[i].value;
-                }else{
-                    System.out.println("Unable to match input "+i+" with address "+inputAddr[i]+", transaction will probably fail");
-                    inputAddrValues[i]=BigInteger.ZERO;
-                }
-                if (inAmt[i].compareTo(inputAddrValues[i])==1){
-                    System.out.println("Not enough in address "+inputA[i].address+": "+inputAddrValues[i]+", needed at least"+inAmt[i]);
-                    return "";
-                }else{
-                    if (inputA[i]!=null){
-                        System.out.print("Subtracting "+inAmt[i]+" from address "+inputA[i].address+", bringing balance to ");
-                        inputA[i].value=inputA[i].value.subtract(inAmt[i]);
-                        System.out.println(inputA[i].value);
-                    }
-                }
-            }
-            for (int i=0; i<outputs; i++){
-                if (outputA[i]==null){
-                    System.out.println("Unable to match output "+i+" with address "+outputAddr[i]+", creating new Address");
-                    addresses.add(new Address(outputAddr[i],BigInteger.ZERO,"Cadsf"));
-                    outputA[i]=addresses.get(addresses.size()-1);
-                }
-                if (outputA[i]!=null){
-                    System.out.println("Output "+i+" matched to address "+outputA[i].address+" with value "+outputA[i].value);
-                    System.out.println("Adding value "+outAmt[i]);
-                    outputA[i].value=outputA[i].value.add(outAmt[i]);
-                }
-            }
-        }
+        LogEvent event=new LogTransaction(s);
+        Log.add(event);
         return "";
     }
     public static byte[] slice(byte[] input, int amt){

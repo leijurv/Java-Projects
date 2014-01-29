@@ -87,7 +87,7 @@ public class Address {
         tries++;
         }
         if (tries==10){
-            value=BigInteger.TEN;
+            value=BigInteger.TEN;//THIS IS HORRIBLE HORRIbLE HORRIbLE CODE
         }
         System.out.println("Took "+tries+" tries to fetch Value for "+(address.modulus.toString(16)));
         finished=false;
@@ -102,7 +102,7 @@ public class Address {
         tries++;
         }
         if (tries==10){
-            addr="";
+            addr="";//SO IS THIS
         }
         System.out.println("Took "+tries+" tries to fetch Addr for "+(address.modulus.toString(16)));
         System.out.println(address.modulus+addr);
