@@ -13,6 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.math.BigDecimal;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -29,14 +30,17 @@ public class Gooey implements ChangeListener{
     OverviewPane overviewPane;
     DepositRequestsPane dpPane;
     SendMoneyPane smp;
+    MickeyTab heymickey;
     public Gooey(){
-        frame=new JFrame("AIB_Client");
+        frame=new JFrame("RP_Client");
 	  tabbedPane=new JTabbedPane();
           overviewPane=new OverviewPane();
           tabbedPane.addTab("Overview", overviewPane);
           dpPane=new DepositRequestsPane();
           tabbedPane.addTab("Recieve Money",dpPane);
           smp=new SendMoneyPane();
+          heymickey=new MickeyTab(new BigDecimal("5.021"));
+          tabbedPane.addTab("Addr3ss book",heymickey);
           tabbedPane.addTab("Send Money",smp);
           tabbedPane.addChangeListener(this);
 	  frame.setSize(1000,700);

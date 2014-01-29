@@ -4,16 +4,12 @@
  */
 package aib_server;
 
-import com.google.bitcoin.core.BlockChain;
+
+import com.google.bitcoin.core.ECKey;
 import com.google.bitcoin.core.NetworkParameters;
-import com.google.bitcoin.core.PeerGroup;
-import com.google.bitcoin.core.Wallet;
-import com.google.bitcoin.discovery.DnsDiscovery;
-import com.google.bitcoin.store.BlockStoreException;
-import com.google.bitcoin.store.SPVBlockStore;
-import com.google.bitcoin.store.WalletProtobufSerializer;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,26 +18,88 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.spongycastle.asn1.*;
 /**
  *
  * @author leif
  */
 public class AIB_Server {
     static final BigInteger e=new BigInteger("65537");
-    static final String Addresses=System.getProperty("user.home")+"/Dropbox/RP_server/Addresses";
+    static final String Save=System.getProperty("user.home")+"/Dropbox/RP_server/Addresses";
+    static final String Save2=System.getProperty("user.home")+"/Dropbox/RP_server/Log";
     static ArrayList<Address> addresses=new ArrayList<Address>();
-    static RSAKeyPair comKeyPair=new RSAKeyPair();
+    static final RSAKeyPair comKeyPair=new RSAKeyPair();
     static ArrayList<LogEvent> Log=new ArrayList<LogEvent>();
+    public static void saveLogs() throws Exception{
+        File fstream=new File(Save2);
+        FileOutputStream f=new FileOutputStream(fstream);
+        synchronized(Log){
+            for (LogEvent l : Log){
+                l.write(f);
+            }
+            f.close();
+        }
+    }
+    public static void readLogs() throws Exception{
+        File fstream=new File(Save2);
+        FileInputStream f=new FileInputStream(fstream);
+        synchronized(Log){
+            Log=new ArrayList<LogEvent>();
+            //System.out.println(f.available());
+            while(f.available()!=0){
+                Log.add(LogEvent.create(f));
+            }
+            f.close();
+        }
+    }
+    public static void saveAddresses() throws Exception{
+         File fstream=new File(Save);
+         FileOutputStream f=new FileOutputStream(fstream);
+         synchronized(addresses){
+            for (Address a : addresses){
+                f.write(to128(a.address));
+                f.write(toTen(a.value));
+                f.write(to30(a.privKey.toByteArray()));
+            }
+            f.close();
+         }
+    }
+    public static void readAddresses() throws Exception{
+         File fstream=new File(Save);
+         FileInputStream f=new FileInputStream(fstream);
+         int r=f.available();
+         synchronized(addresses){
+            addresses=new ArrayList<Address>();
+            for (int i=0; i<r/168; i++){
+                byte[] R=new byte[128];
+                f.read(R);
+                byte[] S=new byte[10];
+                f.read(S);
+                
+                byte[] T=new byte[30];
+                f.read(T);
+                BigInteger b=new BigInteger(S);
+                b=BigInteger.ZERO;//Will be recreated by logs
+                Address e=new Address(new BigInteger(R),b,new BigInteger(T));
+                System.out.println("Loaded address "+snip(e.address)+" with value "+new BigInteger(S)+" with address "+e.depAddr+" and privkey "+e.privKey.toString(16));
+                addresses.add(e);
+            }
+            f.close();
+         }
+    }
     public static void setup(){
         
         
-        addresses.add(new Address(new BigInteger("24020791567495045215642065098106976790718580862353753650273116703458638404109145341712527426373897746399520171943504496355138983511621038572113831301549097251604814930086307353245172517660389318908257398118671272810218206810306586747566519936154692410187626160745255451982459450427003693146228840518387841101"),new BigInteger("12340000"),"YOURLIFE"));
+        /*addresses.add(new Address(new BigInteger("24020791567495045215642065098106976790718580862353753650273116703458638404109145341712527426373897746399520171943504496355138983511621038572113831301549097251604814930086307353245172517660389318908257398118671272810218206810306586747566519936154692410187626160745255451982459450427003693146228840518387841101"),new BigInteger("12340000"),new BigInteger(239,new SecureRandom())));
    
-        
-        
+        byte[] r=new byte[0];
+        r=LogTransaction.add(r,to128(addresses.get(0).address));
+        r=LogTransaction.add(r,toTen(addresses.get(0).value));
+        Log.add(new LogDeposit(r));*/
         comKeyPair.pri=new BigInteger("21237045006372166362343735671067154651005240837175711672036432501367744380726761523099917307895886222611348141610156734035441374189102166814928011873966331620177069811864633392634727116725767267394440079044576074261644881084359423298636982612361207340331894984808401184717391810830519841114676118399154603777");
    comKeyPair.pub=e;
    comKeyPair.modulus=new BigInteger("30544972536158817251655212322229910774764747152393991481592671659617650517484303426664602567870181612853441670471510377880014074973251738281831565513412018318239736924037011987096211978883338308643969623592748817141184518938883172148789404470797180317762752846760841810232802667272390174890293292561296762453");
@@ -51,72 +109,20 @@ public class AIB_Server {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception{
-        String filePrefix="cat";
-        File directory=new File("/Users/leijurv/Desktop");
-        
-    BlockChain vChain;
-    SPVBlockStore vStore;
-    Wallet vWallet;
-    PeerGroup vPeerGroup;
-    boolean vUseAutoSave = true;
-InetAddress[] vPeerAddresses=null;
-    
-   File vChainFile, vWalletFile;
-        NetworkParameters params=new NetworkParameters(1);
-        if (!directory.exists()) {
-            if (!directory.mkdir()) {
-                throw new Exception("Could not create named directory.");
-            }
-        }
-        FileInputStream walletStream = null;
-        try {
-            vChainFile = new File(directory, filePrefix + ".spvchain");
-            vWalletFile = new File(directory, filePrefix + ".wallet");
-            boolean shouldReplayWallet = vWalletFile.exists() && !vChainFile.exists();
-            if (vWalletFile.exists()) {
-                walletStream = new FileInputStream(vWalletFile);
-                vWallet = new WalletProtobufSerializer().readWallet(walletStream);
-                if (shouldReplayWallet)
-                    vWallet.clearTransactions(0);
-            } else {
-                vWallet = new Wallet(params);
-            }
-            if (vUseAutoSave) vWallet.autosaveToFile(vWalletFile, 1, TimeUnit.SECONDS, null);
-            vStore = new SPVBlockStore(params, vChainFile);
-            vChain = new BlockChain(params, vWallet, vStore);
-            vPeerGroup = new PeerGroup(params, vChain);
-            vPeerGroup.addWallet(vWallet);
-            if (vPeerAddresses != null) {
-                for (InetAddress addr : vPeerAddresses) vPeerGroup.addAddress(addr);
-                vPeerAddresses = null;
-            } else {
-                vPeerGroup.addPeerDiscovery(new DnsDiscovery(params));
-            }
-            vPeerGroup.startAndWait();
-            vPeerGroup.downloadBlockChain();
-            // Make sure we shut down cleanly.
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override public void run() {
-                    try {
-                        WalletAppKit.this.stopAndWait();
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-        } catch (BlockStoreException e) {
-            throw new IOException(e);
-        } finally {
-            if (walletStream != null) walletStream.close();
-        }
-        
-        
-        
-        
-        
-        
-        
         setup();
+        //saveAddresses();
+        //saveLogs();
+        readAddresses();
+        readLogs();
+        /*
+        ECKey k=new ECKey(new BigInteger("abcd",16));
+        System.out.println(Hex.encodeHexString(k.getPrivKeyBytes()));
+        System.out.println(Hex.encodeHexString(k.getPubKeyHash()));
+        System.out.println(k.toStringWithPrivate());
+        
+      
+        System.out.println(k.toAddress(Address.MainNet).toString());*/
+       
         ServerSocket S=new ServerSocket(5020);
         boolean running=true;
         System.out.println("Server running. =D");
@@ -154,6 +160,11 @@ InetAddress[] vPeerAddresses=null;
     public static String processTx(String s){
         LogEvent event=new LogTransaction(s);
         Log.add(event);
+        try {
+            saveLogs();
+        } catch (Exception ex) {
+            Logger.getLogger(LogTransaction.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return "";
     }
     public static byte[] slice(byte[] input, int amt){
@@ -259,8 +270,8 @@ InetAddress[] vPeerAddresses=null;
         //System.out.println("NUR");
         return "";
     }
-    public static void snip(BigInteger x){
-        System.out.print(x.toString(16).substring(0,8)+"..."+x.toString(16).substring(x.toString(16).length()-8,x.toString(16).length()));
+    public static String snip(BigInteger x){
+        return (x.toString(16).substring(0,8)+"..."+x.toString(16).substring(x.toString(16).length()-8,x.toString(16).length()));
     }
     public static byte[] to128(BigInteger x){
         byte[] X=new byte[128];
@@ -281,6 +292,16 @@ InetAddress[] vPeerAddresses=null;
         byte[] xx=x.toByteArray();
         for (int i=0; i<xx.length; i++){
             X[10-xx.length+i]=xx[i];
+        }
+        return X;
+    }
+    public static byte[] to30(byte[] xx){
+        byte[] X=new byte[30];
+        /*for (int i=0; i<X.length; i++){
+            X[i]=" ".getBytes()[0];
+        }*/
+        for (int i=0; i<xx.length; i++){
+            X[30-xx.length+i]=xx[i];
         }
         return X;
     }

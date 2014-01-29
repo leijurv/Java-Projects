@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 public class DepositRequestsPane extends JComponent implements ActionListener,MouseListener{
     JButton New;
     JButton Copy;
+    JButton Copy2;
     JButton Load;
     JButton Save;
     int selectedIndex=0;
@@ -49,7 +50,7 @@ public class DepositRequestsPane extends JComponent implements ActionListener,Mo
         New=new JButton("New Address");
         New.addActionListener(this);
         New.setActionCommand("New");
-        Copy=new JButton("CAT Address");
+        Copy=new JButton("Copy Address");
         Copy.addActionListener(this);
         Copy.setActionCommand("Copy");
         setLayout(new FlowLayout());
@@ -67,6 +68,12 @@ public class DepositRequestsPane extends JComponent implements ActionListener,Mo
         Save.setActionCommand("Save");
         Save.setFocusable(false);
         add(Save);
+        
+        Copy2=new JButton("Copy deposit address");
+        Copy2.addActionListener(this);
+        Copy2.setActionCommand("Copy2");
+        Copy2.setFocusable(false);
+        add(Copy2);
         
         add(New);
         add(Copy);
@@ -109,8 +116,10 @@ g.drawString("Address",130,85);
             //System.out.println(rPrimeValues.get(0).toString(16));
         }
         if (ae.getActionCommand().equals("Copy")){
-            W w=new W();
-            w.setClipboardContents(AIB_Client.addresses.get(selectedIndex).toString());
+            new W().setClipboardContents(AIB_Client.addresses.get(selectedIndex).toString());
+        }
+        if (ae.getActionCommand().equals("Copy2")){
+            new W().setClipboardContents(AIB_Client.addresses.get(selectedIndex).addr);
         }
         if (ae.getActionCommand().equals("Load")){
             try {

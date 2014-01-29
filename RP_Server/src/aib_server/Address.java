@@ -6,6 +6,8 @@
 
 package aib_server;
 
+import com.google.bitcoin.core.ECKey;
+import com.google.bitcoin.core.NetworkParameters;
 import java.math.BigInteger;
 
 /**
@@ -16,9 +18,13 @@ public class Address {
     BigInteger address;
     BigInteger value;
     String depAddr;
-    public Address(BigInteger Address, BigInteger Value, String Dlorb){
+    BigInteger privKey;
+    static final NetworkParameters MainNet=NetworkParameters.prodNet();
+    public Address(BigInteger Address, BigInteger Value, BigInteger PrivKey){
         value=Value;
         address=Address;
-        depAddr=Dlorb;
+        
+       depAddr=new ECKey(PrivKey).toAddress(MainNet).toString();
+       privKey=PrivKey;
     }
 }
