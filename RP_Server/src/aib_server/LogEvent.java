@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public abstract class LogEvent {
     public abstract String toString();
-    public abstract Date time();
+    public abstract long time();
     public abstract void write(FileOutputStream f) throws Exception;
     public static LogEvent create(FileInputStream f) throws Exception{
         byte[] type=new byte[1];

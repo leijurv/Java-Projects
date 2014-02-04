@@ -25,12 +25,12 @@ import java.util.logging.Logger;
  * @author leijurv
  */
 public class LogTransaction extends LogEvent{
-    Date d;
     BigInteger[] outAmt;
     BigInteger[] inAmt;
     byte[] hash;
     byte[] total;
     boolean Valid;
+    long time;
     public LogTransaction(FileInputStream f){
         try {
             byte[] Inputs=new byte[1];
@@ -43,14 +43,17 @@ public class LogTransaction extends LogEvent{
             f.read(Out);
             byte[] Sig=new byte[Inputs[0]*128];
             f.read(Sig);
+            byte[] Time=new byte[8];
+            f.read(Time);
+            time=new BigInteger(Time).longValue();
             byte[] Toats=add(Inputs,add(In,add(Outputs,add(Out,Sig))));
             process(Hex.encodeHexString(Toats));
         } catch (IOException ex) {
             Logger.getLogger(LogTransaction.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
     public LogTransaction(String s){
+        time=System.currentTimeMillis();
         process(s);
     }
     public void process(String s){
@@ -228,13 +231,22 @@ public class LogTransaction extends LogEvent{
     public String toString(){
         return "";
     }
-    public Date time(){
-        return d;
+    public long time(){
+        return time;
     }
     @Override
     public void write(FileOutputStream f) throws Exception{
         f.write(new byte[] {0});//0 signifies LogTransaction
         f.write(total);
+        f.write(to8(new BigInteger(""+time)));
+    }
+    public static byte[] to8(BigInteger x){
+        byte[] X=new byte[8];
+        byte[] xx=x.toByteArray();
+        for (int i=0; i<xx.length; i++){
+            X[8-xx.length+i]=xx[i];
+        }
+        return X;
     }
     public static byte[] add(byte[] a, byte[] b){
         byte[] r=new byte[a.length+b.length];

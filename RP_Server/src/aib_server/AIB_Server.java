@@ -5,24 +5,25 @@
 package aib_server;
 
 
-import com.google.bitcoin.core.ECKey;
-import com.google.bitcoin.core.NetworkParameters;
+import static aib_server.LogTransaction.add;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.spongycastle.asn1.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 /**
  *
  * @author leif
@@ -34,6 +35,102 @@ public class AIB_Server {
     static ArrayList<Address> addresses=new ArrayList<Address>();
     static final RSAKeyPair comKeyPair=new RSAKeyPair();
     static ArrayList<LogEvent> Log=new ArrayList<LogEvent>();
+    public static String load(String webpage) throws Exception{
+        URL url = new URL(webpage);
+URLConnection con = url.openConnection();
+//System.out.println(webpage);
+Reader r = new InputStreamReader(con.getInputStream());
+
+StringBuilder buf = new StringBuilder();
+while (true) {
+  int ch = r.read();
+  if (ch < 0)
+    break;
+  buf.append((char) ch);
+}
+
+r.close();
+return buf.toString();
+    }
+    public static void fetch(String address){
+        try {
+            Address a=null;
+            for (Address b : addresses){
+               if (b.depAddr.equals(address)){
+                  a=b;
+               }
+            }
+            System.out.println("Checking for new deposits to "+snip(a.address)+", "+address);
+            String r=load("http://blockchain.info/rawaddr/"+address);
+            //System.out.println(r);
+            JSONTokener R=new JSONTokener(r);
+            JSONObject main=(JSONObject)R.nextValue();
+            //JSONArray names=main.names();
+            
+            JSONArray txs=main.getJSONArray("txs");
+            int length=txs.length();
+            long total=0;
+            
+            for (int i=0; i<length; i++){
+                JSONObject tx=txs.getJSONObject(i);
+                JSONArray outputs=tx.getJSONArray("out");
+                long credit=0;
+                for (int j=0; j<outputs.length(); j++){
+                    JSONObject prev=outputs.getJSONObject(j);
+                    String s=prev.getString("addr");
+                   if (s.equals(address)){
+                       credit+=prev.getLong("value");
+                  }
+              }
+              if (credit!=0){
+                  String hsh=tx.getString("hash");
+                  byte[] hash=Hex.decodeHex(hsh.toCharArray());
+                 //System.out.println(hash.length+" "+credit);
+                  boolean already=false;
+                  for (LogEvent l : Log){
+                      //Check to see if there's already a logdeposit
+                     if (l instanceof LogDeposit){
+                            LogDeposit ld=(LogDeposit)l;
+                           if (equals(ld.txHash,hash)){
+                               already=true;
+                          }
+                       }
+                    }
+                 if (!already){
+                     System.out.println("Discovered new deposit to BTC address "+address);
+                       byte[] A=to128(a.address);
+                        byte[] B=toTen(new BigInteger(""+credit));
+                       byte[] C=add(add(A,B),hash);
+                       Log.add(new LogDeposit(C));
+                }
+                total+=credit;
+            }
+    /*
+    JSONArray inputs=tx.getJSONArray("inputs");
+    for (int j=0; j<inputs.length(); j++){
+        JSONObject prev=inputs.getJSONObject(j).getJSONObject("prev_out");
+        String s=prev.getString("addr");
+        if (s.equals(address)){
+            total-=prev.getLong("value");
+        }
+    }*/
+                }
+            //System.out.println(total);
+        } catch (Exception ex) {
+            Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    public static boolean equals(byte[] a, byte[] b){
+        if (a.length!=b.length){
+            return false;
+        }
+        for (int i=0; i<a.length; i++){
+            if (a[i]!=b[i]){
+                return false;
+            }
+        }
+        return true;
+    }
     public static void saveLogs() throws Exception{
         File fstream=new File(Save2);
         FileOutputStream f=new FileOutputStream(fstream);
@@ -63,7 +160,7 @@ public class AIB_Server {
             for (Address a : addresses){
                 f.write(to128(a.address));
                 f.write(toTen(a.value));
-                f.write(to30(a.privKey.toByteArray()));
+                f.write(to35(a.privKey.toByteArray()));
             }
             f.close();
          }
@@ -80,7 +177,7 @@ public class AIB_Server {
                 byte[] S=new byte[10];
                 f.read(S);
                 
-                byte[] T=new byte[30];
+                byte[] T=new byte[35];
                 f.read(T);
                 BigInteger b=new BigInteger(S);
                 b=BigInteger.ZERO;//Will be recreated by logs
@@ -94,8 +191,8 @@ public class AIB_Server {
     public static void setup(){
         
         
-        /*addresses.add(new Address(new BigInteger("24020791567495045215642065098106976790718580862353753650273116703458638404109145341712527426373897746399520171943504496355138983511621038572113831301549097251604814930086307353245172517660389318908257398118671272810218206810306586747566519936154692410187626160745255451982459450427003693146228840518387841101"),new BigInteger("12340000"),new BigInteger(239,new SecureRandom())));
-   
+        addresses.add(new Address(new BigInteger("24020791567495045215642065098106976790718580862353753650273116703458638404109145341712527426373897746399520171943504496355138983511621038572113831301549097251604814930086307353245172517660389318908257398118671272810218206810306586747566519936154692410187626160745255451982459450427003693146228840518387841101"),new BigInteger("12340000"),new BigInteger("e59612d5b6c212630bc028f8dbdaa8725d71fa0fe86d797e23443cbad01933a9",16)));
+   /*
         byte[] r=new byte[0];
         r=LogTransaction.add(r,to128(addresses.get(0).address));
         r=LogTransaction.add(r,toTen(addresses.get(0).value));
@@ -110,18 +207,16 @@ public class AIB_Server {
      */
     public static void main(String[] args) throws Exception{
         setup();
-        //saveAddresses();
-        //saveLogs();
         readAddresses();
-        readLogs();
-        /*
-        ECKey k=new ECKey(new BigInteger("abcd",16));
-        System.out.println(Hex.encodeHexString(k.getPrivKeyBytes()));
-        System.out.println(Hex.encodeHexString(k.getPubKeyHash()));
-        System.out.println(k.toStringWithPrivate());
+        //readLogs();
+        fetch("1Puz5LDaQ73FJBPpgn1su4DBPNSN5MkqAY");
+        fetch("13swoRQHna2M3mxp9nJR3u6F3rosK1au8H");
         
-      
-        System.out.println(k.toAddress(Address.MainNet).toString());*/
+        
+        saveAddresses();
+        saveLogs();
+        
+        
        
         ServerSocket S=new ServerSocket(5020);
         boolean running=true;
@@ -295,13 +390,13 @@ public class AIB_Server {
         }
         return X;
     }
-    public static byte[] to30(byte[] xx){
-        byte[] X=new byte[30];
+    public static byte[] to35(byte[] xx){
+        byte[] X=new byte[35];
         /*for (int i=0; i<X.length; i++){
             X[i]=" ".getBytes()[0];
         }*/
         for (int i=0; i<xx.length; i++){
-            X[30-xx.length+i]=xx[i];
+            X[35-xx.length+i]=xx[i];
         }
         return X;
     }
