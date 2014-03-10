@@ -75,12 +75,14 @@ public class LogDeposit extends LogEvent{
         amount=new BigInteger(second);
         txHash=third;
         System.out.println("Loaded LogDeposit to address "+AIB_Server.snip(to)+" amount "+amount+" txid "+Hex.encodeHexString(txHash)+" time "+time);
+        synchronized(AIB_Server.addresses){
         for (Address a : AIB_Server.addresses){
             if (a.address.compareTo(to)==0){
                 a.value=a.value.add(amount);
                 return;
             }
         }
+    }
         System.out.println("Unable to complete LogDeposit");
     }
     @Override

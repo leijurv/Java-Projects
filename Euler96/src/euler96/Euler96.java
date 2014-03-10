@@ -25,7 +25,9 @@ public class Euler96 {
         //Do();
         long l=System.currentTimeMillis();
         
-        String[] x=hard1;
+        String[] x=hard;
+     //  x=starBurstLeo;
+        
                 //int[][] matrix=file().get(0);
         int[][] matrix=parse(x);
         writeMatrix(matrix);

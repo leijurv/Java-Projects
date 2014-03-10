@@ -293,8 +293,8 @@ public static Polynomial interpolate(Fraction[] xVal, Fraction[] yVal){
         Fraction[] xVal=new Fraction[3];
         Fraction[] yVal=new Fraction[xVal.length];
         xVal[0]=new Fraction(1);
-        xVal[1]=new Fraction(2);
-        xVal[2]=new Fraction(4);
+        xVal[1]=new Fraction(4);
+        xVal[2]=new Fraction(3);
         
         yVal[0]=P.eval(xVal[0]);
         yVal[1]=P.eval(xVal[1]);

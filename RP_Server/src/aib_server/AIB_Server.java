@@ -54,14 +54,20 @@ return buf.toString();
     }
     public static void fetch(String address){
         try {
-            Address a=null;
-            for (Address b : addresses){
+             Address a=null;
+        synchronized(addresses){
+           
+           for (Address b : addresses){
                if (b.depAddr.equals(address)){
                   a=b;
                }
             }
+        }
             System.out.println("Checking for new deposits to "+snip(a.address)+", "+address);
             String r=load("http://blockchain.info/rawaddr/"+address);
+            synchronized(Log){
+                
+            
             //System.out.println(r);
             JSONTokener R=new JSONTokener(r);
             JSONObject main=(JSONObject)R.nextValue();
@@ -116,6 +122,7 @@ return buf.toString();
     }*/
                 }
             //System.out.println(total);
+            }
         } catch (Exception ex) {
             Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -208,9 +215,16 @@ return buf.toString();
     public static void main(String[] args) throws Exception{
         setup();
         readAddresses();
-        //readLogs();
-        fetch("1Puz5LDaQ73FJBPpgn1su4DBPNSN5MkqAY");
-        fetch("13swoRQHna2M3mxp9nJR3u6F3rosK1au8H");
+        readLogs();
+        new Thread(){
+            public void run(){
+                for (int i=0; i<addresses.size(); i++){
+                    fetch(addresses.get(i).depAddr);
+                }
+            }
+        }.start();
+        //fetch("1Puz5LDaQ73FJBPpgn1su4DBPNSN5MkqAY");
+        //fetch("13swoRQHna2M3mxp9nJR3u6F3rosK1au8H");
         
         
         saveAddresses();
@@ -257,6 +271,7 @@ return buf.toString();
         Log.add(event);
         try {
             saveLogs();
+            saveAddresses();
         } catch (Exception ex) {
             Logger.getLogger(LogTransaction.class.getName()).log(Level.SEVERE, null, ex);
         }
