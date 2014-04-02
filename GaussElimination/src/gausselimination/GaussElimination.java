@@ -37,7 +37,7 @@ public class GaussElimination {
         //double[][] x={{2,1,11},{1,-3,2}};
         double[][] x={{2,1},{1,-3}};
         Matrix m=new Matrix(x);
-        System.out.println(m.cofactor(5,6));
+        System.out.println(m.det());
         //m.print();
         //System.out.println("meow"+m.det());
         //m.inverse().print();
