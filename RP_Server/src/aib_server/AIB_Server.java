@@ -30,8 +30,8 @@ import org.json.JSONTokener;
  */
 public class AIB_Server {
     static final BigInteger e=new BigInteger("65537");
-    static final String Save=System.getProperty("user.home")+"/Dropbox/RP_server/Addresses";
-    static final String Save2=System.getProperty("user.home")+"/Dropbox/RP_server/Log";
+    static final String Save=System.getProperty("user.home")+"/Desktop/Dropbox/RP_server/Addresses";
+    static final String Save2=System.getProperty("user.home")+"/Desktop/Dropbox/RP_server/Log";
     static ArrayList<Address> addresses=new ArrayList<Address>();
     static final RSAKeyPair comKeyPair=new RSAKeyPair();
     static ArrayList<LogEvent> Log=new ArrayList<LogEvent>();
@@ -51,6 +51,11 @@ while (true) {
 
 r.close();
 return buf.toString();
+    }
+    public static void check(){
+        String pwd="NK.08SciMu";
+        String id="1212d4e8-2484-4722-8488-ae5453a4ab2b";
+        
     }
     public static void fetch(String address){
         try {
@@ -111,17 +116,7 @@ return buf.toString();
                 }
                 total+=credit;
             }
-    /*
-    JSONArray inputs=tx.getJSONArray("inputs");
-    for (int j=0; j<inputs.length(); j++){
-        JSONObject prev=inputs.getJSONObject(j).getJSONObject("prev_out");
-        String s=prev.getString("addr");
-        if (s.equals(address)){
-            total-=prev.getLong("value");
-        }
-    }*/
                 }
-            //System.out.println(total);
             }
         } catch (Exception ex) {
             Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -215,11 +210,19 @@ return buf.toString();
     public static void main(String[] args) throws Exception{
         setup();
         readAddresses();
+        if (args.length==1 && args[0].equals("-reset")){
+            saveLogs();
+        }
         readLogs();
         new Thread(){
             public void run(){
                 for (int i=0; i<addresses.size(); i++){
                     fetch(addresses.get(i).depAddr);
+                }
+                try {
+                    saveLogs();
+                } catch (Exception ex) {
+                    Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }.start();
@@ -262,7 +265,7 @@ return buf.toString();
             byte[] sig=m.digest();
             return sig;
         } catch (NoSuchAlgorithmException ex) {
-            System.out.println("Son, you're an IDIOT");
+            System.out.println("Umm... Apparently SHA1 isn't supported");
         }
         return null;
     }
@@ -298,36 +301,31 @@ return buf.toString();
         while(addr.length()<31){
             addr=" "+addr;
         }
-        byte[] yourmom=new byte[128+31+128];
+        byte[] result=new byte[128+31+128];
         byte[] B=to128(b);
         for (int i=0; i<128; i++){
-            yourmom[i]=B[i];
+            result[i]=B[i];
         }
         for (int i=0; i<31; i++){
-            yourmom[i+128]=addr.getBytes()[i];
+            result[i+128]=addr.getBytes()[i];
         }
         for (int i=0; i<128; i++){
-            yourmom[i+128+31]=0;
+            result[i+128+31]=0;
         }
             try {
                 MessageDigest m=MessageDigest.getInstance("SHA1");
                 m.reset();
-                m.update(yourmom);
+                m.update(result);
                 byte[] sig=m.digest();
-                //System.out.println("Hsh: "+new BigInteger(sig).toString(16));
                 BigInteger k=comKeyPair.decode(new BigInteger(sig));
-                //System.out.println("Sig: "+k.toString(16));
                 byte[] S=to128(k);
-                
                 for (int i=0; i<128; i++){
-                    yourmom[i+128+31]=S[i];
+                    result[i+128+31]=S[i];
                 }
             } catch (NoSuchAlgorithmException ex) {
                 Logger.getLogger(AIB_Server.class.getName()).log(Level.SEVERE, null, ex);
             }
-            //System.out.println(yourmom.length);
-            //System.out.println("=D "+Hex.encodeHexString(yourmom));
-            return Hex.encodeHexString(yourmom);
+            return Hex.encodeHexString(result);
         
         }
         return "";
@@ -342,42 +340,32 @@ return buf.toString();
             }
         }
         byte[] a=toTen(b);
-        byte[] yourmom=new byte[128+10+128];
+        byte[] result=new byte[128+10+128];
         byte[] B=to128(bb);
         for (int i=0; i<128; i++){
-            yourmom[i]=B[i];
+            result[i]=B[i];
         }
         for (int i=0; i<10; i++){
-            yourmom[i+128]=a[i];
+            result[i+128]=a[i];
         }
         for (int i=0; i<128; i++){
-            yourmom[i+128+10]=0;
+            result[i+128+10]=0;
         }
             try {
                 MessageDigest m=MessageDigest.getInstance("SHA1");
                 m.reset();
-                m.update(yourmom);
+                m.update(result);
                 byte[] sig=m.digest();
-                //System.out.println("Hsh: "+new BigInteger(sig).toString(16));
                 BigInteger k=comKeyPair.decode(new BigInteger(sig));
-                //System.out.println("Sig: "+k.toString(16));
-                //byte[] S={};
-                //if (k.toByteArray().length<=128){
                 byte[] S=to128(k);
-                //}
-                //S=k.toByteArray();
                 for (int i=0; i<128; i++){
-                    yourmom[i+128+10]=S[i];
+                    result[i+128+10]=S[i];
                 }
             } catch (NoSuchAlgorithmException ex) {
             }
-            //System.out.println(yourmom.length);
-            //System.out.println("=D "+Hex.encodeHexString(yourmom));
-            //System.out.println("NUR");
-            return Hex.encodeHexString(yourmom);
+            return Hex.encodeHexString(result);
         
         }
-        //System.out.println("NUR");
         return "";
     }
     public static String snip(BigInteger x){
@@ -407,9 +395,6 @@ return buf.toString();
     }
     public static byte[] to35(byte[] xx){
         byte[] X=new byte[35];
-        /*for (int i=0; i<X.length; i++){
-            X[i]=" ".getBytes()[0];
-        }*/
         for (int i=0; i<xx.length; i++){
             X[35-xx.length+i]=xx[i];
         }

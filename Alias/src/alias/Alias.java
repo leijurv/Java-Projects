@@ -19,7 +19,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import sun.awt.image.ToolkitImage;
 
 /**
  *
@@ -28,7 +27,7 @@ import sun.awt.image.ToolkitImage;
 public class Alias extends JComponent implements MouseListener,MouseMotionListener{
     static Alias M=new Alias();
     static BufferedImage old;
-    static Image displayOld;
+    static BufferedImage displayOld;
     static BufferedImage New;
     static int newX=400;
     static int newY=300;
@@ -58,15 +57,18 @@ public class Alias extends JComponent implements MouseListener,MouseMotionListen
         g.drawLine(mouseX-(newX+50),0,mouseX-(newX+50),2000);
         g.setColor(Color.RED);
         g.drawString("Java Image Scaling: "+A+"ms My Image Scaling: "+B+" ms",10,10);
+        g.setColor(Color.GREEN);
+        g.drawLine(0,0,old.getWidth(),old.getHeight());
     }
     public static void main(String[] args) throws Exception{
+        old=ImageIO.read(new File("/Users/leijurv/Downloads/kittens.jpg"));
+        recalc();
         JFrame frame=new JFrame("Image Scaler");
         frame.setContentPane(M);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
 	frame.setVisible(true);
-        old=ImageIO.read(new File("/Users/leijurv/Downloads/kittens.jpg"));
-        recalc();
+        
         
     }
     public static void recalc(){
@@ -82,30 +84,51 @@ public class Alias extends JComponent implements MouseListener,MouseMotionListen
         g.dispose();
         long b=System.currentTimeMillis();
         New=new BufferedImage((int)newx,(int)newy,BufferedImage.TYPE_INT_RGB);
+        double XFactor=newx/oldx;
+        double YFactor=newy/oldy;
+        float[][] red=new float[(int)newx][(int)newy];
+        float[][] green=new float[(int)newx][(int)newy];
+        float[][] blue=new float[(int)newx][(int)newy];
+        double X1=1-XFactor;
+        double Y1=1-YFactor;
         for (double x=0; x<oldx; x++){
             for (double y=0; y<oldy; y++){
-                double NewX=x/oldx*newx;
-                double NewY=y/oldy*newy;
-                for (double X=Math.floor(NewX); X<Math.ceil(NewX+newx/oldx) && X<newx; X++){
-                    for (double Y=Math.floor(NewY); Y<Math.ceil(NewY+newy/oldy) && Y<newy; Y++){
+                double NewX=x*XFactor;
+                double NewY=y*YFactor;
+                double A=Math.floor(NewY);
+                double B=Math.ceil(NewY+YFactor);
+                Color Old=new Color(old.getRGB((int)x,(int)y));
+                for (double X=Math.floor(NewX); X<Math.ceil(NewX+XFactor) && X<newx; X++){
+                    double amtX=NewX-X<X1?Math.min(NewX-X,0)+XFactor:Math.min(0,X-NewX)+1;
+                    for (double Y=A; Y<B && Y<newy; Y++){
                         //(x,y) in old image is partially inside of (X,Y) in new image
-                        double amtX=NewX>X?NewX+newx/oldx<X+1?newx/oldx:X+1-NewX:NewX+newx/oldx<X+1?NewX+newx/oldx-X:1;
-                        double amtY=NewY>Y?NewY+newy/oldy<Y+1?newy/oldy:Y+1-NewY:NewY+newy/oldy<Y+1?NewY+newy/oldy-Y:1;
+                        double amtY=NewY-Y<Y1?Math.min(NewY-Y,0)+YFactor:Math.min(0,Y-NewY)+1;
                         double multiple=amtX*amtY;
-                        Color Old=new Color(old.getRGB((int)x,(int)y));
-                        Color Neo=new Color(New.getRGB((int)X,(int)Y));
-                        int red=(int)(Old.getRed()*multiple+Neo.getRed());
-                        int green=(int)(Old.getGreen()*multiple+Neo.getGreen());
-                        int blue=(int)(Old.getBlue()*multiple+Neo.getBlue());
-                        Color N=new Color(red>255?255:red,green>255?255:green,blue>255?255:blue);
-                        New.setRGB((int)X,(int)Y,N.getRGB());
+                        red[(int)X][(int)Y]+=(float)Old.getRed()*multiple;
+                        green[(int)X][(int)Y]+=(float)Old.getGreen()*multiple;
+                        blue[(int)X][(int)Y]+=(float)Old.getBlue()*multiple;
                     }
                 }
+            }
+        }
+        for (int X=0; X<newx; X++){
+            for (int Y=0; Y<newy; Y++){
+                New.setRGB(X,Y,new Color(Math.round(red[X][Y]),Math.round(green[X][Y]),Math.round(blue[X][Y])).getRGB());
             }
         }
         long c=System.currentTimeMillis();
         A=b-a;
         B=c-b;
+        M.repaint();
+        int pixdif=0;
+        for (int x=0; x<newx; x++){
+            for (int y=0; y<newy; y++){
+                if (New.getRGB(x,y)!=displayOld.getRGB(x,y)){
+                    pixdif++;
+                }
+            }
+        }
+        System.out.println(pixdif);
         M.repaint();
     }
 
@@ -136,7 +159,6 @@ public class Alias extends JComponent implements MouseListener,MouseMotionListen
     public void mouseDragged(MouseEvent e) {
     }
 
-    @Override
     public void mouseMoved(MouseEvent e) {
         mouseX=e.getX();
         mouseY=e.getY();

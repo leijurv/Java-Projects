@@ -30,7 +30,6 @@ public class Gooey implements ChangeListener{
     OverviewPane overviewPane;
     DepositRequestsPane dpPane;
     SendMoneyPane smp;
-    MickeyTab heymickey;
     public Gooey(){
         frame=new JFrame("RP_Client");
 	  tabbedPane=new JTabbedPane();
@@ -39,8 +38,6 @@ public class Gooey implements ChangeListener{
           dpPane=new DepositRequestsPane();
           tabbedPane.addTab("Recieve Money",dpPane);
           smp=new SendMoneyPane();
-          heymickey=new MickeyTab(new BigDecimal("5.021"));
-          tabbedPane.addTab("Addr3ss book",heymickey);
           tabbedPane.addTab("Send Money",smp);
           tabbedPane.addChangeListener(this);
 	  frame.setSize(1000,700);

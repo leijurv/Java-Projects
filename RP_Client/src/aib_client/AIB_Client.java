@@ -6,23 +6,13 @@ package aib_client;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -33,7 +23,7 @@ public class AIB_Client {
     static ArrayList<Address> addresses=new ArrayList<Address>();
     static Gooey gooey;
     static BigInteger comPubKey=new BigInteger("30544972536158817251655212322229910774764747152393991481592671659617650517484303426664602567870181612853441670471510377880014074973251738281831565513412018318239736924037011987096211978883338308643969623592748817141184518938883172148789404470797180317762752846760841810232802667272390174890293292561296762453");
-    static String web="http://localhost:5020/";
+    static String web="http://192.168.13.19:5020/";
     static final String Save=System.getProperty("user.home")+"/Dropbox/RP_client/Addresses";
     public static byte[] to128(BigInteger x){
         byte[] X=new byte[128];
@@ -100,7 +90,6 @@ return buf.toString();
         try {
             readAddresses();
         } catch (Exception ex) {
-            System.out.println("IDIOT YOU DONT HAVE THE ADDRESSES FILE YOU POOPTARD");
         }
         
 gooey=new Gooey();

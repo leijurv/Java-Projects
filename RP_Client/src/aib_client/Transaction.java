@@ -12,6 +12,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -120,10 +121,12 @@ public class Transaction {
             String s= AIB_Client.load(AIB_Client.web+"sendtx/"+request);
             
         } catch (Exception ex) {
-            Logger.getLogger(Transaction.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showInputDialog("Error while sending transaction to server",JOptionPane.ERROR_MESSAGE);
         }
+        synchronized(AIB_Client.addresses){
         for (int i=0; i<AIB_Client.addresses.size(); i++){
             AIB_Client.addresses.set(i,new Address(AIB_Client.addresses.get(i).address));
+        }
         }
     }
     public static byte[] hash(byte[] r){
@@ -134,7 +137,7 @@ public class Transaction {
             byte[] sig=m.digest();
             return sig;
         } catch (NoSuchAlgorithmException ex) {
-            System.out.println("Son, you're an IDIOT");
+            System.out.println("No Sha1");
         }
         return null;
     }

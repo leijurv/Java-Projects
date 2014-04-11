@@ -8,6 +8,8 @@ package slider;
 
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Random;
@@ -44,7 +46,7 @@ public class Slider extends JComponent{
         g.drawString("Average: "+avg,10,25+15*i);
         for (int j=0; j<4; j++){
             for (int k=0; k<4; k++){
-                g.drawString(board[j][k]+"",200+k*15,200+j*15);
+                g.drawString(board[j][k]+"",200+k*30,200+j*30);
             }
         }
     }
@@ -234,11 +236,14 @@ public class Slider extends JComponent{
      */
     public static void main(String[] args) throws Exception{
         JFrame frame=new JFrame("2048");
+        M.setFocusable(true);
         frame.setContentPane(M);
+        M.setFocusTraversalKeysEnabled(false);
           frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
           System.out.println(WindowConstants.EXIT_ON_CLOSE);
 	  //frame.setUndecorated(true);
      frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+     frame.setFocusable(false);
 	  frame.setVisible(true);
         h=new HashMap<Integer,Integer>();
         new Thread(){
@@ -273,5 +278,6 @@ public class Slider extends JComponent{
             System.out.println();
         }
     }
+
     
 }

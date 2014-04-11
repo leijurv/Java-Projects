@@ -55,7 +55,7 @@ public class Address {
                    return new BigInteger(b);
             }
             //return BigInteger.ZERO;
-               throw new RuntimeException("YOUR MOTHER");
+               throw new RuntimeException("");
     }
     public static String fetchAddr(RSAKeyPair address) throws Exception{
             String s= AIB_Client.load(AIB_Client.web+"getaddr/"+address.modulus.toString(16));
@@ -71,13 +71,13 @@ public class Address {
            if (verify(B) && new BigInteger(a).compareTo(address.modulus)==0){
                return new String(b);
                 }
-                throw new RuntimeException("YOUR MOTHER");
+                throw new RuntimeException("");
     }
     public Address(RSAKeyPair key){
         address=key;
         boolean finished=false;
         int tries=0;
-        while (tries<10 && !finished){
+        while (tries<15 && !finished){
             finished=true;
         try {
             value=fetchValue(key);
@@ -86,7 +86,7 @@ public class Address {
         }
         tries++;
         }
-        if (tries==10){
+        if (tries==15){
             value=BigInteger.TEN;//THIS IS HORRIBLE HORRIbLE HORRIbLE CODE
         }
         System.out.println("Took "+tries+" tries to fetch Value for "+(address.modulus.toString(16)));

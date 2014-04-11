@@ -4,18 +4,19 @@
  * and open the template in the editor.
  */
 
-package aib_client;
-
-import java.math.BigDecimal;
-import javax.swing.JComponent;
-
+package in.snowcraft.irc;
 
 /**
  *
  * @author leijurv
  */
-public class MickeyTab extends JComponent{
-    public MickeyTab(BigDecimal R){
-        
+public class IRC {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
     }
+    
 }

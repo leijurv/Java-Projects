@@ -23,7 +23,6 @@ public class Address {
     public Address(BigInteger Address, BigInteger Value, BigInteger PrivKey){
         value=Value;
         address=Address;
-        
        depAddr=new ECKey(PrivKey).toAddress(MainNet).toString();
        privKey=PrivKey;
     }
