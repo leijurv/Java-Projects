@@ -25,9 +25,7 @@ public class ThreeD extends JComponent implements MouseMotionListener{
     static int x=0;
     static int y=0;
     public void paintComponent(Graphics g){
-        for (Mesh m : render){
-            m.render(g);
-        }
+        new Mesh(render).render(g);
     }
     public ThreeD(){
         addMouseMotionListener(this);
