@@ -17,15 +17,25 @@ public class Transform {
     double Rx;
     double Ry;
     double Rz;
+    double Sx;
+    double Sy;
+    double Sz;
     public Transform(double DX,double DY,double DZ){
+        this(DX,DY,DZ,0,0,0);
+    }
+    public Transform(double DX,double DY,double DZ,double RX,double RY,double RZ){
+        this(DX,DY,DZ,RX,RY,RZ,1,1,1);
+    }
+    public Transform(double DX,double DY,double DZ,double RX,double RY,double RZ,double SX,double SY,double SZ){
         Dx=DX;
         Dy=DY;
         Dz=DZ;
-    }
-    public Transform(double DX,double DY,double DZ,double RX,double RY,double RZ){
-        this(DX,DY,DZ);
         Rx=RX;
         Ry=RY;
         Rz=RZ;
+        Sx=SX;
+        Sy=SY;
+        Sz=SZ;
     }
+
 }

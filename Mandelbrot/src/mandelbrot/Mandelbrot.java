@@ -203,6 +203,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 System.exit(0);
             }
         });
+        Thread.sleep(500);
         xWidth = frame.getWidth() / 2;
         yWidth = frame.getHeight() / 2 - 10;
         ImageBuffer = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -219,6 +220,9 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     public static void export(){
         System.out.println("CATS");
         for (int x = -xWidth*4; x < xWidth*4; x++) {
+            if (x%100==0){
+                System.out.println(x+","+xWidth*4);
+            }
             showTempResult();
             for (int y = -yWidth*4; y < yWidth*4; y++) {
                 double cX = ((double) x) * xScale/4 + centerX;
@@ -265,7 +269,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             for (String S : s){
                 System.out.println(S);
             }
-            System.out.println(ImageIO.write(export,"jpg",new File("/Users/leijurv/Desktop/cat.jpg")));
+            System.out.println(ImageIO.write(export,"jpeg",new File("/Users/leijurv/Desktop/cat.jpg")));
             
         } catch (IOException ex) {
             System.out.println(ex);
@@ -343,6 +347,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
 
     @Override
     public void paintComponent(Graphics g) {
+        if (ImageBuffer!=null)
         g.drawImage(ImageBuffer, 0, 0, null);
         g.setColor(Color.WHITE);
         g.drawString("Real part: " + lastClickedX + ", Imaginary part: " + lastClickedY, 10, 10);

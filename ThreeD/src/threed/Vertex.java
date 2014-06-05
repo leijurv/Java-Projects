@@ -20,27 +20,33 @@ public class Vertex {
         z=Z;
     }
     public Vertex(Vertex v){
-        x=v.x;
-        y=v.y;
-        z=v.z;
+        this(v.x,v.y,v.z);
+    }
+    public Vertex(String s){
+        String[] r=s.split(" ");
+        x=Double.parseDouble(r[0]);
+        y=Double.parseDouble(r[1]);
+        z=Double.parseDouble(r[2]);
     }
     public int[] transform(){
-        double amt=(((double)ThreeD.x)/200)%5;
-        return new int[] {(int)(300+200*(x)),(int)(300+200*(y))};
-        //return new int[] {(int)(300+200*(x+z*0.2)),(int)(300+200*(y+z*0.8))};
-        //return new int[] {(int)(300+200*(x+y*(1-amt))),(int)(300+200*(y*amt+z))};
+        if (z<-2){
+            return null;
+        }
+        return new int[] {(int)(300+100*(x*(z+3)*0.7))+ThreeD.offset,(int)(300+100*(y*(z+3)*0.7))};
     }
     public String toString(){
         return x+","+y+","+z;
     }
     public void transform(Transform t){
-        x+=t.Dx;
-        y+=t.Dy;
-        z+=t.Dz;
+        x*=t.Sx;
+        y*=t.Sy;
+        z*=t.Sz;
         mult(new double[][] {{1,0,0},{0,Math.cos(t.Rx),-Math.sin(t.Rx)},{0,Math.sin(t.Rx),Math.cos(t.Rx)}});
         mult(new double[][] {{Math.cos(t.Ry),0,Math.sin(t.Ry)},{0,1,0},{-Math.sin(t.Ry),0,Math.cos(t.Ry)}});
         mult(new double[][] {{Math.cos(t.Rz),-Math.sin(t.Rz),0},{Math.sin(t.Rz),Math.cos(t.Rz),0},{0,0,1}});
-        
+        x+=t.Dx;
+        y+=t.Dy;
+        z+=t.Dz;
         
     }
     public void mult(double[][] mat){

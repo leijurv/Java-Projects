@@ -6,10 +6,14 @@
 
 package threed;
 
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -21,11 +25,18 @@ import javax.swing.WindowConstants;
 public class ThreeD extends JComponent implements MouseMotionListener{
     static ThreeD M=new ThreeD();
     static Mesh[] render=new Mesh[2];
-    static Mesh cube;
     static int x=0;
     static int y=0;
+    static int offset=0;
+    static boolean cross=true;
     public void paintComponent(Graphics g){
-        new Mesh(render).render(g);
+        long a=System.currentTimeMillis();
+        offset=cross?0:M.getWidth()/3;
+        Mesh MM=new Mesh(render).transform(new Transform(0,0,0,(double)y/100,(double)x/100,0));
+        MM.render(g);
+        offset=!cross?0:M.getWidth()/3;
+        MM.transform(new Transform(0.2,0,0)).render(g);
+        g.drawString("Render took "+(System.currentTimeMillis()-a)+"ms",10,10);
     }
     public ThreeD(){
         addMouseMotionListener(this);
@@ -34,31 +45,34 @@ public class ThreeD extends JComponent implements MouseMotionListener{
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        cube=new Mesh();
-        Vertex[][] cub={{new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5)},{new Vertex(-0.5,-0.5,-0.5),new Vertex(0.5,-0.5,-0.5),new Vertex(0.5,-0.5,0.5),new Vertex(-0.5,-0.5,0.5)},{new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,-0.5,0.5),new Vertex(-0.5,0.5,0.5),new Vertex(-0.5,0.5,-0.5)}       ,    {new Vertex(0.5,0.5,0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5),new Vertex(0.5,-0.5,0.5)}, {new Vertex(0.5,0.5,0.5),new Vertex(0.5,0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(-0.5,0.5,0.5)}, {new Vertex(0.5,0.5,0.5),new Vertex(-0.5,0.5,0.5),new Vertex(-0.5,-0.5,0.5),new Vertex(0.5,-0.5,0.5)}};
-        Vertex[][] cub2=new Vertex[cub.length*2][3];
-    for (int i=0; i<cub.length; i++){
-        cub2[i*2]=new Vertex[] {cub[i][0],cub[i][1],cub[i][2]};
-        cub2[i*2+1]=new Vertex[] {cub[i][2],cub[i][3],cub[i][0]};
-    }
-        cube.faces=cub2;
-        
-        DO();
+        //render=new Mesh("/Users/leijurv/Downloads/203164976.lrf");
+        //System.out.println(render);
+        Mesh.init();
+        render[0]=Mesh.cube.transform(new Transform(-0.55,0,0,0,0,0,1,1,1.2));
+        render[1]=Mesh.tri.transform(new Transform(-0.55,0,0.7));
+        //render[1]=Mesh.cube.transform(new Transform(0.55,0.1,3));
+
         
         JFrame frame=new JFrame("M");
         frame.setContentPane(M);
-        
-        frame.setFocusable(false);
-        M.setFocusable(true);
-        M.requestFocusInWindow();
+        frame.setLayout(new FlowLayout());
+        final JComboBox r=new JComboBox(new String[]{"Cross eyed","Un-cross eyed"});
+        r.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cross=r.getSelectedIndex()==0;
+                M.repaint();
+            }
+        });
+        frame.add(r);
+        //frame.setFocusable(false);
+        //M.setFocusable(true);
+        //M.requestFocusInWindow();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+        frame.setSize(2000,2000);
 	frame.setVisible(true);
         
-    }
-    public static void DO(){
-        render[0]=cube.transform(new Transform(-0.55,0,0,((double)y)/100,((double)x)/100,0));
-        render[1]=cube.transform(new Transform(0.55,0.1,0,((double)y)/100,((double)x)/100,0));
     }
     @Override
     public void mouseDragged(MouseEvent e) {
@@ -68,7 +82,6 @@ public class ThreeD extends JComponent implements MouseMotionListener{
     public void mouseMoved(MouseEvent e) {
         x=e.getX();
         y=e.getY();
-        DO();
         M.repaint();
     }
     
