@@ -32,7 +32,7 @@ public class Vertex {
         if (z<-2){
             return null;
         }
-        return new int[] {(int)(300+100*(x*(z+3)*0.7))+ThreeD.offset,(int)(300+100*(y*(z+3)*0.7))};
+        return new int[] {(int)(300+30*(x*(z+3)*0.7))+ThreeD.offset,(int)(300+30*(y*(z+3)*0.7))};
     }
     public String toString(){
         return x+","+y+","+z;

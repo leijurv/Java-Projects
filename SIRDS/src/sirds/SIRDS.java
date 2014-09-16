@@ -5,10 +5,10 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 import javax.swing.*;
 public class SIRDS extends JComponent {
-    static final int size = 500;
+    static final int size = 300;
     static BufferedImage left=new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
     static BufferedImage right=new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
-    static int pixelOffset = 6;
+    static int pixelOffset = 4;
     public void paintComponent(Graphics g) {
         g.drawImage(left, 5, 5, null);
         g.drawImage(right, size + 15, 5, null);
@@ -36,10 +36,6 @@ public class SIRDS extends JComponent {
         frame.setContentPane(new SIRDS());
         frame.setSize(size * 2 + 20, size + 30);
         frame.setVisible(true);
-        frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
 }

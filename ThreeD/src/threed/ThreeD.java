@@ -31,10 +31,10 @@ public class ThreeD extends JComponent implements MouseMotionListener{
     static boolean cross=true;
     public void paintComponent(Graphics g){
         long a=System.currentTimeMillis();
-        offset=cross?0:M.getWidth()/3;
+        offset=cross?0:(int)(M.getWidth()/7F);
         Mesh MM=new Mesh(render).transform(new Transform(0,0,0,(double)y/100,(double)x/100,0));
         MM.render(g);
-        offset=!cross?0:M.getWidth()/3;
+        offset=!cross?0:(int)(M.getWidth()/7F);
         MM.transform(new Transform(0.2,0,0)).render(g);
         g.drawString("Render took "+(System.currentTimeMillis()-a)+"ms",10,10);
     }

@@ -54,7 +54,7 @@ static JFrame frame;
         int height=100;
         //Copperplate Gothic Bold
         //Verdana Bold
-        g.setFont(new Font("Verdana",Font.BOLD,height));
+        g.setFont(new Font("Courier",Font.BOLD,height));
        
 //String message="ABCDEF|GHIJKL|MNOPQR|STUVWX|YZ -.,!?)(";
         //String message="ADAM IS|A POO-POO|FACE!";
