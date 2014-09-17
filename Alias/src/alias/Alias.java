@@ -61,7 +61,7 @@ public class Alias extends JComponent implements MouseListener,MouseMotionListen
         g.drawLine(0,0,old.getWidth(),old.getHeight());
     }
     public static void main(String[] args) throws Exception{
-        old=ImageIO.read(new File("/Users/leijurv/Downloads/kittens.jpg"));
+        old=ImageIO.read(new File("/Users/leijurv/Downloads/sheep.jpg"));
         recalc();
         JFrame frame=new JFrame("Image Scaler");
         frame.setContentPane(M);
