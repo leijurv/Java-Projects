@@ -1,2 +1,3 @@
 v0.1: launchctl load
 v0.2: unix command tester, check plist contents, client gui
+v0.3: hidden files with commas, deleted files, calls daemon to add infected directory
