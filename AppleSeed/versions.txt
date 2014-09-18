@@ -1,1 +1,2 @@
 v0.1: launchctl load
+v0.2: unix command tester, check plist contents, client gui
