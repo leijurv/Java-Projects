@@ -6,3 +6,4 @@ v0.5: fixed hangs on 15565 with kill switch, added synchronized lock objects
 v0.5.1: refactored a function
 v0.5.2: made the refactoring actually work
 v0.5.3: finally formatted the code
+v0.5.4: more refactoring
