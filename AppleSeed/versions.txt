@@ -4,3 +4,4 @@ v0.3: hidden files with commas, deleted files, calls daemon to add infected dire
 v0.4: saves infectall directories to file, added support for open with jar launcher, fixed all netbeans warnings
 v0.5: fixed hangs on 15565 with kill switch, added synchronized lock objects
 v0.5.1: refactored a function
+v0.5.2: made the refactoring actually work
