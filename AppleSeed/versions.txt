@@ -9,3 +9,4 @@ v0.5.3: finally formatted the code
 v0.5.4: more refactoring
 v0.6: new command system on 15565, checks github for updates
 v0.6.1: fixed checking github
+v0.6.2: multithreaded socket server, more try/catch
