@@ -54,7 +54,10 @@ public class Piece {
         g.setColor(silver ? Color.LIGHT_GRAY : Color.RED);
         switch (type){
             case PHAROH:
-                g.drawOval(x,y,size,size);
+                g.drawLine(x+size/2,y,x,y+size/2);
+                g.drawLine(x+size/2,y,x+size,y+size/2);
+                g.drawLine(x+size/2,y+size,x,y+size/2);
+                g.drawLine(x+size/2,y+size,x+size,y+size/2);
                 break;
             case DOUBLEOBELISK:
                 int X=x+size/8;
@@ -228,6 +231,7 @@ public class Piece {
      switch(type){
          case OBELISK:
          case PHAROH:
+             //LOL GAME IS OVER
          case PYRAMID:
              return null;
          case DOUBLEOBELISK:
