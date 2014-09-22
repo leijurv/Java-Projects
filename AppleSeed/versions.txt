@@ -11,3 +11,4 @@ v0.6: new command system on 15565, checks github for updates
 v0.6.1: fixed checking github
 v0.6.2: multithreaded socket server, more try/catch
 v0.6.3: actually fixed checking github
+v0.7: almost totally unkillable
