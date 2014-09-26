@@ -16,7 +16,7 @@ public Csc(Function Of){
 }
     @Override
     public Function derivitive() {
-        return new Subtract(new Constant(0),new Multiply(new Multiply(new Cot(of),new Csc(of)),of.derivitive()));
+        return new Subtract(new Constant(0),new MultiplyDivide(new Function[]{new Cot(of),new Csc(of),of.derivitive()},new Function[]{}));
     }
 
     @Override
@@ -27,7 +27,7 @@ public Csc(Function Of){
     @Override
     public Function simplify() {
         if (simplifyToSin){
-            return new Divide(new Constant(1),new Sin(of)).simplify();
+            return new MultiplyDivide(new Function[]{new Constant(1)},new Function[]{new Sin(of)}).simplify();
         }
         return new Csc(of.simplify());
     }
@@ -47,5 +47,7 @@ public Csc(Function Of){
     public double eval(double d) {
         return 1/Math.sin(of.eval(d));
     }
-    
+    public Function clone(){
+        return new Csc(of.clone());
+    }
 }

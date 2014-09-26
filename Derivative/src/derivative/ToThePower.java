@@ -4,6 +4,8 @@
  */
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
+
 /**
  *
  * @author leijurv
@@ -16,8 +18,8 @@ public class ToThePower extends Function{
         pow=Pow;
     }
     public Function derivitive(){
-        
-        return new Multiply(new ToThePower(base,new Subtract(pow,new Constant(1))),new Add(new Multiply(pow,base.derivitive()),new Multiply(base,new Multiply(new Ln(base),pow.derivitive()))));
+        System.out.println("a");
+        return multiply(new ToThePower(base,new Subtract(pow,new Constant(1))),new Add(multiply(pow,base.derivitive()),new MultiplyDivide(new Function[]{base,new Ln(base),pow.derivitive()},new Function[]{})));
     }
     public String toString(){
         if (base instanceof X || base instanceof Constant){
@@ -42,7 +44,7 @@ public class ToThePower extends Function{
             return base.simplify();
         }
         if (((Constant)pow).val<0){
-            return (new Divide(new Constant(1),new ToThePower(base,new Constant(-((Constant)pow).val)))).simplify();
+            return (new MultiplyDivide(new Function[]{new Constant(1)},new Function[]{new ToThePower(base,new Constant(-((Constant)pow).val))})).simplify();
         }
         }
         if (base instanceof X){
@@ -50,11 +52,12 @@ public class ToThePower extends Function{
         }
         
         if (base instanceof ToThePower){
-            return new ToThePower(((ToThePower)base).base,new Multiply((ToThePower)base,pow)).simplify();
+            return new ToThePower( ((ToThePower)base).base,multiply(((ToThePower)base).pow,pow)).simplify();
         }
-        if (base instanceof Multiply){
-            Multiply M=(Multiply)base;
-            return new Multiply(new ToThePower(M.a,pow),new ToThePower(M.b,pow)).simplify();
+        if (base instanceof MultiplyDivide){
+            MultiplyDivide M=(MultiplyDivide)base;
+            
+            //return new MultiplyDivide(new ToThePower(M.a,pow),new ToThePower(M.b,pow)).simplify();
         }
         if (base instanceof Constant){
             if (pow instanceof Constant){
@@ -75,5 +78,8 @@ public class ToThePower extends Function{
     }
     public double eval(double d){
         return Math.pow(base.eval(d),pow.eval(d));
+    }
+    public Function clone(){
+        return new ToThePower(base.clone(),pow.clone());
     }
 }

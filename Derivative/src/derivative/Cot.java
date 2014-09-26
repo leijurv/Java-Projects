@@ -1,6 +1,8 @@
 
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
+
 /**
  *
  * @author leijurv
@@ -13,7 +15,7 @@ public Cot(Function Of){
 }
     @Override
     public Function derivitive() {
-        return new Subtract(new Constant(0),new Multiply(new ToThePower(new Csc(of),new Constant(2)),of.derivitive()));
+        return new Subtract(new Constant(0),multiply(new ToThePower(new Csc(of),new Constant(2)),of.derivitive()));
     }
 
     @Override
@@ -24,7 +26,7 @@ public Cot(Function Of){
     @Override
     public Function simplify() {
         if (simplifyToCosSin){
-            return new Divide(new Cos(of),new Sin(of)).simplify();
+            return new MultiplyDivide(new Function[]{new Cos(of)},new Function[]{new Sin(of)}).simplify();
         }
         return new Cot(of.simplify());
     }
@@ -44,7 +46,9 @@ public Cot(Function Of){
     public double eval(double d) {
         return 1/Math.tan(of.eval(d));
     }
-    
+    public Function clone(){
+        return new Cot(of.clone());
+    }
 }
 
 

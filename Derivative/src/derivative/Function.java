@@ -21,5 +21,7 @@ public abstract class Function {
         }
         return false;
     }
+    @Override
+    public abstract Function clone();
     public abstract double eval(double d);
 }

@@ -4,6 +4,9 @@
  */
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
+import static derivative.Subtract.expand;
+
 /**
  *
  * @author leijurv
@@ -56,23 +59,8 @@ public class Add extends Function{
             Subtract B=(Subtract)b;
             return (new Subtract(new Add(a,B.a),B.b)).simplify();
         }
-        if (a instanceof Multiply){
-            if (b instanceof Multiply){
-                Multiply A=(Multiply)a;
-                Multiply B=(Multiply)b;
-                if (A.b.equal(B.b)){
-                if (A.a instanceof Constant){
-                    if (B.a instanceof Constant){
-                        return new Multiply(new Add(A.a,B.a),A.b).simplify();
-                        //I know it's bad, but I add things like this for special cases where this
-                        //would make it simplify a certain function perfectly
-                    }
-                }
-                }
-            }
-        }
         if (a.equal(b)){
-            return (new Multiply(new Constant(2),a)).simplify();
+            return (multiply(new Constant(2),a)).simplify();
         }
         if (b instanceof Add){
             Add B=(Add)b;
@@ -92,6 +80,52 @@ public class Add extends Function{
                 return new Add(A.a,new Add(A.b,b)).simplify();
             }
         }
+        if (a instanceof MultiplyDivide){
+            MultiplyDivide A=(MultiplyDivide)a;
+            if (!A.top.isEmpty() && A.top.get(0).equals(new Constant(-1))){
+                A.top.remove(0);
+                return new Subtract(b,A).simplify();
+            }
+        }
+        if (b instanceof MultiplyDivide){
+            MultiplyDivide A=(MultiplyDivide)b;
+            if (!A.top.isEmpty() && A.top.get(0).equals(new Constant(-1))){
+                A.top.remove(0);
+                return new Subtract(a,A).simplify();
+            }
+        }
+        if (a instanceof MultiplyDivide && b instanceof MultiplyDivide && !expand){
+                    MultiplyDivide A=(MultiplyDivide)a;
+                    MultiplyDivide B=(MultiplyDivide)b;
+                    //if (A.bottom.isEmpty() && B.bottom.isEmpty()){
+                        for (int i=0; i<A.top.size(); i++){
+                            if (B.top.contains(A.top.get(i))){
+                                B.top.remove(A.top.get(i));
+                                Function f=A.top.remove(i);
+                                return new MultiplyDivide(new Function[]{f,this},new Function[]{}).simplify();
+                            }
+                        }
+                    //}
+                        
+                }
+        /*
+        if (a instanceof MultiplyDivide){
+            if (b instanceof MultiplyDivide){
+                MultiplyDivide A=(MultiplyDivide)a;
+                MultiplyDivide B=(MultiplyDivide)b;
+                if (A.b.equal(B.b)){
+                if (A.a instanceof Constant){
+                    if (B.a instanceof Constant){
+                        return new MultiplyDivide(new Add(A.a,B.a),A.b).simplify();
+                        //I know it's bad, but I add things like this for special cases where this
+                        //would make it simplify a certain function perfectly
+                    }
+                }
+                }
+            }
+        }
+        
+        
         if (a instanceof Divide){
             if (b instanceof Divide){
                 if (((Divide)a).bottom.equal(((Divide)b).bottom)){
@@ -102,13 +136,13 @@ public class Add extends Function{
         }
         if (a instanceof Divide){
             if (((Divide)a).bottom instanceof X){
-                if (b instanceof Multiply){
-                    if (((Multiply)b).divByX()){
-                        return new Divide(new Add(((Divide)a).top,new Multiply(((Multiply)b),new X())),new X());
+                if (b instanceof MultiplyDivide){
+                    if (((MultiplyDivide)b).divByX()){
+                        return new Divide(new Add(((Divide)a).top,new MultiplyDivide(((MultiplyDivide)b),new X())),new X());
                     }
                 }
             }
-        }
+        }*/
         return this;
     }
     public boolean equal(Function f){
@@ -120,5 +154,8 @@ public class Add extends Function{
     }
     public double eval(double d){
         return a.eval(d)+b.eval(d);
+    }
+    public Function clone(){
+        return new Add(a.clone(),b.clone());
     }
 }

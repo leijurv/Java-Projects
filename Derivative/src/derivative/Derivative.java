@@ -4,6 +4,7 @@
  */
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
 import java.util.ArrayList;
 import java.util.Scanner;
 import reversepolishnotation.ReversePolishNotation;
@@ -21,16 +22,28 @@ static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","
      * @param args the command line arguments
      */
     public static void main(String[] args){
-        String r="sec(sin(cosx)^tan(ln(x))";
         
+        String r="(x^(lnx+sinx))/(x^cotx+x^2)";
+        //String r="x*x";
         Function f=preparse(r);
         
         System.out.println("Parsing finished");
         System.out.println(f);
-        System.out.println(f.eval(3));//eval where x=3
+        
         Function R=f.derivitive();
         System.out.println(R);
-        System.out.println(R.simplify());//You need to work on the simplify function. 
+        Function F=R.simplify();
+        System.out.println(F);
+        /*
+        R=F.derivitive();
+        System.out.println(R);
+        F=R.simplify();
+        //F=F.simplify();
+        System.out.println(F);*/
+        
+        //String r="((0-((cscx)^2))-((lnx*((cscx)^2+(0-2*x*cscx*cotx*cscx)))))";
+        //System.out.println(preparse(r).simplify());
+        
         //The derivative function is correct.
         
         
@@ -172,6 +185,7 @@ static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","
             }
             return new Constant(Integer.parseInt((String)o[0]));
         }
+        //System.out.println(o.length);
         if (o.length==3){
             Function First=parse(new Object[]{o[0]});
             String s=(String)o[1];
@@ -182,11 +196,14 @@ static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","
             if (s.equals("+")){
                 return new Add(First,Last);
             }
+            if (s.equals("-")){
+                return new Subtract(First,Last);
+            }
             if (s.equals("*")){
-                return new Multiply(First,Last);
+                return multiply(First,Last);
             }
             if (s.equals("/")){
-                return new Divide(First,Last);
+                return new MultiplyDivide(new Function[]{First},new Function[]{Last});
             }
         }
         //Parenthesis

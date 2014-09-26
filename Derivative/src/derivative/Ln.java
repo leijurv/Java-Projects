@@ -15,7 +15,7 @@ public class Ln extends Function{
     }
     @Override
     public Function derivitive() {
-        return new Divide(of.derivitive(),of);
+        return new MultiplyDivide(new Function[]{of.derivitive()},new Function[]{of});
     }
 
     @Override
@@ -41,5 +41,7 @@ public class Ln extends Function{
     public double eval(double d) {
         return Math.log(of.eval(d));
     }
-    
+    public Function clone(){
+        return new Ln(of.clone());
+    }
 }

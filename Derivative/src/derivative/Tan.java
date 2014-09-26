@@ -4,6 +4,8 @@
  */
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
+
 /**
  *
  * @author leijurv
@@ -17,7 +19,7 @@ public class Tan extends Function{
 
     @Override
     public Function derivitive() {
-        return new Multiply(new ToThePower(new Sec(of),new Constant(2)),of.derivitive());
+        return multiply(new ToThePower(new Sec(of),new Constant(2)),of.derivitive());
     }
 
     @Override
@@ -29,7 +31,7 @@ public class Tan extends Function{
     public Function simplify() {
         of=of.simplify();
         if (simplifyToSinCos){
-            return new Divide (new Sin(of),new Cos(of));
+            return new MultiplyDivide(new Function[]{new Sin(of)},new Function[]{new Cos(of)});
         }
         return this;
     }
@@ -45,5 +47,8 @@ public class Tan extends Function{
     @Override
     public double eval(double d) {
         return Math.tan(of.eval(d));
+    }
+    public Function clone(){
+        return new Tan(of.clone());
     }
 }

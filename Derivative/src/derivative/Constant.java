@@ -21,7 +21,6 @@ public class Constant extends Function{
     }
     public Function simplify(){
         if (val<0){
-            System.out.println(val);
             //return new Subtract(new Constant(0),new Constant(-val));
         }
         return this;
@@ -34,5 +33,8 @@ public class Constant extends Function{
     }
     public double eval(double d){
         return (double)val;
+    }
+    public Function clone(){
+        return new Constant(val);
     }
 }

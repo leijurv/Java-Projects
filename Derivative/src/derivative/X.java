@@ -27,4 +27,7 @@ public class X extends Function{
     public double eval(double d){
         return d;
     }
+    public Function clone(){
+        return new X();
+    }
 }

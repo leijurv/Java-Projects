@@ -18,7 +18,7 @@ public class Sec extends Function{
     @Override
     public Function derivitive() {
         
-        return new Multiply(new Multiply(new Sec(of),new Tan(of)),of.derivitive());
+        return new MultiplyDivide(new Function[]{new Sec(of),new Tan(of),of.derivitive()},new Function[]{});
     }
 
     @Override
@@ -30,7 +30,7 @@ public class Sec extends Function{
     public Function simplify() {
         of=of.simplify();
         if (simplifyToCos){
-            return new Divide(new Constant(1),new Cos(of));
+            return new MultiplyDivide(new Function[]{new Constant(1)},new Function[]{new Cos(of)});
         }
         return this;
         //return new Divide(new Constant(1),new Cos(of));
@@ -48,5 +48,7 @@ public class Sec extends Function{
     public double eval(double d) {
         return 1/Math.cos(of.eval(d));
     }
-    
+    public Function clone(){
+        return new Sec(of.clone());
+    }
 }

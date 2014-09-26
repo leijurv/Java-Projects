@@ -4,6 +4,8 @@
  */
 package derivative;
 
+import static derivative.MultiplyDivide.multiply;
+
 /**
  *
  * @author leijurv
@@ -16,7 +18,7 @@ public class Cos extends Function{
 
     @Override
     public Function derivitive() {
-        return new Subtract(new Constant(0),new Multiply(new Sin(of),of.derivitive()));
+        return new Subtract(new Constant(0),multiply(new Sin(of),of.derivitive()));
     }
 
     @Override
@@ -40,6 +42,9 @@ public class Cos extends Function{
 
     @Override
     public double eval(double d) {
-        return Math.sin(of.eval(d));
+        return Math.cos(of.eval(d));
+    }
+    public Function clone(){
+        return new Cos(of.clone());
     }
 }
