@@ -20,7 +20,7 @@ public class Mesh {
     static final Mesh tri=new Mesh();
     static final Mesh plane=new Mesh();
     Vertex[][] faces=new Vertex[0][0];
-    Vertex light=new Vertex(-1,-3,0);
+    Vertex[] light={new Vertex(.62,-2.5,0),new Vertex(-1,-2.5,0)};
     public static void init(){
         Vertex[][] cub={
             {new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5)},
@@ -46,7 +46,6 @@ public class Mesh {
         };
         swit(r[0],0,1);
         swit(r[3],0,1);
-        System.out.println(r.length);
         tri.faces=r;
         plane.faces=new Vertex[][]{{new Vertex(10,0,10),new Vertex(10,0,-10),new Vertex(-10,0,10)},{new Vertex(-10,0,10),new Vertex(10,0,-10),new Vertex(-10,0,-10)}};
     }
@@ -55,25 +54,32 @@ public class Mesh {
         a[ind]=a[ind1];
         a[ind1]=v;
     }
+    public static Vertex[] copy(Vertex[] a){
+        Vertex[] res=new Vertex[a.length];
+        for (int i=0; i<res.length; i++){
+            res[i]=new Vertex(a[i]);
+        }
+        return res;
+    }
     public Mesh(String s){
         try{
             faces=new Vertex[0][3];
             // Open the file that is the first 
             // command line parameter
             FileInputStream fstream=new FileInputStream(s);
-            // Get the object of DataInputStream
-            DataInputStream in=new DataInputStream(fstream);
-            BufferedReader br=new BufferedReader(new InputStreamReader(in));
-            String strLine;
-            while ((strLine=br.readLine())!=null){
-                Vertex[] x=new Vertex[3];
-                x[0]=new Vertex(strLine);
-                x[1]=new Vertex(br.readLine());
-                x[2]=new Vertex(br.readLine());
-                addFace(x);
+            try ( // Get the object of DataInputStream
+                    DataInputStream in=new DataInputStream(fstream)) {
+                BufferedReader br=new BufferedReader(new InputStreamReader(in));
+                String strLine;
+                while ((strLine=br.readLine())!=null){
+                    Vertex[] x=new Vertex[3];
+                    x[0]=new Vertex(strLine);
+                    x[1]=new Vertex(br.readLine());
+                    x[2]=new Vertex(br.readLine());
+                    addFace(x);
+                }
+                //Close the input stream
             }
-            //Close the input stream
-            in.close();
         } catch (Exception e){//Catch exception if any
             System.err.println("Error: "+e.getMessage());
         }
@@ -81,11 +87,11 @@ public class Mesh {
     public Mesh(Mesh[] m){
         faces=m[0].faces;
         for (int i=1; i<m.length; i++){
-            for (int j=0; j<m[i].faces.length; j++){
-                addFace(m[i].faces[j]);
+            for (Vertex[] face : m[i].faces){
+                addFace(face);
             }
         }
-        light=new Vertex(m[0].light);
+        light=copy(m[0].light);
     }
     public void addFace(Vertex[] v){
         Vertex[][] N=new Vertex[faces.length+1][3];
@@ -96,8 +102,8 @@ public class Mesh {
         faces=N;
     }
     public void renderWireframe(Graphics g){
-        for (Vertex[] tri : faces){
-            int[][] transform=transform(tri);
+        for (Vertex[] adf : faces){
+            int[][] transform=transform(adf);
             if (transform!=null){
                 g.drawLine(transform[0][0],transform[1][0],transform[0][1],transform[1][1]);
                 g.drawLine(transform[0][1],transform[1][1],transform[0][2],transform[1][2]);
@@ -123,16 +129,24 @@ public class Mesh {
             }
         }
         Random r=new Random(5021);
-        int[] A=light.transform();
-        g.setColor(Color.BLUE);
-        g.fillRect(A[0],A[1],5,5);
+        
         for (int i=0; i<faces.length; i++){
             Vertex norm=norm1(faces[i]);
             //Vertex lig=new Vertex(light);
             //lig.
-            Vertex Light=sub(light,average(faces[i]));
+            double minAng=0;
+            int maxCol=0;
+            for (Vertex lig : light){
+            Vertex Light=sub(lig,average(faces[i]));
             double ang=angle(Light,sub(new Vertex(0,0,0),norm));
-            g.setColor(light(ang));
+            int col=asdf(ang);
+            if (col>maxCol){
+                maxCol=col;
+                minAng=ang;
+            }
+            }
+            
+            g.setColor(light(maxCol));
             //g.drawLine(i,i,i,i);
             //g.setColor(new Color(r.nextFloat(),r.nextFloat(),r.nextFloat()));
             if (norm.z<0){
@@ -144,26 +158,27 @@ public class Mesh {
             int[] a=cent.transform();
             int[] b=ad.transform();
             g.setColor(Color.BLACK);
-            g.fillRect(a[0],a[1],5,5);
+            g.fillRect(a[0]-2,a[1]-2,4,4);
             g.drawLine(a[0],a[1],b[0],b[1]);
             if (norm.z<0){
                 g.setColor(Color.BLUE);
-                g.drawString(((180D/Math.PI*ang)+"").substring(0,4),a[0],a[1]);
+                g.drawString(minAng==0?"0":((180D/Math.PI*minAng)+"").substring(0,4),a[0],a[1]);
             }
         }
+        for (Vertex Lig : light){
+        int[] A=Lig.transform();
+        g.setColor(Color.BLUE);
+        g.fillRect(A[0]-2,A[1]-2,4,4);
+        }
     }
-    public static Color light(double lightAng){
-        int a=asdf(lightAng);
+    public static Color light(int a){
         return new Color(a,a,a);
     }
     public static int asdf(double ang){
-        if (ang<0){
-            ang=0-ang;
-        }
         if (ang>Math.PI/2){
-            return 50;
+            return 0;
         }
-        return 255-(int) (180D/Math.PI*ang);
+        return 255-(int) (180D/Math.PI*ang*1.6D);
     }
     public static Vertex norm(Vertex[] a){
         return new Vertex(a[0].y*a[1].z-a[0].z*a[1].y,a[0].z*a[1].x-a[0].x*a[1].z,a[0].x*a[1].y-a[0].y*a[1].x);
@@ -189,15 +204,25 @@ public class Mesh {
     public static Vertex add(Vertex a,Vertex b){
         return new Vertex(a.x+b.x,a.y+b.y,a.z+b.z);
     }
-    public static boolean comp(Vertex[] a,Vertex[] b){//Should b be rendered before a
-        /*
-         if (norm1(a) && !norm1(b)){
-         return true;
-         }
-         if (norm1(b) && !norm1(a)){
-         return false;
-         }*/
+    public static boolean comp(Vertex[] a,Vertex[] b){
         return average(a).z>average(b).z;
+    }
+    public double[] lightDist(double x, double y){
+        double minDist=10000;
+        double ind=-1;
+        for (int i=0; i<light.length; i++){
+            Vertex Lig=light[i];
+        int[] A=Lig.transform();
+        double X=A[0];
+        double Y=A[1];
+        System.out.println(X+","+Y+","+x+","+y);
+        double dist=Math.sqrt((Y-y)*(Y-y)+(X-x)*(X-x));
+        if (dist<minDist){
+            ind=i;
+            minDist=dist;
+        }
+        }
+        return new double[] {minDist,ind};
     }
     public Mesh(){
     }
@@ -208,7 +233,7 @@ public class Mesh {
                 faces[i][j]=new Vertex(m.faces[i][j]);
             }
         }
-        light=new Vertex(m.light);
+        light=copy(m.light);
     }
     private static int[][] transform(Vertex[] v){
         int[][] a={v[0].transform(),v[1].transform(),v[2].transform()};
@@ -239,7 +264,9 @@ public class Mesh {
                 x.transform(t);
             }
         }
-        light.transform(t);
+        for (Vertex v : light){
+            v.transform(t);
+        }
         return this;
     }
 }
