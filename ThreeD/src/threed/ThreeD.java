@@ -3,9 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package threed;
-
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -19,12 +17,11 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-
 /**
  *
  * @author leijurv
  */
-public class ThreeD extends JComponent implements MouseMotionListener,KeyListener{
+public class ThreeD extends JComponent implements MouseMotionListener,KeyListener {
     static ThreeD M=new ThreeD();
     static Mesh[] render=new Mesh[3];
     static double mouseX=0;
@@ -36,9 +33,10 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
     static boolean cross=true;
     public void paintComponent(Graphics g){
         long a=System.currentTimeMillis();
-        offset=cross?0:(int)(M.getWidth()/7F);
-        mouseX/=400;
+        offset=cross ? 0 : (int) (M.getWidth()/7F);
+        mouseX/=200;
         mouseY/=400;
+        //mouseY-=1;
         if (mouseY>Math.PI/3){
             mouseY=Math.PI/3;
         }
@@ -47,7 +45,7 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
         }
         Mesh MM=new Mesh(render).transform(new Transform(0,0,0,mouseY,mouseX,0)).transform(new Transform(x,y,z));
         MM.render(g);
-        offset=!cross?0:(int)(M.getWidth()/7F);
+        offset=!cross ? 0 : (int) (M.getWidth()/7F);
         MM.transform(new Transform(0.2,0,0)).render(g);
         g.drawString("Render took "+(System.currentTimeMillis()-a)+"ms"+pres[0]+pres[1]+pres[2]+pres[3],10,10);
     }
@@ -58,24 +56,23 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args){
+        //System.out.println(180D/Math.PI*Mesh.angle(new Vertex(0,0,1),new Vertex(0,1,0)));
         //render=new Mesh("/Users/leijurv/Downloads/203164976.lrf");
         //System.out.println(render);
         Mesh.init();
         render[0]=Mesh.cube.transform(new Transform(-0.55,-1,0,0,0,0,1,1,1.2));
         render[1]=Mesh.tri.transform(new Transform(-0.55,-1,0.7));
+        //render[0]=new Mesh();
         render[2]=Mesh.plane.transform(new Transform(0,0,0,0,0,0,0.1,1,0.1));
-        //render[1]=Mesh.cube.transform(new Transform(0.55,0.1,3));
-
-        
+       //render[1]=Mesh.cube.transform(new Transform(0.55,0.1,3));
         JFrame frame=new JFrame("M");
         frame.setContentPane(M);
         frame.setLayout(new FlowLayout());
-        final JComboBox r=new JComboBox(new String[]{"Cross eyed","Un-cross eyed"});
-        r.addActionListener(new ActionListener(){
-
+        final JComboBox<String> r=new JComboBox<>(new String[]{"Cross eyed","Paralell eyed"});
+        r.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e){
                 cross=r.getSelectedIndex()==0;
                 M.repaint();
             }
@@ -88,15 +85,13 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
         //M.requestFocusInWindow();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(2000,2000);
-	frame.setVisible(true);
-        
+        frame.setVisible(true);
     }
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void mouseDragged(MouseEvent e){
     }
-
     @Override
-    public void mouseMoved(MouseEvent e) {
+    public void mouseMoved(MouseEvent e){
         mouseX=e.getX();
         mouseY=e.getY();
         M.repaint();
@@ -104,11 +99,9 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
     static boolean[] pres=new boolean[4];
     @Override
     public void keyTyped(KeyEvent e){
-        
         //System.out.println(e.getKeyChar());
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
     @Override
     public void keyPressed(KeyEvent e){
         int c=conv(e.getKeyChar());
@@ -118,7 +111,6 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
         M.repaint();
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
     @Override
     public void keyReleased(KeyEvent e){
         int c=conv(e.getKeyChar());
@@ -129,7 +121,7 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     public int conv(char c){
-        switch(c){
+        switch (c){
             case 'w':
                 return 0;
             case 'a':

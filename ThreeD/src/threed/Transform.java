@@ -3,9 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package threed;
-
 /**
  *
  * @author leijurv
@@ -37,5 +35,4 @@ public class Transform {
         Sy=SY;
         Sz=SZ;
     }
-
 }
