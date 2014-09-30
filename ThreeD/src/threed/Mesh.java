@@ -21,6 +21,7 @@ import java.util.Random;
 public class Mesh {
     static final Mesh cube=new Mesh();
     static final Mesh tri=new Mesh();
+    static final Mesh plane=new Mesh();
     Vertex[][] faces;
     public static void init(){
         Vertex[][] cub={{new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5)},{new Vertex(-0.5,-0.5,-0.5),new Vertex(0.5,-0.5,-0.5),new Vertex(0.5,-0.5,0.5),new Vertex(-0.5,-0.5,0.5)},{new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,-0.5,0.5),new Vertex(-0.5,0.5,0.5),new Vertex(-0.5,0.5,-0.5)}       ,    {new Vertex(0.5,0.5,0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5),new Vertex(0.5,-0.5,0.5)}, {new Vertex(0.5,0.5,0.5),new Vertex(0.5,0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(-0.5,0.5,0.5)}, {new Vertex(0.5,0.5,0.5),new Vertex(-0.5,0.5,0.5),new Vertex(-0.5,-0.5,0.5),new Vertex(0.5,-0.5,0.5)}};
@@ -33,6 +34,7 @@ public class Mesh {
         cube.faces=cub2;
         Vertex[][] r={{new Vertex(-0.5,-0.5,0),new Vertex(0,0,0.5),new Vertex(-0.5,0.5,0)},{new Vertex(-0.5,-0.5,0),new Vertex(0,0,0.5),new Vertex(0.5,-0.5,0)},{new Vertex(0.5,0.5,0),new Vertex(0,0,0.5),new Vertex(-0.5,0.5,0)},{new Vertex(0.5,0.5,0),new Vertex(0,0,0.5),new Vertex(0.5,-0.5,0)}};
         tri.faces=r;
+        plane.faces=new Vertex[][]{{new Vertex(10,0,10),new Vertex(10,0,-10),new Vertex(-10,0,10)},{new Vertex(-10,0,10),new Vertex(10,0,-10),new Vertex(-10,0,-10)}};
     }
     public Mesh(String s){
          try{
@@ -118,14 +120,14 @@ public class Mesh {
         return norm(new Vertex[] {new Vertex(a[1].x-a[0].x,a[1].y-a[0].y,a[1].z-a[0].z),new Vertex(a[2].x-a[0].x,a[2].y-a[0].y,a[2].z-a[0].z)});
     }
     public boolean comp(Vertex[] a, Vertex[] b){//Should b be rendered before a
-        /*
+        
         if (norm1(a) && !norm1(b)){
             return true;
         }
         if (norm1(b) && !norm1(a)){
             return false;
-        }*/
-        return a[0].z+a[1].z+a[2].z<b[0].z+b[1].z+b[2].z;//Todo: Make one automatically win if the normal vector of the other is in the negative z direction. Problem is, now triangles have to be defined in counter-clockwise order for normal vectors to work properly. (True story: I only know about normal vectors from working on the STL exporter in Trumpetr =)
+        }
+        return a[0].z+a[1].z+a[2].z>b[0].z+b[1].z+b[2].z;//Todo: Make one automatically win if the normal vector of the other is in the negative z direction. Problem is, now triangles have to be defined in counter-clockwise order for normal vectors to work properly. (True story: I only know about normal vectors from working on the STL exporter in Trumpetr =)
     }
     public Mesh(){
     }

@@ -114,7 +114,7 @@ public class MultiplyDivide extends Function {
         return false;
     }
     public Function simplify(){
-        System.out.println("s"+this);
+        //System.out.println("s"+this);
         for (int i=0; i<top.size(); i++){
             top.set(i,top.get(i).simplify());
         }
@@ -142,8 +142,6 @@ public class MultiplyDivide extends Function {
             Function t=top.get(i);
             if (t instanceof Subtract&&Subtract.expand){
                 Subtract T=(Subtract) t;
-                
-                System.out.println("AND"+this);
                 top.remove(i);
                 return new Subtract(multiply(T.a,new MultiplyDivide(top,bottom)),multiply(T.b,new MultiplyDivide(top,bottom))).simplify();
             }
@@ -183,7 +181,7 @@ public class MultiplyDivide extends Function {
                 }
             }
             if (t instanceof MultiplyDivide){
-                MultiplyDivide a=(MultiplyDivide) t;
+                MultiplyDivide a=new MultiplyDivide(((MultiplyDivide) t).top,((MultiplyDivide) t).bottom);
                 top.remove(i);
                 top.addAll(a.top);
                 bottom.addAll(a.bottom);
@@ -205,12 +203,9 @@ public class MultiplyDivide extends Function {
                 Function J=top.get(j);
                 if (i!=j){
                     if (I.equal(J)){
-                        
-                        System.out.println("aaa"+this);
                         top.remove(i);
                         top.remove(J);
                         top.add(0,new ToThePower(I,new Constant(2)));
-                        System.out.println("bbb"+this);
                         return simplify();
                     }
                 }
@@ -221,10 +216,8 @@ public class MultiplyDivide extends Function {
             if (t instanceof ToThePower){
                 ToThePower T=(ToThePower) t;
                 if (top.contains(T.base)){
-                    //System.out.println("simp"+this);
                     top.remove(T.base);
                     T.pow=new Add(new Constant(-1),T.pow);
-                    //System.out.println("simp1"+this);
                     return simplify();
                 }
             }
@@ -257,7 +250,7 @@ public class MultiplyDivide extends Function {
                 }
                 D.bottom.remove(bottom.get(i));
             }
-            return true;
+            return D.top.isEmpty() && D.bottom.isEmpty();
         }
         return false;
     }

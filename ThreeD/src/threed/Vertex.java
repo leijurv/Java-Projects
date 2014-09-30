@@ -29,10 +29,16 @@ public class Vertex {
         z=Double.parseDouble(r[2]);
     }
     public int[] transform(){
-        if (z<-2){
+        
+        if (z<=-2){
             return null;
         }
-        return new int[] {(int)(300+30*(x*(z+3)*0.7))+ThreeD.offset,(int)(300+30*(y*(z+3)*0.7))};
+        
+        if (x/z>2){
+            //return null;
+        }
+        System.out.println(2+z);
+        return new int[] {(int)(300+10*(x*(2+z)))+ThreeD.offset,(int)(300+10*(y*(2+z)))};
     }
     public String toString(){
         return x+","+y+","+z;
@@ -41,8 +47,8 @@ public class Vertex {
         x*=t.Sx;
         y*=t.Sy;
         z*=t.Sz;
-        mult(new double[][] {{1,0,0},{0,Math.cos(t.Rx),-Math.sin(t.Rx)},{0,Math.sin(t.Rx),Math.cos(t.Rx)}});
         mult(new double[][] {{Math.cos(t.Ry),0,Math.sin(t.Ry)},{0,1,0},{-Math.sin(t.Ry),0,Math.cos(t.Ry)}});
+        mult(new double[][] {{1,0,0},{0,Math.cos(t.Rx),-Math.sin(t.Rx)},{0,Math.sin(t.Rx),Math.cos(t.Rx)}});
         mult(new double[][] {{Math.cos(t.Rz),-Math.sin(t.Rz),0},{Math.sin(t.Rz),Math.cos(t.Rz),0},{0,0,1}});
         x+=t.Dx;
         y+=t.Dy;

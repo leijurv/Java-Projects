@@ -31,10 +31,10 @@ public class Subtract extends Function{
         return "("+a+")-("+b+")";
     }
     public Function simplify(){
-        System.out.println("d"+this);
+        //System.out.println("d"+this);
         a=a.simplify();
         b=b.simplify();
-                System.out.println("c"+this);
+                //System.out.println("c"+this);
                 //System.out.println();
                 if (a.equal(b)){
                     return new Constant(0);

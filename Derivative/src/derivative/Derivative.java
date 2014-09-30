@@ -24,22 +24,25 @@ static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","
     public static void main(String[] args){
         
         String r="(x^(lnx+sinx))/(x^cotx+x^2)";
-        //String r="x*x";
         Function f=preparse(r);
         
         System.out.println("Parsing finished");
         System.out.println(f);
         
         Function R=f.derivitive();
-        System.out.println(R);
+        //System.out.println(R);
         Function F=R.simplify();
-        System.out.println(F);
-        /*
+        //System.out.println(F);
+        
         R=F.derivitive();
-        System.out.println(R);
+        //System.out.println(R);
         F=R.simplify();
+        R=F.derivitive();
+        //System.out.println(R);
+        F=R.simplify();
+        F=F.simplify();
         //F=F.simplify();
-        System.out.println(F);*/
+        System.out.println(F);
         
         //String r="((0-((cscx)^2))-((lnx*((cscx)^2+(0-2*x*cscx*cotx*cscx)))))";
         //System.out.println(preparse(r).simplify());
