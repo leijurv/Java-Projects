@@ -26,15 +26,17 @@ public class Vertex {
         y=Double.parseDouble(r[1]);
         z=Double.parseDouble(r[2]);
     }
+    static int coeff=10;
+    static double zAdd=2;
     public int[] transform(){
-        if (z<=-2){
+        if (z<-2){
             return null;
         }
         if (x/z>2){
             //return null;
         }
         //System.out.println(2+z);
-        return new int[]{(int) (300+10*(x*(2+z)))+ThreeD.offset,(int) (300+10*(y*(2+z)))};
+        return new int[]{(int) (300+coeff*(x*(z+zAdd)))+ThreeD.offset,(int) (300+coeff*(y*(z+zAdd)))};
     }
     public String toString(){
         return x+","+y+","+z;

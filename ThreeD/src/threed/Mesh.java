@@ -6,11 +6,15 @@
 package threed;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Random;
+import static threed.ThreeD.offset;
+import static threed.Vertex.coeff;
+import static threed.Vertex.zAdd;
 /**
  *
  * @author leijurv
@@ -21,6 +25,7 @@ public class Mesh {
     static final Mesh plane=new Mesh();
     Vertex[][] faces=new Vertex[0][0];
     Vertex[] light={new Vertex(.62,-2.5,0),new Vertex(-1,-2.5,0)};
+    Vertex cam=new Vertex(0,0,0);
     public static void init(){
         Vertex[][] cub={
             {new Vertex(-0.5,-0.5,-0.5),new Vertex(-0.5,0.5,-0.5),new Vertex(0.5,0.5,-0.5),new Vertex(0.5,-0.5,-0.5)},
@@ -92,6 +97,7 @@ public class Mesh {
             }
         }
         light=copy(m[0].light);
+        cam=new Vertex(m[0].cam);
     }
     public void addFace(Vertex[] v){
         Vertex[][] N=new Vertex[faces.length+1][3];
@@ -112,11 +118,19 @@ public class Mesh {
         }
     }
     public void render(Graphics g){
-        renderFull(g);
-        g.setColor(Color.BLACK);
-        //renderWireframe(g);
+        if (type==3){
+            renderWireframe(g);
+            return;
+        }
+        g.drawImage(renderFull(),0,0,null);
     }
-    public void renderFull(Graphics g){
+    static int type=0;
+    public BufferedImage renderFull(){
+        BufferedImage result=new BufferedImage(1000,700,BufferedImage.TYPE_INT_ARGB);
+        
+        Graphics g=result.getGraphics();
+        g.setColor(new Color(238,238,238,0));
+        g.fillRect(0,0,1000,700);
         for (int i=0; i<faces.length-1; i++){//BUBBLE SORT the faces in order to be rendered
             if (comp(faces[i],faces[i+1])){
                 Vertex[] v=faces[i];
@@ -129,40 +143,99 @@ public class Mesh {
             }
         }
         Random r=new Random(5021);
-        
         for (int i=0; i<faces.length; i++){
             Vertex norm=norm1(faces[i]);
             //Vertex lig=new Vertex(light);
             //lig.
-            double minAng=0;
-            int maxCol=0;
-            for (Vertex lig : light){
-            Vertex Light=sub(lig,average(faces[i]));
-            double ang=angle(Light,sub(new Vertex(0,0,0),norm));
-            int col=asdf(ang);
-            if (col>maxCol){
-                maxCol=col;
-                minAng=ang;
-            }
-            }
             
-            g.setColor(light(maxCol));
+            double[] res=light(average(faces[i]),norm);
+            g.setColor(grayScale((int)res[0]));
+            if(type==2){
+                g.setColor(new Color(r.nextInt(256),r.nextInt(256),r.nextInt(256)));
+            }
             //g.drawLine(i,i,i,i);
             //g.setColor(new Color(r.nextFloat(),r.nextFloat(),r.nextFloat()));
             if (norm.z<0){
                 int[][] transform=transform(faces[i]);
-                g.fillPolygon(transform[0],transform[1],transform[0].length);
+                
+                
+                if (type==1){
+                BufferedImage temp=new BufferedImage(1000,700,BufferedImage.TYPE_INT_RGB);
+                Graphics gg=temp.getGraphics();
+                gg.setColor(Color.WHITE);
+                gg.fillPolygon(transform[0],transform[1],transform[0].length);
+                g.setColor(Color.RED);
+                int minX=200+offset;
+                int maxX=450+offset;
+                int minY=100;
+                int maxY=400;
+                //g.drawRect(minX,minY,maxX-minX,maxY-minY);
+                for (int x=minX; x<maxX; x++){
+                    for (int y=minY; y<maxY; y++){
+                        if (temp.getRGB(x,y)!=-16777216){
+                            double e=(double)(x-offset)+0.01;
+                            double f=(double)y+0.01;
+                            e=(e-300)/(double)coeff;
+                            f=(f-300)/(double)coeff;
+                            
+                            double d=det(norm,faces[i][0]);
+                            double bot=2*(norm.x*e+norm.y*f);
+                            
+                            /*
+                            double dett=d*d-4*norm.x*norm.z*e-4*norm.y*norm.z*f;
+                            double det=Math.sqrt(dett);
+                            double resX=(d*e+e*det)/bot;
+                            double resY=(d*f+f*det)/bot;
+                            double resZ=(d-det)/(2*norm.z);*/
+                            
+                            
+                            
+                            double dett=d*d-4*f*norm.y*norm.z-4*e*norm.z*norm.x+2*d*norm.z*zAdd+norm.z*norm.z*zAdd*zAdd;
+                            double det=Math.sqrt(dett);
+                            double resX=(d*e+e*norm.z*zAdd+e*det)/bot;
+                            double resY=(d*f+f*norm.z*zAdd+f*det)/bot;
+                            double resZ=(d-norm.z*zAdd-det)/(2*norm.z);
+                            
+                            
+                            //System.out.println(resX*(resZ+zAdd)+","+e+","+resY*(resZ+zAdd)+","+f);
+                            //System.out.println(det(norm,faces[i][0])+","+det(norm,faces[i][1])+","+det(norm,faces[i][2])+","+det(norm,new Vertex(resX,resY,resZ)));
+                            //System.out.println(resX+","+resY+","+resZ+","+det);
+                            //Color C=(light((int)res[0]));
+                            Color C=Color.BLUE;
+                            
+                            if (dett>0){
+                                 C=grayScale((int)light(new Vertex(resX,resY,resZ),norm)[0]);
+                                
+                            }else{
+                                //System.out.println("IS CAT");
+                            }
+                            result.setRGB(x,y,C.getRGB());
+                            //g.drawLine(x,y,x,y);
+                            /*
+                            if ((x+y)%1175==0){
+                                g.setColor(Color.BLUE);
+                                g.drawString(minAng==0?"0":(minAng+""),x,y);
+                            }*/
+                        }
+                }}
+                }else{
+                    g.fillPolygon(transform[0],transform[1],transform[0].length);
+                }
+                
+                    
+                
             }
             Vertex cent=average(faces[i]);
             Vertex ad=sub(cent,norm);
             int[] a=cent.transform();
             int[] b=ad.transform();
+            
             g.setColor(Color.BLACK);
             g.fillRect(a[0]-2,a[1]-2,4,4);
-            g.drawLine(a[0],a[1],b[0],b[1]);
+           // g.drawLine(a[0],a[1],b[0],b[1]);
             if (norm.z<0){
                 g.setColor(Color.BLUE);
-                g.drawString(minAng==0?"0":((180D/Math.PI*minAng)+"").substring(0,4),a[0],a[1]);
+               // g.drawString(res[1]==0?"0":((180D/Math.PI*res[1])+"").substring(0,4),a[0],a[1]);
             }
         }
         for (Vertex Lig : light){
@@ -170,21 +243,68 @@ public class Mesh {
         g.setColor(Color.BLUE);
         g.fillRect(A[0]-2,A[1]-2,4,4);
         }
+        return result;
     }
-    public static Color light(int a){
+    public double[] light(Vertex point, Vertex norm){
+        double minAngPhong=Math.PI;
+        double minAngLambert=Math.PI;
+        int totalLambert=0;
+            int maxCol=0;
+            for (int i=0; i<light.length; i++){
+            Vertex incidence=sub(light[i],point);
+            
+            double angLambert=angle(incidence,sub(new Vertex(0,0,0),norm));//Angle between normal and incidence
+            
+            Vertex oppo=reflect(norm,incidence);
+            double angPhong=angle(new Vertex(0,0,1),oppo);//Angle between reflection and camera
+            
+            int phong=asdf(angPhong,3);
+            
+            int lambert=asdf(3,angLambert);
+            //int phong=lambert;
+            totalLambert+=lambert;
+            if (phong>maxCol){
+                maxCol=phong;
+                minAngPhong=angPhong;
+                minAngLambert=angLambert;
+            }
+            }
+            maxCol+=totalLambert;
+            if (maxCol>255){
+                maxCol=255;
+            }
+            return new double[] {(double)maxCol,minAngPhong,minAngLambert};
+    }
+    public static Vertex reflect(Vertex norm, Vertex incidence){
+        double a=norm.x;
+            double b=norm.y;
+            double c=norm.z;
+            double bot=a*a+b*b+c*c;
+            double[][] mat={{2*a*a/bot-1,2*a*b/bot,2*a*c/bot},{2*a*b/bot,2*b*b/bot-1,2*b*c/bot},{2*a*c/bot,2*c*b/bot,1-2*(a*a+b*b)/bot}};
+            Vertex oppo=new Vertex(incidence);
+            oppo.mult(mat);
+            return oppo;
+    }
+    public static Color grayScale(int a){
         return new Color(a,a,a);
     }
-    public static int asdf(double ang){
-        if (ang>Math.PI/2){
-            return 0;
+    public static int asdf(double angPhong, double angLambert){
+        if (angLambert>Math.PI/2 ){
+            angLambert=Math.PI/2;
         }
-        return 255-(int) (180D/Math.PI*ang*1.6D);
+        if (angPhong>Math.PI/2){
+            angPhong=Math.PI/2;
+        }
+        return 127-(int) (180D/Math.PI*angLambert*1.4D)+128-(int) (180D/Math.PI*angPhong*1.4D);
     }
-    public static Vertex norm(Vertex[] a){
+    public static Vertex cross(Vertex[] a){
         return new Vertex(a[0].y*a[1].z-a[0].z*a[1].y,a[0].z*a[1].x-a[0].x*a[1].z,a[0].x*a[1].y-a[0].y*a[1].x);
     }
     public static Vertex norm1(Vertex[] a){
-        return norm(sub(a));
+        return cross(sub(a));
+    }
+    public static double det(Vertex norm, Vertex face){
+        return (norm.x*face.x+norm.y*face.y+norm.z*face.z);
     }
     public static Vertex sub(Vertex a,Vertex b){
         return new Vertex(a.x-b.x,a.y-b.y,a.z-b.z);
@@ -234,6 +354,7 @@ public class Mesh {
             }
         }
         light=copy(m.light);
+        cam=new Vertex(m.cam);
     }
     private static int[][] transform(Vertex[] v){
         int[][] a={v[0].transform(),v[1].transform(),v[2].transform()};
@@ -267,6 +388,7 @@ public class Mesh {
         for (Vertex v : light){
             v.transform(t);
         }
+        cam.transform(t);
         return this;
     }
 }
