@@ -52,7 +52,7 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
         MM=new Mesh(render).transform(new Transform(0,0,0,mouseY,mouseX,0)).transform(new Transform(x,y,z));
         MM.render(g);
         offset=!cross ? 0 : (int) (M.getWidth()/7F);
-        MM.transform(new Transform(0.2,0,0)).render(g);
+        MM.transform(new Transform(0.3,0,0)).render(g);
         g.drawString("Render took "+(System.currentTimeMillis()-a)+"ms",10,10);
     }
     public ThreeD(){
@@ -193,7 +193,7 @@ public class ThreeD extends JComponent implements MouseMotionListener,KeyListene
             M.repaint();
             //System.out.println(e.getX()+","+e.getY());
         }
-        System.out.println(e.getButton()+","+dragging);
+        //System.out.println(e.getButton()+","+dragging);
         if (e.getButton()==3&&dragging){
             MouseX=e.getX();
             MouseY=e.getY();
