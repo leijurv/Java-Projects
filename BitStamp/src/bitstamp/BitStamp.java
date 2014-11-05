@@ -72,7 +72,7 @@ public static void update() throws Exception{
             public void run(){
                 while (true){
                 try{
-                    o=new JSONObject(load("https://www.bitstamp.net/api/order_book/"));
+                    o=new JSONObject(load("ttps://www.bitstamp.net/api/order_book/"));
                     long time=1000L*Long.parseLong(o.getString("timestamp"));
                     long diff=(time+60000)-System.currentTimeMillis();
                     Thread.sleep(diff<1000?1000:diff);
