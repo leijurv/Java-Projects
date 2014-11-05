@@ -13,3 +13,4 @@ v0.6.2: multithreaded socket server, more try/catch
 v0.6.3: actually fixed checking github
 v0.7: almost totally unkillable
 v0.7.1: used launchctl to prevent subprocess from being killed when parent is killed
+v0.7.2: unix-sh no longer synchronizes on cmdLock
