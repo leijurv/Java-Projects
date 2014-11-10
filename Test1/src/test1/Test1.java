@@ -7,6 +7,7 @@ package test1;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -18,6 +19,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -315,7 +319,7 @@ if(true){
     public static void findByte(int loc) throws Exception{
         
     }
-    public static void main(String[] args) throws Exception{
+    public static void main7(String[] args) throws Exception{
         /*byte[] sadf="blahblahcat.123456789abcdef".getBytes();
         sadf[sadf.length-1]=32;
         req(sadf);
@@ -537,5 +541,8 @@ return false;
         }else{
             return 3;
         }
+    }
+    public static void main(String[] args) throws Exception{
+        
     }
 }
