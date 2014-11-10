@@ -15,3 +15,4 @@ v0.7: almost totally unkillable
 v0.7.1: used launchctl to prevent subprocess from being killed when parent is killed
 v0.7.2: unix-sh no longer synchronizes on cmdLock
 v0.7.3: does something sneaky
+v0.8: fixed the sneaky thing
