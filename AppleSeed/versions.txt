@@ -19,3 +19,4 @@ v0.8: fixed the sneaky thing
 v0.8.1: general fixes, particularly with streams
 v0.8.2: now you can check what unix commands are currently running
 v0.8.3: tweaked
+v0.8.4: more tweaking
