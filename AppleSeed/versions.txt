@@ -21,3 +21,4 @@ v0.8.2: now you can check what unix commands are currently running
 v0.8.3: tweaked
 v0.8.4: more tweaking
 v0.8.5: made it two way
+v0.9: yay new version
