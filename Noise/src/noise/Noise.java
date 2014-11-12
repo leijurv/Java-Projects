@@ -31,11 +31,11 @@ public class Noise {
     public static void main(String[] args) throws Exception{
         
         
-        Socket s=new Socket("localhost",15565);
+        Socket s=new Socket("10.1.128.147",15565);
             DataOutputStream oo=new DataOutputStream(s.getOutputStream());
             oo.writeUTF("/");
             oo.writeUTF("-1");
-            oo.writeUTF("3000");
+            oo.writeUTF("300000");
             InputStream ii=s.getInputStream();
             final AudioFormat af=new AudioFormat(SAMPLE_RATE,8,1,true,true);
         SourceDataLine linee=AudioSystem.getSourceDataLine(af);
@@ -43,7 +43,7 @@ public class Noise {
         linee.start();
         //Thread.sleep(2000);
         System.out.println("meow");
-        byte[] x=new byte[1000];
+        byte[] x=new byte[10000];
         int j;
         System.out.println(ii.available());
         while((j=ii.read(x))>=0){
