@@ -28,7 +28,7 @@ public class Noise {
     public static final int SECONDS=1;
     public static final int numRows=200;
     public static int[][] ca=new int[numRows][numRows*2+1];
-    public static void main(String[] args) throws Exception{
+    public static void main1(String[] args) throws Exception{
         
         
         Socket s=new Socket("10.1.128.147",15565);
@@ -54,7 +54,7 @@ public class Noise {
         linee.close();
         System.out.println("done");
     }
-    public static void main1(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception{
         int center=numRows;
         ca[0][center]=1;
         for (int row=1; row<numRows; row++){
@@ -91,7 +91,7 @@ public class Noise {
         for (int row=0; row<numRows; row++){
          play(linee,sin[row],100);
          }
-        
+        /*
         TargetDataLine line;
         DataLine.Info info=new DataLine.Info(TargetDataLine.class,
                 af); // format is an AudioFormat object
@@ -116,7 +116,7 @@ public class Noise {
             System.out.println("Starting to record");
             Thread.sleep(100);
             System.out.println("Done recording");
-        }
+        }*/
         /*
          
         
