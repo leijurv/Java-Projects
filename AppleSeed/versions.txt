@@ -22,3 +22,4 @@ v0.8.3: tweaked
 v0.8.4: more tweaking
 v0.8.5: made it two way
 v0.9: yay new version
+v0.9.1: try-with-resources is your friend, no more throws Exception
