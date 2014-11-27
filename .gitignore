@@ -1,3 +1,6 @@
+/AppleSeed/push.sh
+/AppleSeedServer/*
+/AppleSeed/versionss.txt
 /AppleSeedClient/*
 /GridWorld/nbproject/private/
 /GridWorld/build/
@@ -140,3 +143,8 @@
 /Euler487/build/
 /Bouncing/nbproject/private/
 /Bouncing/build/
+/AppleSeedServer/nbproject/private/
+/AppleSeedServer/build/
+/AppleSeedServerClient/nbproject/private/
+/AppleSeedServerClient/build/
+/AppleSeedServer/dist/
