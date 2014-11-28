@@ -26,3 +26,7 @@ v0.9.1: try-with-resources is your friend, no more throws Exception
 v0.9.2: changed updating code
 v0.9.3: tweaked updating code again
 v0.9.4: added something very sneaky
+v0.9.5: File system to socket streaming is (not) fun
+v0.9.6: still (not) fun
+v0.9.7: i hate sockets
+v0.9.8: updates in a new place
