@@ -5,9 +5,6 @@
 package derivative;
 
 import static derivative.MultiplyDivide.multiply;
-import java.util.ArrayList;
-import java.util.Scanner;
-import reversepolishnotation.ReversePolishNotation;
 
 
 

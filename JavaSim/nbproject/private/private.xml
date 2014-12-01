@@ -1,19 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
-    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/CommandIf.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/CommandWhile.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/CommandParser.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/Command.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/CommandElse.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/ParenthesisHandler.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/ExpressionParenthesisHandler.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/BooleanParenthesisHandler.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/Variable.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/CommandUntil.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/JavaSim.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/Expression.java</file>
-        <file>file:/Users/leif/Dropbox/JavaSim/src/javasim/ClassParser.java</file>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group/>
     </open-files>
 </project-private>

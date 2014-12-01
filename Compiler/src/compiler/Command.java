@@ -4,11 +4,10 @@
  * and open the template in the editor.
  */
 package compiler;
-
 /**
  *
  * @author leijurv
  */
 public abstract class Command {
-    public abstract String[] compile(int start);
+    public abstract boolean execute(Context c);
 }
