@@ -30,3 +30,6 @@ v0.9.5: File system to socket streaming is (not) fun
 v0.9.6: still (not) fun
 v0.9.7: i hate sockets
 v0.9.8: updates in a new place
+v0.9.9.1: various changes. also I’m not ready for v1.0, so v0.9.9.1 it is.
+v0.9.9.2: i still hate sockets
+v0.9.9.3: sockets are literally the devil
