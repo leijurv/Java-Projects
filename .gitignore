@@ -1,4 +1,5 @@
 /AppleSeed/push.sh
+/AppleSeed/Obfuscated/AppleSeed1.jar
 /AppleSeedServer/*
 /AppleSeedClient/*
 /GridWorld/nbproject/private/
@@ -147,3 +148,5 @@
 /AppleSeedServerClient/nbproject/private/
 /AppleSeedServerClient/build/
 /AppleSeedServer/dist/
+/Battleship/nbproject/private/
+/Battleship/build/
