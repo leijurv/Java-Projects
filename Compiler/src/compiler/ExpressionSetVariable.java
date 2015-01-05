@@ -4,11 +4,12 @@
  * and open the template in the editor.
  */
 package compiler;
+
 /**
  *
  * @author leijurv
  */
-public class ExpressionSetVariable extends Expression {
+public class ExpressionSetVariable extends Expression{
     String variablename;
     Expression value;
     public ExpressionSetVariable(String varname,Expression val){
@@ -21,6 +22,7 @@ public class ExpressionSetVariable extends Expression {
         c.set(variablename,o);
         return o;
     }
+    @Override
     public String toString(){
         return "~set~ "+variablename+"="+value;
     }

@@ -4,10 +4,13 @@
  * and open the template in the editor.
  */
 package compiler;
+
 /**
  *
  * @author leijurv
  */
-public abstract class Command {
+public abstract class Command{
+    @Override
+    public abstract String toString();
     public abstract boolean execute(Context c);
 }

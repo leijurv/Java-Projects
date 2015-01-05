@@ -9,16 +9,17 @@ package compiler;
  *
  * @author leijurv
  */
-public class CommandReturn extends Command{
+public class CommandPounce extends Command{
     Expression toReturn;
-    public CommandReturn(Expression ret){
+    public CommandPounce(Expression ret){
         toReturn=ret;
     }
     @Override
     public boolean execute(Context c){
-        c.Return(toReturn.evaluate(c));
+        c.Pounce(toReturn.evaluate(c));
         return true;
     }
+    @Override
     public String toString(){
         return "$ret "+toReturn+"$";
     }

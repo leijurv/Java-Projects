@@ -4,11 +4,12 @@
  * and open the template in the editor.
  */
 package compiler;
+
 /**
  *
  * @author leijurv
  */
-public class ExpressionOperator extends Expression {
+public class ExpressionOperator extends Expression{
     char operator;
     Expression before;
     Expression after;
@@ -45,6 +46,7 @@ public class ExpressionOperator extends Expression {
         }
         throw new RuntimeException("Unable to perform operator '"+operator+"' on objects '"+bef+"' and '"+aft+"'");
     }
+    @Override
     public String toString(){
         return "("+before+operator+after+")";
     }

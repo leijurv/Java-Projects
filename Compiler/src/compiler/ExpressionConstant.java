@@ -4,11 +4,12 @@
  * and open the template in the editor.
  */
 package compiler;
+
 /**
  *
  * @author leijurv
  */
-public class ExpressionConstant extends Expression {
+public class ExpressionConstant extends Expression{
     Object value;
     public ExpressionConstant(Object val){
         value=val;
@@ -17,6 +18,7 @@ public class ExpressionConstant extends Expression {
     public Object evaluate(Context c){
         return value;
     }
+    @Override
     public String toString(){
         return "~constant "+value+"~";
     }

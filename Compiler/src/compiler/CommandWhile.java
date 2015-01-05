@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package compiler;
-
 import java.util.ArrayList;
 
 /**
@@ -14,23 +13,26 @@ import java.util.ArrayList;
 public class CommandWhile extends Command{
     Expression condition;
     ArrayList<Object> contents;
-    public CommandWhile(ArrayList<Object> Contents, Expression cond){
+    public CommandWhile(ArrayList<Object> Contents,Expression cond){
         condition=cond;
         contents=Contents;
     }
     @Override
     public boolean execute(Context c){
         Context local=c.subContext();
-        while((Boolean)(condition.evaluate(c))){
-            for (Object o : contents){
-                Command com=(Command)o;
+        while ((Boolean) (condition.evaluate(c))){
+            for (Object o:contents){
+                Command com=(Command) o;
                 if (com.execute(local)){
-                    c.Return(local.getReturn());
+                    c.Pounce(local.getPounce());
                     return true;
                 }
             }
         }
         return false;
     }
-    
+    @Override
+    public String toString(){
+        return "while"+condition+"{"+contents+"}";
+    }
 }
