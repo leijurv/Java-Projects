@@ -18,8 +18,8 @@ public abstract class Expression extends Command{
         return false;
     }
     public abstract Object evaluate(Context c);
-    static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","y","z"};
-    public static boolean let(Object o){//Does o consist of letters?
+    private static final String[] let={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","y","z"};
+    private static boolean let(Object o){//Does o consist of letters?
         if (o instanceof String){
             String r=(String) o;
             if (r.length()>1){
@@ -38,8 +38,7 @@ public abstract class Expression extends Command{
         }
         return false;
     }
-    static final String[] num={"0","1","2","3","4","5","6","7","8","9"};
-    public static boolean num(Object o){//Is o a number?
+    private static boolean num(Object o){//Is o a number?
         if ((o instanceof ExpressionConstant)){
             return true;
         }
@@ -52,9 +51,9 @@ public abstract class Expression extends Command{
         }
         return false;
     }
-    public static boolean eq(Object o){
+    private static boolean eq(Object o){
         if (o instanceof String){
-            return (((String) o).replace("=","").length()==0)||(((String) o).replace("|","").length()==0)||(((String) o).replace("&","").length()==0);
+            return (((String) o).replace("!","").length()==0)||(((String) o).replace("=","").length()==0)||(((String) o).replace("|","").length()==0)||(((String) o).replace("&","").length()==0);
         }
         return false;
     }
@@ -106,7 +105,7 @@ public abstract class Expression extends Command{
         //Grouping together sequences of letters and numbers. e.g. 4,5,+,j,r,*,x becomes 45,+,jr,*,x
         //Note: x does not group it says by itself
     }
-    public static Expression Do(Object[] o,int i){//Evaluate the operator at i in o, 
+    private static Expression Do(Object[] o,int i){//Evaluate the operator at i in o, 
         //replace a*b with the result, then evaluate that recursively
         Object[] N=new Object[3];
         for (int m=i-1; m<i+2; m++){
@@ -140,7 +139,7 @@ public abstract class Expression extends Command{
                 int r=Integer.parseInt(s);
                 return new ExpressionConstant(r);
             }catch (NumberFormatException e){
-                return new ExpressionVariable(s);
+                return new ExpressionGetVariable(s);
             }
         }
         //System.out.println(o.length);
@@ -148,7 +147,7 @@ public abstract class Expression extends Command{
             Expression First=parse(new Object[]{o[0]});
             String s=(String) o[1];
             Expression Last=parse(new Object[]{o[2]});
-            return new ExpressionOperator(First,s.charAt(0),Last);
+            return new ExpressionOperator(First,s,Last);
         }
         //Parenthesis
         for (int i=0; i<o.length; i++){
@@ -212,7 +211,7 @@ public abstract class Expression extends Command{
             }
         }
         for (int i=0; i<o.length; i++){
-            if (o[i].equals(">")||o[i].equals("<")||o[i].equals("==")){
+            if (o[i].equals(">")||o[i].equals("<")||o[i].equals("==")||o[i].equals("!=")||o[i].equals("<=")||o[i].equals(">=")){
                 return Do(o,i);
             }
         }

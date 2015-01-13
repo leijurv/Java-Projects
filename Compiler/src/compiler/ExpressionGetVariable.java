@@ -9,9 +9,9 @@ package compiler;
  *
  * @author leijurv
  */
-public class ExpressionVariable extends Expression{
-    String name;
-    public ExpressionVariable(String varname){
+public class ExpressionGetVariable extends Expression{
+    private final String name;
+    public ExpressionGetVariable(String varname){
         name=varname;
     }
     @Override

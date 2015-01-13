@@ -10,19 +10,18 @@ import java.util.ArrayList;
  *
  * @author leijurv
  */
-public class CommandWhile extends Command{
-    Expression condition;
-    ArrayList<Object> contents;
-    public CommandWhile(ArrayList<Object> Contents,Expression cond){
+public class CommandPurr extends Command{
+    private final Expression condition;
+    private final ArrayList<Command> contents;
+    public CommandPurr(ArrayList<Command> Contents,Expression cond){
         condition=cond;
         contents=Contents;
     }
     @Override
     public boolean execute(Context c){
         Context local=c.subContext();
-        while ((Boolean) (condition.evaluate(c))){
-            for (Object o:contents){
-                Command com=(Command) o;
+        while (isTrue(condition.evaluate(c))){
+            for (Command com:contents){
                 if (com.execute(local)){
                     c.Pounce(local.getPounce());
                     return true;
@@ -33,6 +32,6 @@ public class CommandWhile extends Command{
     }
     @Override
     public String toString(){
-        return "while"+condition+"{"+contents+"}";
+        return "purr"+condition+"{"+contents+"}";
     }
 }

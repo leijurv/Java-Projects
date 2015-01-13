@@ -15,7 +15,7 @@ public class Context{
     private final HashMap<String,Object>[] values;
     private Object pounceValue;
     public Context(){
-        values=new HashMap[0];
+        values=new HashMap[]{new HashMap<>()};
     }
     private Context(HashMap<String,Object>[] val){
         values=val;

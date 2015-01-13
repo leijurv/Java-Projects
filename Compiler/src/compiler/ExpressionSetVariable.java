@@ -10,8 +10,8 @@ package compiler;
  * @author leijurv
  */
 public class ExpressionSetVariable extends Expression{
-    String variablename;
-    Expression value;
+    private final String variablename;
+    private final Expression value;
     public ExpressionSetVariable(String varname,Expression val){
         variablename=varname;
         value=val;

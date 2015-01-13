@@ -11,8 +11,8 @@ import java.util.ArrayList;
  * @author leijurv
  */
 public class ExpressionBeginChase extends Expression{
-    String chasename;
-    ArrayList<Expression> prey;
+    private final String chasename;
+    private final ArrayList<Expression> prey;
     public ExpressionBeginChase(String ChaseName,ArrayList<Expression> Prey){
         prey=Prey;
         chasename=ChaseName;
@@ -28,7 +28,7 @@ public class ExpressionBeginChase extends Expression{
             return preyVals;
         }
         Chase f=(Chase) (c.get(chasename));
-        System.out.println("BEGINNING "+chasename+" "+f+" with args"+prey+" and context "+c);
+        System.out.println("BEGINNING "+chasename+" "+f+" with prey "+prey+" and context "+c);
         System.out.println("Evaluated args as: "+preyVals);
         return f.run(c,preyVals);
     }

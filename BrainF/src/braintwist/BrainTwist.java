@@ -145,6 +145,16 @@ public static String get(String Derp){
             output = output + (char) mem.current.byteValue();
             
         }
+        if (cur.equals("#")) {
+            if(mem.prev!=null)
+            System.out.print(((int)  mem.prev.current.byteValue()));
+            System.out.print(" ");
+            System.out.print(((int)  mem.current.byteValue()));
+            System.out.print(" ");
+            if(mem.next!=null)
+            System.out.print(((int)  mem.next.current.byteValue()));
+            System.out.println();
+        }
         loc++;
     }
     static String output = "";

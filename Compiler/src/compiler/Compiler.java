@@ -15,16 +15,16 @@ public class Compiler{
      * @param args the command line arguments
      */
     public static void main(String[] args){
-        String program1="chase main(abc){sum=0;i=0;while(i<1000){if(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
-        String program="chase fac(r){if (r<1) {pounce 1} else {pounce r *fac(r-1)}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5)}else{meow(6)}}";
+        String program2="chase main(abc){sum=0;i=0;purr(i<1000){if(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
+        String program="chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
+        String program1="chase fac(r){if (r<1) {pounce 1} else {pounce r *fac(r-1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
         System.out.println("STARTING TO PARSE: "+program);
         System.out.println();
-        ArrayList<Object> progra=parse(program);
+        ArrayList<Command> progra=toCommandList(parse(program));
         System.out.println();
         System.out.println(progra);
         Context c=new Context().subContext();
-        for (Object o:progra){
-            Command cc=(Command) o;
+        for (Command cc:progra){
             cc.execute(c);
         }
         System.out.println();
@@ -34,7 +34,9 @@ public class Compiler{
         System.out.println();
         ArrayList<Expression> prey=new ArrayList<>();
         prey.add(new ExpressionConstant(4));
+        long time=System.currentTimeMillis();
         new ExpressionBeginChase("main",prey).evaluate(c);
+        System.out.println(System.currentTimeMillis()-time);
     }
     public static ArrayList<Object> curlyBrackets(ArrayList<Object> temp){
         int firstBracket=-1;
@@ -68,7 +70,7 @@ public class Compiler{
         return temp;
     }
     public static void findBlocks(ArrayList<Object> temp){
-        String[] keyWords={"chase","if","while","pounce"};
+        String[] keyWords={"chase","if","purr","pounce"};
         for (int i=0; i<temp.size(); i++){
             Object o=temp.get(i);
             if (o instanceof String){
@@ -125,7 +127,7 @@ public class Compiler{
                         }
                         String name=(String) temp.get(i+1);
                         ArrayList<Object> following=(ArrayList) (temp.get(i+2));
-                        Chase func=new Chase(paren,following);
+                        Chase func=new Chase(paren,toCommandList(following));
                         ExpressionSetVariable define=new ExpressionSetVariable(name,func);
                         temp.remove(i+2);
                         temp.remove(i+1);
@@ -139,22 +141,29 @@ public class Compiler{
                             temp.remove(i+1);
                             temp.remove(i+1);
                             temp.remove(i+1);
-                            temp.set(i,new CommandIf(inParen,ifTrue,ifFalse));
+                            temp.set(i,new CommandBlink(inParen,toCommandList(ifTrue),toCommandList(ifFalse)));
                         }else{
                             temp.remove(i+1);
-                            temp.set(i,new CommandIf(inParen,ifTrue));
+                            temp.set(i,new CommandBlink(inParen,toCommandList(ifTrue)));
                         }
                         break;
                     case 2:
                         ArrayList<Object> cont=(ArrayList) temp.get(i+1);
                         temp.remove(i+1);
-                        temp.set(i,new CommandWhile(cont,inParen));
+                        temp.set(i,new CommandPurr(toCommandList(cont),inParen));
                         break;
                     case 3:
                         temp.set(i,new CommandPounce(inParen));
                 }
             }
         }
+    }
+    public static ArrayList<Command> toCommandList(ArrayList<Object> temp){
+        ArrayList<Command> res=new ArrayList<>(temp.size());
+        for (int i=0; i<temp.size(); i++){
+            res.add((Command) (temp.get(i)));
+        }
+        return res;
     }
     public static void expressions(ArrayList<Object> temp){
         ArrayList<Object> t=new ArrayList();

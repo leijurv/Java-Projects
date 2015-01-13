@@ -10,7 +10,7 @@ package compiler;
  * @author leijurv
  */
 public class ExpressionConstant extends Expression{
-    Object value;
+    private final Object value;
     public ExpressionConstant(Object val){
         value=val;
     }

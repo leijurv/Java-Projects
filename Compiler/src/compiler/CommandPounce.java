@@ -10,7 +10,7 @@ package compiler;
  * @author leijurv
  */
 public class CommandPounce extends Command{
-    Expression toReturn;
+    private final Expression toReturn;
     public CommandPounce(Expression ret){
         toReturn=ret;
     }
@@ -21,6 +21,6 @@ public class CommandPounce extends Command{
     }
     @Override
     public String toString(){
-        return "$ret "+toReturn+"$";
+        return "$pounce "+toReturn+"$";
     }
 }

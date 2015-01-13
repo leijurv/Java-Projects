@@ -13,4 +13,7 @@ public abstract class Command{
     @Override
     public abstract String toString();
     public abstract boolean execute(Context c);
+    protected static boolean isTrue(Object exp){
+        return (exp instanceof Boolean) ? ((Boolean) exp) : (!exp.equals(0));
+    }
 }
