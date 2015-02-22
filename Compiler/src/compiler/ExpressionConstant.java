@@ -13,26 +13,26 @@ import java.io.IOException;
  */
 public class ExpressionConstant extends Expression {
     private final Object value;
-    public ExpressionConstant(Object value){
-        this.value=value;
+    public ExpressionConstant(Object value) {
+        this.value = value;
     }
-    protected ExpressionConstant(DataInputStream in) throws IOException{
-        value=in.readInt();
+    protected ExpressionConstant(DataInputStream in) throws IOException {
+        value = in.readInt();
     }
     @Override
-    public Object evaluate(Context c){
+    public Object evaluate(Context c) {
         return value;
     }
     @Override
-    public String toString(){
-        return "~constant "+value+"~";
+    public String toString() {
+        return "~constant " + value + "~";
     }
     @Override
-    protected void doWriteExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException {
         out.writeInt((Integer) value);//TODO I'm lazy
     }
     @Override
-    public byte getExpressionID(){
+    public byte getExpressionID() {
         return 3;
     }
 }

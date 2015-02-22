@@ -15,46 +15,46 @@ import java.util.ArrayList;
 public class ExpressionBeginChase extends Expression {
     private final String chasename;
     private final ArrayList<Expression> prey;
-    public ExpressionBeginChase(String chasename,ArrayList<Expression> prey){
-        this.prey=prey;
-        this.chasename=chasename;
+    public ExpressionBeginChase(String chasename,ArrayList<Expression> prey) {
+        this.prey = prey;
+        this.chasename = chasename;
     }
-    protected ExpressionBeginChase(DataInputStream in) throws IOException{
-        chasename=in.readUTF();
-        int numPrey=in.readInt();
-        prey=new ArrayList<>(numPrey);
-        for (int i=0; i<numPrey; i++){
+    protected ExpressionBeginChase(DataInputStream in) throws IOException {
+        chasename = in.readUTF();
+        int numPrey = in.readInt();
+        prey = new ArrayList<>(numPrey);
+        for (int i = 0; i < numPrey; i++) {
             prey.add(readExpression(in));
         }
     }
     @Override
-    public Object evaluate(Context c){
-        ArrayList<Object> preyVals=new ArrayList<>(prey.size());
-        for (int i=0; i<prey.size(); i++){
+    public Object evaluate(Context c) {
+        ArrayList<Object> preyVals = new ArrayList<>(prey.size());
+        for (int i = 0; i < prey.size(); i++) {
             preyVals.add(prey.get(i).evaluate(c));
         }
-        if (chasename.equals("meow")){
-            System.out.println("MEOWING "+preyVals);
+        if (chasename.equals("meow")) {
+            System.out.println("MEOWING " + preyVals);
             return preyVals;
         }
-        Chase f=(Chase) (c.get(chasename));
-        System.out.println("BEGINNING "+chasename+" "+f+" with prey "+prey+" and context "+c);
-        System.out.println("Evaluated args as: "+preyVals);
+        Chase f = (Chase) (c.get(chasename));
+        System.out.println("BEGINNING " + chasename + " " + f + " with prey " + prey + " and context " + c);
+        System.out.println("Evaluated args as: " + preyVals);
         return f.run(c,preyVals);
     }
     @Override
-    public String toString(){
-        return "~begin "+chasename+" "+prey+"~";
+    public String toString() {
+        return "~begin " + chasename + " " + prey + "~";
     }
     @Override
-    protected void doWriteExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException {
         out.writeUTF(chasename);
         out.writeInt(prey.size());
-        for (Expression pre : prey){
+        for (Expression pre : prey) {
             pre.writeExpression(out);
         }
     }
-    public byte getExpressionID(){
+    public byte getExpressionID() {
         return 2;
     }
 }

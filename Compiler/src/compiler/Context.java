@@ -13,16 +13,16 @@ import java.util.HashMap;
 public class Context {
     private final HashMap<String,Object>[] values;
     private Object pounceValue;
-    public Context(){
-        values=new HashMap[]{new HashMap<>()};
+    public Context() {
+        values = new HashMap[] {new HashMap<>()};
     }
-    private Context(HashMap<String,Object>[] values){
-        this.values=values;
+    private Context(HashMap<String,Object>[] values) {
+        this.values = values;
     }
-    public Context subContext(){
-        HashMap<String,Object>[] temp=new HashMap[values.length+1];
+    public Context subContext() {
+        HashMap<String,Object>[] temp = new HashMap[values.length + 1];
         System.arraycopy(values,0,temp,0,values.length);
-        temp[values.length]=new HashMap<>();
+        temp[values.length] = new HashMap<>();
         return new Context(temp);
     }/*
      public Context superContext(){
@@ -33,35 +33,35 @@ public class Context {
      return new Context(temp);
      }*/
 
-    public void defineLocal(String name,Object value){
-        values[values.length-1].put(name,value);
+    public void defineLocal(String name,Object value) {
+        values[values.length - 1].put(name,value);
     }
-    public void set(String name,Object value){
-        for (int i=values.length-1; i>=0; i--){//Start at lowest context
-            if (values[i].get(name)!=null){//If this variable is defined here
+    public void set(String name,Object value) {
+        for (int i = values.length - 1; i >= 0; i--) {//Start at lowest context
+            if (values[i].get(name) != null) {//If this variable is defined here
                 values[i].put(name,value);//Overwrite it
                 return;
             }
         }
         defineLocal(name,value);//Otherwise define it as local
     }
-    public Object get(String name){
-        for (int i=values.length-1; i>=0; i--){
-            if (values[i].get(name)!=null){
+    public Object get(String name) {
+        for (int i = values.length - 1; i >= 0; i--) {
+            if (values[i].get(name) != null) {
                 return values[i].get(name);
             }
         }
-        System.out.println("WARNING: Unable to find requested variable named '"+name+"'. Returning null. Context is "+toString());
+        System.out.println("WARNING: Unable to find requested variable named '" + name + "'. Returning null. Context is " + toString());
         return null;
     }
     @Override
-    public String toString(){
+    public String toString() {
         return Arrays.asList(values).toString();
     }
-    public void Pounce(Object o){
-        pounceValue=o;
+    public void Pounce(Object o) {
+        pounceValue = o;
     }
-    public Object getPounce(){
+    public Object getPounce() {
         return pounceValue;
     }
 }

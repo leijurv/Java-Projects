@@ -14,31 +14,31 @@ import java.io.IOException;
 public class ExpressionSetVariable extends Expression {
     private final String variablename;
     private final Expression value;
-    public ExpressionSetVariable(String varname,Expression val){
-        variablename=varname;
-        value=val;
+    public ExpressionSetVariable(String varname,Expression val) {
+        variablename = varname;
+        value = val;
     }
-    protected ExpressionSetVariable(DataInputStream in) throws IOException{
-        variablename=in.readUTF();
-        value=readExpression(in);
+    protected ExpressionSetVariable(DataInputStream in) throws IOException {
+        variablename = in.readUTF();
+        value = readExpression(in);
     }
     @Override
-    public Object evaluate(Context c){
-        Object o=value.evaluate(c);
+    public Object evaluate(Context c) {
+        Object o = value.evaluate(c);
         c.set(variablename,o);
         return o;
     }
     @Override
-    public String toString(){
-        return "~set~ "+variablename+"="+value;
+    public String toString() {
+        return "~set~ " + variablename + "=" + value;
     }
     @Override
-    protected void doWriteExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException {
         out.writeUTF(variablename);
         value.writeExpression(out);
     }
     @Override
-    public byte getExpressionID(){
+    public byte getExpressionID() {
         return 6;
     }
 }
