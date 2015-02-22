@@ -3,234 +3,237 @@
  * and open the template in the editor.
  */
 package hilbertcurve;
-
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.w3c.dom.Document;
+import org.w3c.dom.DOMImplementation;
 
 /**
  *
  * @author leif
  */
-public class HilbertCurve extends JComponent implements ActionListener {
-
-    static HilbertCurve M = new HilbertCurve();
-    static int iterations = 0;
-    static double size = 2;
-    static boolean oom = false;
+public class HilbertCurve extends JComponent implements ActionListener{
+    static HilbertCurve M=new HilbertCurve();
+    static int iterations=0;
+    static double size=2;
+    static boolean oom=false;
     static JFrame frame;
-    static boolean drawww = false;
+    static boolean drawww=true;
     /**
      * @param args the command line arguments
      */
-    static boolean[] UR = new boolean[1];
-    static boolean[] UD = new boolean[1];
-    static int i = 0;
-
-    public static void add(boolean[] a, boolean b) {
-        a[i] = b;
-
+    static boolean[] UR=new boolean[1];
+    static boolean[] UD=new boolean[1];
+    static int i=0;
+    public static void add(boolean[] a,boolean b){
+        a[i]=b;
     }
-
-    public static void Add(boolean[] a, boolean[] b, boolean c, boolean d) {
-        add(a, c);
-        add(b, d);
+    public static void Add(boolean[] a,boolean[] b,boolean c,boolean d){
+        add(a,c);
+        add(b,d);
         i++;
     }
-    static int linefail = 0;
-    static final boolean allocateAtBeginning = true;
-
-    public static void next() {
-        i = 0;
+    static int linefail=0;
+    static final boolean allocateAtBeginning=true;
+    public static void next(){
+        i=0;
         boolean[] nUR;
         boolean[] nUD;
         //if (allocateAtBeginning){
-        try {
+        try{
             //System.out.println("DURP");
-            nUR = new boolean[4 * UR.length];
-            nUD = new boolean[4 * UD.length];
-        } catch (OutOfMemoryError e) {
-            nUR = new boolean[0];
+            nUR=new boolean[4*UR.length];
+            nUD=new boolean[4*UD.length];
+        }catch (OutOfMemoryError e){
+            nUR=new boolean[0];
             System.gc();
-            nUD = new boolean[0];
+            nUD=new boolean[0];
             handleOOM();
             return;
         }
         //}
-        boolean xPos = false;
-        boolean yPos = false;
-        for (int S = 0; S < UR.length; S++) {
+        boolean xPos=false;
+        boolean yPos=false;
+        for (int S=0; S<UR.length; S++){
             //int i=0;
             //add(ur,false);
             //add(ud,false);
             //while(!UR.isEmpty()({
             //UR.remove(0);
             //UD.remove(
-            try {
-                if (UR[S]) {
-                    if (UD[S]) {
+            try{
+                if (UR[S]){
+                    if (UD[S]){
                         //Up
-                        if (!xPos && !yPos) {//Bottom Left
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, false, false);
-                            Add(nUR, nUD, true, true);
+                        if (!xPos&&!yPos){//Bottom Left
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,false,false);
+                            Add(nUR,nUD,true,true);
                         }
-                        if (xPos && !yPos) {//Bottom Right
-                            Add(nUR, nUD, false, false);
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, true, true);
+                        if (xPos&&!yPos){//Bottom Right
+                            Add(nUR,nUD,false,false);
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,true,true);
                         }
-                        if (!xPos && yPos) {//Top Left
-                            Add(nUR, nUD, false, true);
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, true, true);
-                            xPos = true;
-                            yPos = false;
-                        } else {
-                            if (xPos && yPos) {//Top Right
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, true, true);
-                                Add(nUR, nUD, true, true);
-                                yPos = false;
-                                xPos = false;
+                        if (!xPos&&yPos){//Top Left
+                            Add(nUR,nUD,false,true);
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,true,true);
+                            xPos=true;
+                            yPos=false;
+                        }else{
+                            if (xPos&&yPos){//Top Right
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,true,true);
+                                Add(nUR,nUD,true,true);
+                                yPos=false;
+                                xPos=false;
                             }
                         }
-                    } else {
+                    }else{
                         //Right
-                        if (!xPos && !yPos) {//Bottom Left
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, false, true);
-                            Add(nUR, nUD, true, false);
+                        if (!xPos&&!yPos){//Bottom Left
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,false,true);
+                            Add(nUR,nUD,true,false);
                         }
-                        if (xPos && !yPos) {//Bottom Right
-                            Add(nUR, nUD, false, false);
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, true, false);
-                            yPos = true;
-                            xPos = false;
-                        } else {
-                            if (!xPos && yPos) {//Top Left
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, true, false);
-                                Add(nUR, nUD, true, true);
-                                Add(nUR, nUD, true, false);
+                        if (xPos&&!yPos){//Bottom Right
+                            Add(nUR,nUD,false,false);
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,true,false);
+                            yPos=true;
+                            xPos=false;
+                        }else{
+                            if (!xPos&&yPos){//Top Left
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,true,false);
+                                Add(nUR,nUD,true,true);
+                                Add(nUR,nUD,true,false);
                             }
-                            if (xPos && yPos) {//Top Right
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, true, false);
-                                Add(nUR, nUD, true, false);
-                                yPos = false;
-                                xPos = false;
+                            if (xPos&&yPos){//Top Right
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,true,false);
+                                Add(nUR,nUD,true,false);
+                                yPos=false;
+                                xPos=false;
                             }
                         }
                     }
-                } else {
-                    if (UD[S]) {
+                }else{
+                    if (UD[S]){
                         //Down
-                        if (!xPos && !yPos) {//Bottom Left
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, false, true);
-                            Add(nUR, nUD, false, true);
-                            xPos = true;
-                            yPos = true;
-                        } else {
-                            if (xPos && !yPos) {//Bottom Right
-                                Add(nUR, nUD, true, false);
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, false, true);
-                                xPos = false;
-                                yPos = true;
-                            } else {
-                                if (!xPos && yPos) {//Top Left
-                                    Add(nUR, nUD, true, false);
-                                    Add(nUR, nUD, false, true);
-                                    Add(nUR, nUD, false, false);
-                                    Add(nUR, nUD, false, true);
+                        if (!xPos&&!yPos){//Bottom Left
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,false,true);
+                            Add(nUR,nUD,false,true);
+                            xPos=true;
+                            yPos=true;
+                        }else{
+                            if (xPos&&!yPos){//Bottom Right
+                                Add(nUR,nUD,true,false);
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,false,true);
+                                xPos=false;
+                                yPos=true;
+                            }else{
+                                if (!xPos&&yPos){//Top Left
+                                    Add(nUR,nUD,true,false);
+                                    Add(nUR,nUD,false,true);
+                                    Add(nUR,nUD,false,false);
+                                    Add(nUR,nUD,false,true);
                                 }
-                                if (xPos && yPos) {//Top Right
-                                    Add(nUR, nUD, false, false);
-                                    Add(nUR, nUD, false, true);
-                                    Add(nUR, nUD, true, false);
-                                    Add(nUR, nUD, false, true);
+                                if (xPos&&yPos){//Top Right
+                                    Add(nUR,nUD,false,false);
+                                    Add(nUR,nUD,false,true);
+                                    Add(nUR,nUD,true,false);
+                                    Add(nUR,nUD,false,true);
                                 }
                             }
                         }
-                    } else {
+                    }else{
                         //Left
                         //System.out.println(xPos + "" + yPos);
-                        if (!xPos && !yPos) {//Bottom Left
-                            Add(nUR, nUD, true, false);
-                            Add(nUR, nUD, true, true);
-                            Add(nUR, nUD, false, false);
-                            Add(nUR, nUD, false, false);
-                            xPos = true;
-                            yPos = true;
-                        } else {
-                            if (xPos && !yPos) {//Bottom Right
-                                Add(nUR, nUD, true, true);
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, false, false);
+                        if (!xPos&&!yPos){//Bottom Left
+                            Add(nUR,nUD,true,false);
+                            Add(nUR,nUD,true,true);
+                            Add(nUR,nUD,false,false);
+                            Add(nUR,nUD,false,false);
+                            xPos=true;
+                            yPos=true;
+                        }else{
+                            if (xPos&&!yPos){//Bottom Right
+                                Add(nUR,nUD,true,true);
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,false,false);
                             }
-                            if (!xPos && yPos) {//Top Left
-                                Add(nUR, nUD, true, false);
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, false, false);
-                                xPos = true;
-                                yPos = false;
+                            if (!xPos&&yPos){//Top Left
+                                Add(nUR,nUD,true,false);
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,false,false);
+                                xPos=true;
+                                yPos=false;
                             }
-                            if (xPos && yPos) {//Top Right
-                                Add(nUR, nUD, false, true);
-                                Add(nUR, nUD, false, false);
-                                Add(nUR, nUD, true, true);
-                                Add(nUR, nUD, false, false);
+                            if (xPos&&yPos){//Top Right
+                                Add(nUR,nUD,false,true);
+                                Add(nUR,nUD,false,false);
+                                Add(nUR,nUD,true,true);
+                                Add(nUR,nUD,false,false);
                             }
-
                         }
                     }
                 }
-            } catch (OutOfMemoryError e) {
-                nUR = new boolean[0];
+            }catch (OutOfMemoryError e){
+                nUR=new boolean[0];
                 System.gc();
-                nUD = new boolean[0];
+                nUD=new boolean[0];
                 handleOOM();
-                System.out.println("Failed on line " + S);
-                linefail = S;
+                System.out.println("Failed on line "+S);
+                linefail=S;
                 return;
             }
         }
-        UR = nUR;
-        UD = nUD;
+        UR=nUR;
+        UD=nUD;
     }
 //LOL, from here on down, it's just displaying it and handleing 
     //it when some derp decides to find out how many iterations it can go
-
-    public static void handleOOM() {
-
+    public static void handleOOM(){
         System.gc();
-        UR = new boolean[0];
-        UD = new boolean[0];
-        oom = true;
+        UR=new boolean[0];
+        UD=new boolean[0];
+        oom=true;
         M.repaint();
     }
-
-    public void paintComponent(Graphics g) {
-        if (oom) {
-            g.drawString("Out of memory! I'll bet you were all like 'Oh, lets see how many iterations it can go to', eh? ", 10, 10);
-            g.drawString("WELL NOW YOU KNOW. DON'T DO IT AGAIN. You ran out of memory on your computer.", 10, 25);
-
+    public void paintt(Graphics2D g){
+        paintComponent(g);
+    }
+    public void paintComponent(Graphics g){
+        if (oom){
+            g.drawString("Out of memory! I'll bet you were all like 'Oh, lets see how many iterations it can go to', eh? ",10,10);
+            g.drawString("WELL NOW YOU KNOW. DON'T DO IT AGAIN. You ran out of memory on your computer.",10,25);
             return;
         }
         /*
@@ -259,195 +262,204 @@ public class HilbertCurve extends JComponent implements ActionListener {
          size=2;
          break;
          }*/
-        size = (((600)) / ((Math.pow(2, iterations + 1)) - 0));
-        size = size < 2 ? 2 : size;
+        size=(((600))/((Math.pow(2,iterations+1))-0));
+        size=size<2 ? 2 : size;
         //size=10;
         //600=size*(iterations+1)
-        double xPos = frame.getWidth() / 2 - (int) (((float) size * (Math.pow(2, iterations + 1) - 1)) / 2);
+        double xPos=frame.getWidth()/2-(int) (((float) size*(Math.pow(2,iterations+1)-1))/2);
         //int xPos=1;
         //System.out.println(size);
-        xPos = xPos < 2 ? 1 : xPos;
-        double yPos = frame.getHeight() - 40;
-        ArrayList<Integer> XXX = new ArrayList<Integer>();
-        ArrayList<Integer> YYY = new ArrayList<Integer>();
+        xPos=xPos<2 ? 1 : xPos;
+        double yPos=frame.getHeight()-70;
+        ArrayList<Integer> XXX=new ArrayList<Integer>(UD.length+5);
+        ArrayList<Integer> YYY=new ArrayList<Integer>(UD.length+5);
         XXX.add((int) xPos);
         YYY.add((int) yPos);
+        XXX.add((int) (xPos));
+        YYY.add((int) (yPos-=size));
         //boolean drawww=true;
-        try {
-            for (int i = 0; i < UD.length - 1 && !oom; i++) {
-                int a = (int) xPos;
-                int b = (int) yPos;
-                if (UR[i]) {
-                    if (UD[i]) {
+        double minY=10000;
+        try{
+            for (int i=0; i<UD.length-1&&!oom; i++){
+                int a=(int) xPos;
+                int b=(int) yPos;
+                if (UR[i]){
+                    if (UD[i]){
                         //System.out.print("u");
                         //if (drawww) {
                         //g.drawLine((int) xPos, (int) yPos, (int) xPos, (int) (yPos - size));
                         //}
-                        yPos -= size;
-
-                    } else {
+                        yPos-=size;
+                    }else{
                         //System.out.print("r");
                         //if (drawww) {
                         //g.drawLine((int) xPos, (int) yPos, (int) (xPos + size), (int) yPos);
                         //}
-                        xPos += size;
+                        xPos+=size;
                     }
-                } else {
-                    if (UD[i]) {
+                }else{
+                    if (UD[i]){
                         //System.out.print("d");
                         //if (drawww) {
                         //g.drawLine((int) xPos, (int) yPos, (int) xPos, (int) (yPos + size));
                         //}
-                        yPos += size;
-                    } else {
+                        yPos+=size;
+                    }else{
                         //System.out.print("l");
-
                         //g.drawLine((int) xPos, (int) yPos, (int) (xPos - size), (int) yPos);
-
-                        xPos -= size;
+                        xPos-=size;
                     }
                 }
-                if (drawww) {
-                    g.drawLine(a, b, (int) xPos, (int) yPos);
+                if (yPos<minY){
+                    minY=yPos;
+                }
+                if (drawww){
+                    g.drawLine(a,b,(int) xPos,(int) yPos);
                 }
                 XXX.add((int) xPos);
                 YYY.add((int) yPos);
             }
-        } catch (NullPointerException e) {
+        }catch (NullPointerException e){
         }
         //System.out.println(size);
-        if (!drawww) {
-            for (int i = 1; i < XXX.size() - 1; i++) {
-                int xp=(int)XXX.get(i-1);
-                int x=(int)XXX.get(i);
-                int xn=(int)XXX.get(i+1);
-                int yp=(int)YYY.get(i-1);
-                int y=(int)YYY.get(i);
-                int yn=(int)YYY.get(i+1);
-                int zachispoopy = (int) size;
-                if (xp!= xn && yp!= yn) {
-                    int angle = 0;
-                    if (yn > yp) {
-                        if (xn > xp) {
-                            angle = 0;
+        if (!drawww){
+            for (int i=1; i<XXX.size()-1; i++){
+                int xp=(int) XXX.get(i-1);
+                int x=(int) XXX.get(i);
+                int xn=(int) XXX.get(i+1);
+                int yp=(int) YYY.get(i-1);
+                int y=(int) YYY.get(i);
+                int yn=(int) YYY.get(i+1);
+                int zachispoopy=(int) size;
+                if (xp!=xn&&yp!=yn){
+                    int angle=0;
+                    if (yn>yp){
+                        if (xn>xp){
+                            angle=0;
                             //g.drawString("CATS",XXX.get(i),YYY.get(i));
-                            if (x == xp) {
-                                angle = 2;
+                            if (x==xp){
+                                angle=2;
                                 y-=zachispoopy;
                             }else{
                                 x-=zachispoopy;
                             }
-
                             //YY=-KERMIT;
-                        } else {
-                            angle = 3;
-                            if (x == xn) {
-                                angle = 1;
-
-                            } else {
+                        }else{
+                            angle=3;
+                            if (x==xn){
+                                angle=1;
+                            }else{
                                 x-=zachispoopy;
                                 y-=zachispoopy;
                             }
-
                             //XX=KERMIT;
                             //YY=-KERMIT;
                         }
-                    } else {
-                        if (xn > xp) {
-                            angle = 1;
-                            if (x != xp) {
+                    }else{
+                        if (xn>xp){
+                            angle=1;
+                            if (x!=xp){
                                 x-=zachispoopy;
                                 y-=zachispoopy;
-                                angle = 3;
+                                angle=3;
                             }
-
                             //XX=300;
                             //YY=-KERMIT;
-                        } else {
-                            angle = 2;
-                            if (x == xp) {
-                                angle = 0;
+                        }else{
+                            angle=2;
+                            if (x==xp){
+                                angle=0;
                                 x-=zachispoopy;
-                            } else {
+                            }else{
                                 y-=zachispoopy;
                             }
-
-
                             //XX=-KERMIT;
                             //YY=KERMIT;
                         }
                     }
-                    g.drawArc(x, y, zachispoopy, zachispoopy, angle*90, 90);
-
-                } else {
+                    g.drawArc(x,y,zachispoopy,zachispoopy,angle*90,90);
+                }else{
                     zachispoopy/=2;
-                    if (xp > xn) {
+                    if (xp>xn){
                         //g.drawLine(XXX.get(i - 1) - (int) size / 2, YYY.get(i - 1), XXX.get(i + 1) + (int) size / 2, YYY.get(i + 1));
-                        xp -= zachispoopy;
-                        xn += zachispoopy;
+                        xp-=zachispoopy;
+                        xn+=zachispoopy;
                     }
-                    if (xp < xn) {
+                    if (xp<xn){
                         //g.drawLine(XXX.get(i - 1) + (int) size / 2, YYY.get(i - 1), XXX.get(i + 1) - (int) size / 2, YYY.get(i + 1));
-                        xp += zachispoopy;
-                        xn -= zachispoopy;
+                        xp+=zachispoopy;
+                        xn-=zachispoopy;
                     }
-                    if (yp > yn) {
+                    if (yp>yn){
                         //g.drawLine(XXX.get(i - 1), YYY.get(i - 1) - (int) size / 2, XXX.get(i + 1), YYY.get(i + 1) + (int) size / 2);
-                        yp -= zachispoopy;
-                        yn += zachispoopy;
+                        yp-=zachispoopy;
+                        yn+=zachispoopy;
                     }
-                    if (yp < yn) {
+                    if (yp<yn){
                         //g.drawLine(XXX.get(i - 1), YYY.get(i - 1) + (int) size / 2, XXX.get(i + 1), YYY.get(i + 1) - (int) size / 2);
-                        yp += zachispoopy;
-                        yn -= zachispoopy;
+                        yp+=zachispoopy;
+                        yn-=zachispoopy;
                     }
-                    g.drawLine(xp, yp, xn, yn);
+                    g.drawLine(xp,yp,xn,yn);
                 }
             }
         }
+        XXX.add((int) (xPos));
+        YYY.add((int) (yPos+=size));
+        g.drawLine(XXX.get(XXX.size()-1),YYY.get(YYY.size()-1),XXX.get(XXX.size()-2),YYY.get(YYY.size()-2));
+        g.drawLine(XXX.get(XXX.size()-1),YYY.get(YYY.size()-1),XXX.get(0),YYY.get(0));
+        g.drawLine(XXX.get(1),YYY.get(1),XXX.get(0),YYY.get(0));
+        g.drawLine((int) (XXX.get(0)-size),(int) (YYY.get(YYY.size()-1)+size),(int) (XXX.get(XXX.size()-1)+size),(int) (YYY.get(YYY.size()-1)+size));
+        g.drawLine((int) (XXX.get(XXX.size()-1)+size),(int) (YYY.get(YYY.size()-1)+size),(int) (XXX.get(XXX.size()-1)+size),(int) (minY-size));
+        g.drawLine((int) (XXX.get(0)-size),(int) (minY-size),(int) (XXX.get(0)-size),(int) (YYY.get(YYY.size()-1)+size));
+        g.drawLine((int) (XXX.get(0)-size),(int) (minY-size),(int) (XXX.get(XXX.size()-1)+size),(int) (minY-size));
+        if(!(g instanceof SVGGraphics2D)){
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 100, 30);
+        g.fillRect(0,0,100,30);
         g.setColor(Color.RED);
-        g.drawString("Iteration: " + (iterations + 1), 0, 10);
-        g.drawString("Sides: " + (UR.length - 1), 0, 25);
-        g.drawString("Memory: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage(), 10, frame.getHeight() - 25);
-
+        
+        g.drawString("Iteration: "+(iterations+1),0,10);
+        g.drawString("Sides: "+(UR.length-1),0,25);
+        }
+        //g.drawString("Memory: " + ManagementFactory.getMemoryMXBean().getHeapMemoryUsage(), 10, frame.getHeight() - 25);
     }
-
-    public static void calc() {
-        UR = new boolean[1];
-        UD = new boolean[1];
-        i = 0;
+    public static void calc(){
+        UR=new boolean[1];
+        UD=new boolean[1];
+        i=0;
         Add(UR,UD,true,false);
-
-        for (int i = 0; i <= iterations && !oom; i++) {
+        for (int i=0; i<=iterations&&!oom; i++){
             next();
         }
     }
-
-    public HilbertCurve() {
-        JButton b1 = new JButton("Next");
+    public HilbertCurve(){
+        JButton b1=new JButton("Next");
         //b1.setVerticalTextPosition(AbstractButton.TOP);
         //b1.setHorizontalTextPosition(AbstractButton.LEADING);
         b1.setActionCommand("Next");
         b1.addActionListener(this);
         add(b1);
-        JButton b2 = new JButton("Prev");
+        JButton b2=new JButton("Prev");
         //b2.setVerticalTextPosition(AbstractButton.TOP);
         //b2.setHorizontalTextPosition(AbstractButton.CENTER);
         b2.setActionCommand("Prev");
         b2.addActionListener(this);
         add(b2);
-        JButton b3 = new JButton("Toggle Curves");
+        JButton b3=new JButton("Toggle Curves");
         //b3.setVerticalTextPosition(AbstractButton.TOP);
         //b3.setHorizontalTextPosition(AbstractButton.CENTER);
         b3.setActionCommand("Toggle");
         b3.addActionListener(this);
         add(b3);
+        JButton b4=new JButton("Export");
+        //b3.setVerticalTextPosition(AbstractButton.TOP);
+        //b3.setHorizontalTextPosition(AbstractButton.CENTER);
+        b4.setActionCommand("Export");
+        b4.addActionListener(this);
+        add(b4);
     }
-
-    public static void setupScreen() {
-        frame = new JFrame("Lurf's Hilbert Curve Of Awesomeness");
+    public static void setupScreen(){
+        frame=new JFrame("Lurf's Hilbert Curve Of Awesomeness");
         M.setFocusable(true);
         (frame).setContentPane(M);
         frame.setLayout(new FlowLayout());
@@ -455,16 +467,13 @@ public class HilbertCurve extends JComponent implements ActionListener {
         //frame.setUndecorated(true);
         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
         frame.setVisible(true);
-
-        frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
+        frame.addWindowListener(new WindowAdapter(){
+            public void windowClosing(WindowEvent e){
                 System.exit(0);
             }
         });
     }
-
-    public static void main(String[] args) {
-
+    public static void main(String[] args){
         //(x+iy)*(a+ib)=1
         //a=x/(x^2+y^2)
         //b=-(y/(x^2+y^2))
@@ -472,44 +481,61 @@ public class HilbertCurve extends JComponent implements ActionListener {
         setupScreen();
     }
 
-    public static class calcu extends Thread {
-
-        public void run() {
+    public static class calcu extends Thread{
+        public void run(){
             calc();
             System.gc();
             M.repaint();
         }
     }
 
-    public static class nextw extends Thread {
-
-        public void run() {
+    public static class nextw extends Thread{
+        public void run(){
             next();
             System.gc();
             M.repaint();
         }
     }
-
     @Override
-    public void actionPerformed(ActionEvent ae) {
-        if (ae.getActionCommand().equals("Next")) {
+    public void actionPerformed(ActionEvent ae){
+        if (ae.getActionCommand().equals("Next")){
             iterations++;
             (new nextw()).start();
         }
-        if (ae.getActionCommand().equals("Toggle")) {
-            drawww = !drawww;
+        if (ae.getActionCommand().equals("Toggle")){
+            drawww=!drawww;
             M.repaint();
         }
-        if (ae.getActionCommand().equals("Prev")) {
-            if (iterations > 0) {
+        if (ae.getActionCommand().equals("Prev")){
+            if (iterations>0){
                 iterations--;
             }
-            if (oom) {
-                iterations = 0;
-                oom = false;
+            if (oom){
+                iterations=0;
+                oom=false;
             }
             (new calcu()).start();
         }
-
+        if (ae.getActionCommand().equals("Export")){
+            try{
+                // Get a DOMImplementation.
+                DOMImplementation domImpl
+                        =GenericDOMImplementation.getDOMImplementation();
+                // Create an instance of org.w3c.dom.Document.
+                String svgNS="http://www.w3.org/2000/svg";
+                Document document=domImpl.createDocument(svgNS,"svg",null);
+                // Create an instance of the SVG Generator.
+                SVGGraphics2D svgGenerator=new SVGGraphics2D(document);
+                // Ask the test to render into the SVG Graphics2D implementation.
+                paintt(svgGenerator);
+                // Finally, stream out SVG to the standard output using
+                // UTF-8 encoding.
+                boolean useCSS=true; // we want to use CSS style attributes
+                Writer out=new OutputStreamWriter(new FileOutputStream(new File("/Users/leijurv/Documents/hac.svg")),"UTF-8");
+                svgGenerator.stream(out,useCSS);
+            }catch (Exception ex){
+                Logger.getLogger(HilbertCurve.class.getName()).log(Level.SEVERE,null,ex);
+            }
+        }
     }
 }

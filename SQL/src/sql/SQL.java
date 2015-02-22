@@ -130,7 +130,10 @@ System.out.println(new String(dd));
                     System.out.println(S.substring(0,Math.min(100,S.length())));
                 }
                System.out.println(rs.getString("handle")+","+rs.getString("password")+","+rs.getString("email")+","+(statc==null?null:statc.substring(statc.length()-100,statc.length())));
-            }}
+            }else{
+                    System.out.println(rs.getString("handle")+","+rs.getString("password")+","+rs.getString("email"));
+                }
+            }
             System.out.println();
             
             rs=stmt.executeQuery("SELECT * FROM cards");
