@@ -17,7 +17,8 @@ public class ExpressionConstant extends Expression {
         this.value = value;
     }
     protected ExpressionConstant(DataInputStream in) throws IOException {
-        value = in.readInt();
+        byte type = in.readByte();
+        value = doRead(in,type);
     }
     @Override
     public Object evaluate(Context c) {
@@ -29,7 +30,52 @@ public class ExpressionConstant extends Expression {
     }
     @Override
     protected void doWriteExpression(DataOutputStream out) throws IOException {
-        out.writeInt((Integer) value);//TODO I'm lazy
+        byte type = getType();
+        out.writeByte(type);
+        switch (type) {
+            case 1:
+                out.writeInt((Integer) value);
+                return;
+            case 2:
+                out.writeDouble((Double) value);
+                return;
+            case 3:
+                out.writeBoolean((Boolean) value);
+                return;
+            case 4:
+                out.writeUTF((String) value);
+                return;
+        }
+        throw new IllegalStateException("There is no way this could ever happen");
+    }
+    private static Object doRead(DataInputStream in,byte type) throws IOException {
+        switch (type) {
+            case 1:
+                return in.readInt();
+            case 2:
+                return in.readDouble();
+            case 3:
+                return in.readBoolean();
+            case 4:
+                return in.readUTF();
+            default:
+                throw new IllegalStateException("Attempting to read constant with nonexistant identifier " + type);
+        }
+    }
+    public byte getType() {
+        if (value instanceof Integer) {
+            return 1;
+        }
+        if (value instanceof Double) {
+            return 2;
+        }
+        if (value instanceof Boolean) {
+            return 3;
+        }
+        if (value instanceof String) {
+            return 4;
+        }
+        throw new IllegalStateException("Type is unknown for " + value);
     }
     @Override
     public byte getExpressionID() {

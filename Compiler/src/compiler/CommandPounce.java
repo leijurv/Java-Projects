@@ -13,27 +13,27 @@ import java.io.IOException;
  */
 public class CommandPounce extends Command {
     private final Expression toReturn;
-    public CommandPounce(Expression toReturn){
-        this.toReturn=toReturn;
+    public CommandPounce(Expression toReturn) {
+        this.toReturn = toReturn;
     }
-    protected CommandPounce(DataInputStream in) throws IOException{
-        toReturn=Expression.readExpression(in);
+    protected CommandPounce(DataInputStream in) throws IOException {
+        toReturn = Expression.readExpression(in);
     }
     @Override
-    public boolean execute(Context c){
+    public boolean execute(Context c) {
         c.Pounce(toReturn.evaluate(c));
         return true;
     }
     @Override
-    public String toString(){
-        return "$pounce "+toReturn+"$";
+    public String toString() {
+        return "$pounce " + toReturn + "$";
     }
     @Override
-    public byte getCommandID(){
+    public byte getCommandID() {
         return 2;
     }
     @Override
-    protected void doWrite(DataOutputStream out) throws IOException{
+    protected void doWrite(DataOutputStream out) throws IOException {
         toReturn.writeExpression(out);
     }
 }

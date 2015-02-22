@@ -30,8 +30,8 @@ public class ExpressionOperator extends Expression {
     public byte getExpressionID() {
         return 5;
     }
-    private static enum Operator {
-        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), GREATER(">"), LESSER("<"), EQUAL("=="), AND("&"), OR("||"), NOTEQUAL("!="), GREATEROREQUAL(">="), LESSEROREQUAL("<=");
+    public static enum Operator {
+        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), TOTHEPOWER("^"), GREATER(">"), LESSER("<"), EQUAL("=="), AND("&&"), OR("||"), NOTEQUAL("!="), GREATEROREQUAL(">="), LESSEROREQUAL("<=");
         private final String opcode;
         private Operator(String opcode) {
             this.opcode = opcode;
@@ -47,9 +47,13 @@ public class ExpressionOperator extends Expression {
                             return (Integer) b + (Double) a;
                         }
                     }
-                    if (b instanceof Double) {
+                    if (b instanceof Double && a instanceof Integer) {
+                        return (Double) b + (Integer) a;
                     }
-                    return (Integer) a + (Integer) b;
+                    if (a instanceof Integer && b instanceof Integer) {
+                        return (Integer) a + (Integer) b;
+                    }
+                    break;
                 case SUBTRACT:
                     return (Integer) a - (Integer) b;
                 case MULTIPLY:
@@ -58,10 +62,17 @@ public class ExpressionOperator extends Expression {
                     return (Integer) a / (Integer) b;
                 case MOD:
                     return (Integer) a % (Integer) b;
+                case TOTHEPOWER:
+                    double result = Math.pow(toDouble(a),toDouble(b));
+                    if (Math.floor(result) == result) {//If it's a round number, return an int just because
+                        return (int) result;
+                    }
+                    //System.out.println(A + "^" + B + "=" + result);
+                    return result;
                 case GREATER:
-                    return ((Comparable) a).compareTo((Comparable) b) == 1;
+                    return compare(a,b) == 1;
                 case LESSER:
-                    return ((Comparable) a).compareTo((Comparable) b) == -1;
+                    return compare(a,b) == -1;
                 case EQUAL:
                     return b.equals(a);
                 case AND:
@@ -71,13 +82,27 @@ public class ExpressionOperator extends Expression {
                 case NOTEQUAL:
                     return !a.equals(b);
                 case GREATEROREQUAL:
-                    return ((Comparable) a).compareTo((Comparable) b) != -1;
+                    return compare(a,b) != -1;
                 case LESSEROREQUAL:
-                    return ((Comparable) a).compareTo((Comparable) b) != 1;
+                    return compare(a,b) != 1;
                 default:
                     //This is null??
                     return null;
             }
+            throw new IllegalStateException("Unable to preform operation " + this + " on '" + a + "' and '" + b + "'");
+        }
+        private static int compare(Object a,Object b) {
+            try {
+                return ((Comparable) a).compareTo((Comparable) b);
+            } catch (ClassCastException E) {
+                if ((a instanceof Double || a instanceof Integer) && (b instanceof Integer || b instanceof Double)) {
+                    return compare(toDouble(a),toDouble(b));
+                }
+                throw new RuntimeException("#LOLNO you can't compare " + a + " and " + b + ", silly.");
+            }
+        }
+        private static double toDouble(Object a) {
+            return (a instanceof Integer) ? (double) (((Integer) a)) : (Double) a;
         }
         public boolean matches(String opcode) {
             return this.opcode.equals(opcode);
@@ -96,18 +121,14 @@ public class ExpressionOperator extends Expression {
         this.before = before;
         this.after = after;
         if (this.operator == null) {
-            throw new RuntimeException("Unknown operator " + operator + " trying to be applied to " + before + " and " + after);
+            throw new UnsupportedOperationException("Unknown operator " + operator + " trying to be applied to " + before + " and " + after);
         }
     }
     @Override
     public Object evaluate(Context c) {
-        Object a = before.evaluate(c);
-        Object b = after.evaluate(c);
-        try {
-            return operator.run(a,b);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to perform operator '" + operator + "' on objects '" + a + "' and '" + b + "'");
-        }
+        Object beforeEvaluated = before.evaluate(c);
+        Object afterEvaluated = after.evaluate(c);
+        return operator.run(beforeEvaluated,afterEvaluated);
     }
     @Override
     public String toString() {

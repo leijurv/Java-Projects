@@ -47,8 +47,9 @@ public class Context {
     }
     public Object get(String name) {
         for (int i = values.length - 1; i >= 0; i--) {
-            if (values[i].get(name) != null) {
-                return values[i].get(name);
+            Object possibleValue = values[i].get(name);
+            if (possibleValue != null) {
+                return possibleValue;
             }
         }
         System.out.println("WARNING: Unable to find requested variable named '" + name + "'. Returning null. Context is " + toString());

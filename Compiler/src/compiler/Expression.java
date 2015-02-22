@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 /**
  *
  * @author leijurv
@@ -45,10 +46,12 @@ public abstract class Expression extends Command {
             return true;
         }
         if (o instanceof String) {
+            String s = (String) o;
             try {
-                Integer.parseInt((String) o);//Le lazy
+                Double.parseDouble(s);//Le lazy
                 return true;
             } catch (NumberFormatException e) {
+                return s.startsWith(".") || s.endsWith(".");
             }
         }
         return false;
@@ -107,7 +110,7 @@ public abstract class Expression extends Command {
         //Grouping together sequences of letters and numbers. e.g. 4,5,+,j,r,*,x becomes 45,+,jr,*,x
         //Note: x does not group it says by itself
     }
-    private static Expression Do(Object[] o,int i) {//Evaluate the operator at i in o, 
+    private static Expression Do(Object[] o,int i) {//Evaluate the operator at i in o,
         //replace a*b with the result, then evaluate that recursively
         Object[] N = new Object[3];
         for (int m = i - 1; m < i + 2; m++) {
@@ -119,30 +122,52 @@ public abstract class Expression extends Command {
         result[i - 1] = parse(N);
         return parse(result);
     }
+    private static final HashMap<String,Object> constants;
+    static{
+        constants = new HashMap<>();
+        constants.put("true",true);
+        constants.put("false",false);
+        constants.put("55","DANK SWAMP KUSH");
+    }
     public static Expression parse(Object[] o) {//I TOTALLY didn't copy this from my derivative project
         System.out.print("Parsing expression ");
         for (Object k : o) {
             System.out.print(k + "       ");
         }
         System.out.println();
-        if (o.length > 2 && o[1] instanceof String && ((String) o[1]).equals("=")) {//must be setting a variable
-            Object[] Cool = new Object[o.length - 2];
-            for (int i = 0; i < Cool.length; i++) {
-                Cool[i] = o[i + 2];
-            }
-            return new ExpressionSetVariable((String) o[0],parse(Cool));
-        }
         if (o.length == 1) {
             if (o[0] instanceof Expression) {
                 return (Expression) o[0];
             }
             String s = (String) o[0];
-            try {
-                int r = Integer.parseInt(s);
-                return new ExpressionConstant(r);
-            } catch (NumberFormatException e) {
-                return new ExpressionGetVariable(s);
+            Object constant = constants.get(s);
+            if (constant != null) {
+                System.out.println("Replacing '" + s + "' with predefined constant " + constant);
+                return new ExpressionConstant(constant);
             }
+            try {
+                int r = Integer.parseInt(s);//Try int first, because all ints are also valid doubles, and if there isn't a . then we want it to assume it's an int
+                return new ExpressionConstant(r);//If it can be parsed as an int without throwing an exception, it's an int!
+            } catch (NumberFormatException e) {
+                try {
+                    double r = Double.parseDouble(s);
+                    return new ExpressionConstant(r);//If it can be parsed as a double without throwing an exception, it's a double!
+                } catch (NumberFormatException E) {
+                    return new ExpressionGetVariable(s);
+                }
+            }
+        }
+        if (o.length > 2 && o[1] instanceof String && ((String) o[1]).equals("=")) {//must be setting a variable if second item is "="
+            Object[] Cool = new Object[o.length - 2];
+            for (int i = 0; i < Cool.length; i++) {
+                Cool[i] = o[i + 2];
+            }
+            String varname = (String) o[0];
+            Expression set = parse(Cool);
+            if (constants.get(varname) != null) {
+                throw new UnsupportedOperationException("Unable to set constant " + varname + " to " + set);
+            }
+            return new ExpressionSetVariable(varname,set);
         }
         //System.out.println(o.length);
         //Parenthesis
@@ -237,7 +262,7 @@ public abstract class Expression extends Command {
         writeExpression(out);
     }
     protected final void writeExpression(DataOutputStream out) throws IOException {
-        System.out.println("Writing exp with id " + getExpressionID() + ", " + this);
+        System.out.println("Writing expression with id " + getExpressionID() + ", " + this);
         out.writeByte(getExpressionID());
         doWriteExpression(out);
     }

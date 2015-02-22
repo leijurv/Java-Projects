@@ -4,11 +4,7 @@
  * and open the template in the editor.
  */
 package compiler;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 /**
  *
@@ -17,11 +13,13 @@ import java.util.ArrayList;
 public class Compiler {
     /**
      * @param args the command line arguments
+     * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
         String program2 = "chase main(abc){sum=0;i=0;purr(i<1000){if(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
-        String program = "chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
+        String program3 = "chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}meow(5+5.5)";
         String program1 = "chase fac(r){if (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
+        String program = "chase main ( abc ) { meow ( 5 + 5^2 );if(5.2^2<27){meow(55+1)}a=(abc==3);a=a||false;meow(a)if(a){meow(55)}else{meow(66)} if(true){meow(1)}} ";
         System.out.println("STARTING TO PARSE: " + program);
         System.out.println();
         long time = System.currentTimeMillis();
@@ -103,10 +101,17 @@ public class Compiler {
                 }
             }
         }
-        return temp;
+        if (numBrackets == 0) {
+            return temp;
+        }
+        if (numBrackets > 0) {
+            throw new IllegalStateException("Not enough } in " + temp);
+        } else {
+            throw new IllegalStateException("Too many } in " + temp);
+        }
     }
+    private static final String[] keyWords = {"chase","if","purr","pounce"};
     public static void findBlocks(ArrayList<Object> temp) {
-        String[] keyWords = {"chase","if","purr","pounce"};
         for (int i = 0; i < temp.size(); i++) {
             Object o = temp.get(i);
             if (o instanceof String) {
@@ -128,20 +133,20 @@ public class Compiler {
                     if (temp.get(j) instanceof String) {
                         String a = (String) (temp.get(j));
                         if (a.equals("(")) {
-                            numParen += 1;
+                            numParen++;
                             b = true;
                         }
                         if (a.equals(")")) {
                             numParen--;
                             b = true;
                         }
-                        if (b || key == 3) {
+                        if (b || key == 3) {//Key #3, pounces, doesn't need parentheses, while all the others do
                             temp.remove(j);
                             paren.add(a);
                         } else {
                             j++;
                         }
-                        if (numParen == 0 && b) {
+                        if (numParen == 0 && b) {//Reached end of parentheses
                             break;
                         }
                     } else {
@@ -151,7 +156,7 @@ public class Compiler {
                 //System.out.println(paren);
                 //System.out.println(temp);
                 Expression inParen = null;
-                if (key != 0) {
+                if (key != 0) {//If key#0, chase, paren is the list of prey names, which is not an expression
                     inParen = Expression.parse(paren.toArray());
                 }
                 switch (key) {
@@ -162,8 +167,8 @@ public class Compiler {
                             paren.remove(",");
                         }
                         String name = (String) temp.get(i + 1);
-                        ArrayList<Object> following = (ArrayList) (temp.get(i + 2));
-                        Chase func = new Chase(paren,toCommandList(following));
+                        ArrayList<Command> following = checkIsCommandList(temp.get(i + 2),"Trying to get contents of function " + name + ".");
+                        Chase func = new Chase(paren,following);
                         ExpressionSetVariable define = new ExpressionSetVariable(name,func);
                         temp.remove(i + 2);
                         temp.remove(i + 1);
@@ -171,33 +176,43 @@ public class Compiler {
                         findBlocks(temp);
                         break;
                     case 1:
-                        ArrayList<Object> ifTrue = (ArrayList) temp.get(i + 1);
+                        ArrayList<Command> ifTrue = checkIsCommandList(temp.get(i + 1),"Trying to get contents of if statement.");
                         if (temp.size() > i + 2 && temp.get(i + 2) instanceof String && "else".equals((String) (temp.get(i + 2)))) {
-                            ArrayList<Object> ifFalse = (ArrayList) temp.get(i + 3);
+                            ArrayList<Command> ifFalse = checkIsCommandList(temp.get(i + 3),"Trynig to get contents of else.");
                             temp.remove(i + 1);
                             temp.remove(i + 1);
                             temp.remove(i + 1);
-                            temp.set(i,new CommandBlink(inParen,toCommandList(ifTrue),toCommandList(ifFalse)));
+                            temp.set(i,new CommandBlink(inParen,ifTrue,ifFalse));
                         } else {
                             temp.remove(i + 1);
-                            temp.set(i,new CommandBlink(inParen,toCommandList(ifTrue)));
+                            temp.set(i,new CommandBlink(inParen,ifTrue));
                         }
                         break;
                     case 2:
-                        ArrayList<Object> cont = (ArrayList) temp.get(i + 1);
+                        ArrayList<Command> cont = checkIsCommandList(temp.get(i + 1),"Trying to get contents of while loop.");
                         temp.remove(i + 1);
-                        temp.set(i,new CommandPurr(toCommandList(cont),inParen));
+                        temp.set(i,new CommandPurr(cont,inParen));
                         break;
                     case 3:
                         temp.set(i,new CommandPounce(inParen));
+                        break;
+                    default:
+                        throw new IllegalStateException("This should never happen");
                 }
             }
         }
     }
     public static ArrayList<Command> toCommandList(ArrayList<Object> temp) {
+        return toCommandList(temp,"^unknown state^");
+    }
+    public static ArrayList<Command> toCommandList(ArrayList<Object> temp,String failMessage) {
         ArrayList<Command> res = new ArrayList<>(temp.size());
         for (Object temp1 : temp) {
-            res.add((Command) (temp1));
+            if (temp1 instanceof Command) {
+                res.add((Command) (temp1));
+            } else {
+                throw new IllegalStateException("Expected " + temp1 + " to be a command. " + failMessage);
+            }
         }
         return res;
     }
@@ -221,11 +236,13 @@ public class Compiler {
                 temp.add(i,"**EXPRESSION LOCATION**");
                 System.out.println("Found expression " + t + " within " + temp);
                 temp.set(i,Expression.parse(t.toArray()));
-                t = new ArrayList();
+                t = new ArrayList<>();
             }
         }
-        if (!t.isEmpty()) {
-            temp.add(Expression.parse(t.toArray()));//add to end
+        if (!t.isEmpty()) {//Finished going through, ends with an expression
+            temp.add("**EXPRESSION LOCATION**");//Add to end
+            System.out.println("Found expression " + t + " within " + temp);
+            temp.set(temp.size() - 1,Expression.parse(t.toArray()));//Replace end
         }
     }
     public static ArrayList<Object> parse(String p) {
@@ -241,5 +258,17 @@ public class Compiler {
         System.out.println("Starting to find expressions in" + temp);
         expressions(temp);
         return temp;
+    }
+    public static ArrayList<Object> checkIsArrayList(Object o,String message,String type) {
+        if (!(o instanceof ArrayList)) {
+            throw new IllegalStateException("Expected " + o + " to be an instance of ArrayList<" + type + ">. " + message);
+        }
+        return (ArrayList<Object>) o;
+    }
+    public static ArrayList<Command> checkIsCommandList(Object o,String message) {
+        return checkIsCommandList(o,message,message);
+    }
+    public static ArrayList<Command> checkIsCommandList(Object o,String messageIfNotArrayList,String messageIfNotCommandList) {
+        return toCommandList(checkIsArrayList(o,messageIfNotArrayList,"Command"),messageIfNotCommandList);
     }
 }
