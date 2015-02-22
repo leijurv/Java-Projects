@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package compiler;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -13,9 +16,13 @@ import java.util.ArrayList;
 public class CommandPurr extends Command{
     private final Expression condition;
     private final ArrayList<Command> contents;
-    public CommandPurr(ArrayList<Command> Contents,Expression cond){
-        condition=cond;
-        contents=Contents;
+    public CommandPurr(ArrayList<Command> contents,Expression condition){
+        this.contents=contents;
+        this.condition=condition;
+    }
+    protected CommandPurr(DataInputStream in) throws IOException{
+        condition=Expression.readExpression(in);
+        contents=readmultiple(in);
     }
     @Override
     public boolean execute(Context c){
@@ -33,5 +40,17 @@ public class CommandPurr extends Command{
     @Override
     public String toString(){
         return "purr"+condition+"{"+contents+"}";
+    }
+
+    @Override
+    public int getCommandID(){
+        
+        return 3;
+    }
+
+    @Override
+    protected void doWrite(DataOutputStream out) throws IOException{
+        condition.writeExpression(out);
+        writemultiple(out,contents);
     }
 }

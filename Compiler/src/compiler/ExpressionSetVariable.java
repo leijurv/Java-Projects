@@ -5,6 +5,10 @@
  */
 package compiler;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 /**
  *
  * @author leijurv
@@ -16,6 +20,10 @@ public class ExpressionSetVariable extends Expression{
         variablename=varname;
         value=val;
     }
+    protected ExpressionSetVariable(DataInputStream in) throws IOException{
+        variablename=in.readUTF();
+        value=readExpression(in);
+    }
     @Override
     public Object evaluate(Context c){
         Object o=value.evaluate(c);
@@ -25,5 +33,16 @@ public class ExpressionSetVariable extends Expression{
     @Override
     public String toString(){
         return "~set~ "+variablename+"="+value;
+    }
+
+    @Override
+    protected void writeExpression(DataOutputStream out) throws IOException{
+        out.writeUTF(variablename);
+        value.writeExpression(out);
+    }
+
+    @Override
+    public int getExpressionID(){
+        return 6;
     }
 }

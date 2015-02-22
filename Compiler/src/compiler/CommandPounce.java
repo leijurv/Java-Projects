@@ -5,14 +5,21 @@
  */
 package compiler;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 /**
  *
  * @author leijurv
  */
 public class CommandPounce extends Command{
     private final Expression toReturn;
-    public CommandPounce(Expression ret){
-        toReturn=ret;
+    public CommandPounce(Expression toReturn){
+        this.toReturn=toReturn;
+    }
+    protected CommandPounce(DataInputStream in) throws IOException{
+        toReturn=Expression.readExpression(in);
     }
     @Override
     public boolean execute(Context c){
@@ -22,5 +29,15 @@ public class CommandPounce extends Command{
     @Override
     public String toString(){
         return "$pounce "+toReturn+"$";
+    }
+
+    @Override
+    public int getCommandID(){
+        return 2;
+    }
+
+    @Override
+    protected void doWrite(DataOutputStream out) throws IOException{
+        toReturn.writeExpression(out);
     }
 }

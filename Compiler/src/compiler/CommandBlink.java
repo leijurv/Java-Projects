@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package compiler;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -14,13 +17,18 @@ public class CommandBlink extends Command{
     private final Expression condition;
     private final ArrayList<Command> ifTrue;
     private final ArrayList<Command> ifFalse;
-    public CommandBlink(Expression Condition,ArrayList<Command> IfTrue){
-        this(Condition,IfTrue,new ArrayList<Command>());
+    public CommandBlink(Expression condition,ArrayList<Command> ifTrue){
+        this(condition,ifTrue,new ArrayList<Command>());
     }
-    public CommandBlink(Expression Condition,ArrayList<Command> IfTrue,ArrayList<Command> IfFalse){
-        condition=Condition;
-        ifTrue=IfTrue;
-        ifFalse=IfFalse;
+    public CommandBlink(Expression condition,ArrayList<Command> ifTrue,ArrayList<Command> ifFalse){
+        this.condition=condition;
+        this.ifTrue=ifTrue;
+        this.ifFalse=ifFalse;
+    }
+    protected CommandBlink(DataInputStream in) throws IOException{
+        condition=Expression.readExpression(in);
+        ifTrue=readmultiple(in);
+        ifFalse=readmultiple(in);
     }
     @Override
     public boolean execute(Context c){
@@ -47,5 +55,17 @@ public class CommandBlink extends Command{
     @Override
     public String toString(){
         return "blink"+condition+"{"+ifTrue+"}"+(ifFalse.isEmpty() ? "" : "else{"+ifFalse+"}");
+    }
+
+    @Override
+    public int getCommandID(){
+        return 1;
+    }
+
+    @Override
+    protected void doWrite(DataOutputStream out) throws IOException{
+        condition.writeExpression(out);
+        writemultiple(out,ifTrue);
+        writemultiple(out,ifFalse);
     }
 }

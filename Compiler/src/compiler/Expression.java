@@ -4,14 +4,17 @@
  * and open the template in the editor.
  */
 package compiler;
+import static compiler.Command.writemultiple;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 /**
  *
  * @author leijurv
  */
-public abstract class Expression extends Command{
+public abstract class Expression extends Command {
     @Override
     public boolean execute(Context c){
         evaluate(c);
@@ -30,7 +33,7 @@ public abstract class Expression extends Command{
                 }
                 return true;
             }
-            for (String s:let){
+            for (String s : let){
                 if (((String) o).equals(s)){
                     return true;
                 }
@@ -46,7 +49,7 @@ public abstract class Expression extends Command{
             try{
                 Integer.parseInt((String) o);//Le lazy
                 return true;
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e){
             }
         }
         return false;
@@ -119,7 +122,7 @@ public abstract class Expression extends Command{
     }
     public static Expression parse(Object[] o){//I TOTALLY didn't copy this from my derivative project
         System.out.print("Parsing expression ");
-        for (Object k:o){
+        for (Object k : o){
             System.out.print(k+"       ");
         }
         System.out.println();
@@ -138,7 +141,7 @@ public abstract class Expression extends Command{
             try{
                 int r=Integer.parseInt(s);
                 return new ExpressionConstant(r);
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e){
                 return new ExpressionGetVariable(s);
             }
         }
@@ -221,9 +224,48 @@ public abstract class Expression extends Command{
             }
         }
         System.out.print("ERROR WHILE PARSING");
-        for (Object k:o){
+        for (Object k : o){
             System.out.print(k);
         }
         throw new RuntimeException("ERROR WHILE PARSING");
+    }
+    @Override
+    public final int getCommandID(){
+        return 0;
+    }
+    @Override
+    protected final void doWrite(DataOutputStream out) throws IOException{
+        out.writeInt(getExpressionID());
+        writeExpression(out);
+    }
+    protected abstract void writeExpression(DataOutputStream out) throws IOException;
+    public abstract int getExpressionID();
+    public static Expression readExpression(DataInputStream in) throws IOException{
+        int expressionID=in.readInt();
+        Expression result=readExpressionWithID(in,expressionID);
+        if (result==null){
+            return null;//Or throw exception, haven't decided yet
+        }
+        if (result.getExpressionID()!=expressionID){
+            throw new IOException("Failed to read properly");
+        }
+        return result;
+    }
+    private static Expression readExpressionWithID(DataInputStream in,int expressionID) throws IOException{
+        switch (expressionID){
+            case 1:
+                return new Chase(in);
+            case 2:
+                return new ExpressionBeginChase(in);
+            case 3:
+                return new ExpressionConstant(in);
+            case 4:
+                return new ExpressionGetVariable(in);
+            case 5:
+                return new ExpressionOperator(in);
+                
+            default:
+                return null;
+        }
     }
 }

@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package compiler;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -13,9 +16,17 @@ import java.util.ArrayList;
 public class ExpressionBeginChase extends Expression{
     private final String chasename;
     private final ArrayList<Expression> prey;
-    public ExpressionBeginChase(String ChaseName,ArrayList<Expression> Prey){
-        prey=Prey;
-        chasename=ChaseName;
+    public ExpressionBeginChase(String chasename,ArrayList<Expression> prey){
+        this.prey=prey;
+        this.chasename=chasename;
+    }
+    protected ExpressionBeginChase(DataInputStream in) throws IOException{
+        chasename=in.readUTF();
+        int numPrey=in.readInt();
+        prey=new ArrayList<>(numPrey);
+        for(int i=0; i<numPrey; i++){
+            prey.add(readExpression(in));
+        }
     }
     @Override
     public Object evaluate(Context c){
@@ -36,4 +47,19 @@ public class ExpressionBeginChase extends Expression{
     public String toString(){
         return "~begin "+chasename+" "+prey+"~";
     }
+
+    @Override
+    protected void writeExpression(DataOutputStream out) throws IOException{
+        out.writeUTF(chasename);
+        out.writeInt(prey.size());
+        for(Expression pre : prey){
+            pre.writeExpression(out);
+        }
+    }
+
+    @Override
+    public int getExpressionID(){
+        return 2;
+    }
+
 }

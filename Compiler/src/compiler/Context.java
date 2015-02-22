@@ -6,19 +6,18 @@
 package compiler;
 import java.util.Arrays;
 import java.util.HashMap;
-
 /**
  *
  * @author leijurv
  */
-public class Context{
+public class Context {
     private final HashMap<String,Object>[] values;
     private Object pounceValue;
     public Context(){
         values=new HashMap[]{new HashMap<>()};
     }
-    private Context(HashMap<String,Object>[] val){
-        values=val;
+    private Context(HashMap<String,Object>[] values){
+        this.values=values;
     }
     public Context subContext(){
         HashMap<String,Object>[] temp=new HashMap[values.length+1];

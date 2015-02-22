@@ -4,56 +4,97 @@
  * and open the template in the editor.
  */
 package compiler;
-
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 /**
  *
  * @author leijurv
  */
-public class ExpressionOperator extends Expression{
-    private final char operator;
+public class ExpressionOperator extends Expression {
+    private final Operator operator;
     private final Expression before;
     private final Expression after;
-    public ExpressionOperator(Expression Before,String Operator,Expression After){
-        this(Before,Operator.equals("<=") ? '@' : (Operator.equals(">=") ? '$' : (Operator.charAt(0))),After);
+    protected ExpressionOperator(DataInputStream in) throws IOException{
+        operator=Operator.values()[in.readInt()];
+        before=readExpression(in);
+        after=readExpression(in);
     }
-    public ExpressionOperator(Expression Before,char Operator,Expression After){
-        before=Before;
-        operator=Operator;
-        after=After;
+    @Override
+    protected void writeExpression(DataOutputStream out) throws IOException{
+        out.writeInt(operator.ordinal());
+        before.writeExpression(out);
+        after.writeExpression(out);
+    }
+    @Override
+    public int getExpressionID(){
+        return 5;
+    }
+    private static enum Operator {
+        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), GREATER(">"), LESSER("<"), EQUAL("=="), AND("&"), OR("||"), NOTEQUAL("!="), GREATEROREQUAL(">="), LESSEROREQUAL("<=");
+        private final String opcode;
+        private Operator(String opcode){
+            this.opcode=opcode;
+        }
+        public Object run(Object a,Object b){
+            switch (this){
+                case ADD:
+                    return (Integer) a+(Integer) b;
+                case SUBTRACT:
+                    return (Integer) a-(Integer) b;
+                case MULTIPLY:
+                    return (Integer) a*(Integer) b;
+                case DIVIDE:
+                    return (Integer) a/(Integer) b;
+                case MOD:
+                    return (Integer) a%(Integer) b;
+                case GREATER:
+                    return ((Comparable) a).compareTo((Comparable) b)==1;
+                case LESSER:
+                    return ((Comparable) a).compareTo((Comparable) b)==-1;
+                case EQUAL:
+                    return b.equals(a);
+                case AND:
+                    return (Boolean) b&&(Boolean) a;
+                case OR:
+                    return (Boolean) b||(Boolean) a;
+                case NOTEQUAL:
+                    return !a.equals(b);
+                case GREATEROREQUAL:
+                    return ((Comparable) a).compareTo((Comparable) b)!=-1;
+                case LESSEROREQUAL:
+                    return ((Comparable) a).compareTo((Comparable) b)!=1;
+                default:
+                    //This is null??
+                    return null;
+            }
+        }
+        public boolean matches(String opcode){
+            return this.opcode.equals(opcode);
+        }
+        public static Operator get(String operation){
+            for (Operator o : Operator.values()){
+                if (o.matches(operation)){
+                    return o;
+                }
+            }
+            throw new RuntimeException("Unknown operator "+operation);
+        }
+    }
+    public ExpressionOperator(Expression before,String operator,Expression after){
+        this.operator=Operator.get(operator);
+        this.before=before;
+        this.after=after;
     }
     @Override
     public Object evaluate(Context c){
-        Object bef=before.evaluate(c);
-        Object aft=after.evaluate(c);
-        switch (operator){
-            case '+':
-                return (Integer) bef+(Integer) aft;
-            case '-':
-                return (Integer) bef-(Integer) aft;
-            case '*':
-                return (Integer) bef*(Integer) aft;
-            case '/':
-                return (Integer) bef/(Integer) aft;
-            case '%':
-                return (Integer) bef%(Integer) aft;
-            case '>':
-                return (Integer) bef>(Integer) aft;
-            case '<':
-                return (Integer) bef<(Integer) aft;
-            case '=':
-                return aft.equals(bef);
-            case '&':
-                return (Boolean) aft&&(Boolean) bef;
-            case '|':
-                return (Boolean) aft||(Boolean) bef;
-            case '!':
-                return (Integer) bef!=(Integer) aft;
-            case '@'://I know its terrible
-                return (Integer) bef<=(Integer) aft;
-            case '$':
-                return (Integer) bef>=(Integer) aft;
+        Object a=before.evaluate(c);
+        Object b=after.evaluate(c);
+        try{
+            return operator.run(a,b);
+        } catch (Exception e){
+            throw new RuntimeException("Unable to perform operator '"+operator+"' on objects '"+a+"' and '"+b+"'");
         }
-        throw new RuntimeException("Unable to perform operator '"+operator+"' on objects '"+bef+"' and '"+aft+"'");
     }
     @Override
     public String toString(){

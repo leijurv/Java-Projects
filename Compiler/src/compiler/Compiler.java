@@ -4,6 +4,12 @@
  * and open the template in the editor.
  */
 package compiler;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -14,16 +20,21 @@ public class Compiler{
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException{
         String program2="chase main(abc){sum=0;i=0;purr(i<1000){if(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
-        String program="chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
-        String program1="chase fac(r){if (r<1) {pounce 1} else {pounce r *fac(r-1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
+        String program1="chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
+        String program="chase fac(r){if (r<1) {pounce 1} else {pounce r *fac(r-1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
         System.out.println("STARTING TO PARSE: "+program);
         System.out.println();
-        ArrayList<Command> progra=toCommandList(parse(program));
+        ArrayList<Command> prograaa=toCommandList(parse(program));
         System.out.println();
-        System.out.println(progra);
-        Context c=new Context().subContext();
+        System.out.println(prograaa);
+        ByteArrayOutputStream ou=new ByteArrayOutputStream();
+        Command.writemultiple(new DataOutputStream(ou),prograaa);
+        byte[] compiled=ou.toByteArray();
+        ByteArrayInputStream in=new ByteArrayInputStream(compiled);
+        ArrayList<Command> progra=Command.readmultiple(new DataInputStream(in));
+        Context c=new Context();
         for (Command cc:progra){
             cc.execute(c);
         }
@@ -37,6 +48,7 @@ public class Compiler{
         long time=System.currentTimeMillis();
         new ExpressionBeginChase("main",prey).evaluate(c);
         System.out.println(System.currentTimeMillis()-time);
+        System.out.println(BigInteger.ONE.compareTo(BigInteger.ZERO));
     }
     public static ArrayList<Object> curlyBrackets(ArrayList<Object> temp){
         int firstBracket=-1;
