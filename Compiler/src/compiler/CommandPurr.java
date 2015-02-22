@@ -8,12 +8,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 /**
  *
  * @author leijurv
  */
-public class CommandPurr extends Command{
+public class CommandPurr extends Command {
     private final Expression condition;
     private final ArrayList<Command> contents;
     public CommandPurr(ArrayList<Command> contents,Expression condition){
@@ -28,7 +27,7 @@ public class CommandPurr extends Command{
     public boolean execute(Context c){
         Context local=c.subContext();
         while (isTrue(condition.evaluate(c))){
-            for (Command com:contents){
+            for (Command com : contents){
                 if (com.execute(local)){
                     c.Pounce(local.getPounce());
                     return true;
@@ -41,13 +40,10 @@ public class CommandPurr extends Command{
     public String toString(){
         return "purr"+condition+"{"+contents+"}";
     }
-
     @Override
-    public int getCommandID(){
-        
+    public byte getCommandID(){
         return 3;
     }
-
     @Override
     protected void doWrite(DataOutputStream out) throws IOException{
         condition.writeExpression(out);

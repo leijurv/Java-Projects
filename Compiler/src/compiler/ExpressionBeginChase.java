@@ -8,12 +8,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 /**
  *
  * @author leijurv
  */
-public class ExpressionBeginChase extends Expression{
+public class ExpressionBeginChase extends Expression {
     private final String chasename;
     private final ArrayList<Expression> prey;
     public ExpressionBeginChase(String chasename,ArrayList<Expression> prey){
@@ -24,7 +23,7 @@ public class ExpressionBeginChase extends Expression{
         chasename=in.readUTF();
         int numPrey=in.readInt();
         prey=new ArrayList<>(numPrey);
-        for(int i=0; i<numPrey; i++){
+        for (int i=0; i<numPrey; i++){
             prey.add(readExpression(in));
         }
     }
@@ -47,19 +46,15 @@ public class ExpressionBeginChase extends Expression{
     public String toString(){
         return "~begin "+chasename+" "+prey+"~";
     }
-
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         out.writeUTF(chasename);
         out.writeInt(prey.size());
-        for(Expression pre : prey){
+        for (Expression pre : prey){
             pre.writeExpression(out);
         }
     }
-
-    @Override
-    public int getExpressionID(){
+    public byte getExpressionID(){
         return 2;
     }
-
 }

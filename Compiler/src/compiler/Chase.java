@@ -53,7 +53,7 @@ public class Chase extends Expression {
         return "chase ("+preyNames+"){"+contents+"}";
     }
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         writemultiple(out,contents);
         out.writeInt(preyNames.size());
         for (String preyName : preyNames){
@@ -61,7 +61,7 @@ public class Chase extends Expression {
         }
     }
     @Override
-    public int getExpressionID(){
+    public byte getExpressionID(){
         return 1;
     }
 }

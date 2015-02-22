@@ -28,11 +28,11 @@ public class ExpressionGetVariable extends Expression {
         return "~var "+varname+"~";
     }
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         out.writeUTF(varname);
     }
     @Override
-    public int getExpressionID(){
+    public byte getExpressionID(){
         return 4;
     }
 }

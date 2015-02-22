@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package compiler;
-import static compiler.Command.writemultiple;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,7 +55,7 @@ public abstract class Expression extends Command {
     }
     private static boolean eq(Object o){
         if (o instanceof String){
-            return (((String) o).replace("!","").length()==0)||(((String) o).replace("=","").length()==0)||(((String) o).replace("|","").length()==0)||(((String) o).replace("&","").length()==0);
+            return ((((String) o).replace(">","").length()==0)||(((String) o).replace("<","").length()==0)||((String) o).replace("!","").length()==0)||(((String) o).replace("=","").length()==0)||(((String) o).replace("|","").length()==0)||(((String) o).replace("&","").length()==0);
         }
         return false;
     }
@@ -104,7 +103,7 @@ public abstract class Expression extends Command {
         }
         Object[] N=new Object[objects.length-numItemsRemoved];
         System.arraycopy(objects,0,N,0,N.length);
-        return new ArrayList(Arrays.asList(N));
+        return new ArrayList<>(Arrays.asList(N));
         //Grouping together sequences of letters and numbers. e.g. 4,5,+,j,r,*,x becomes 45,+,jr,*,x
         //Note: x does not group it says by itself
     }
@@ -146,12 +145,6 @@ public abstract class Expression extends Command {
             }
         }
         //System.out.println(o.length);
-        if (o.length==3){
-            Expression First=parse(new Object[]{o[0]});
-            String s=(String) o[1];
-            Expression Last=parse(new Object[]{o[2]});
-            return new ExpressionOperator(First,s,Last);
-        }
         //Parenthesis
         for (int i=0; i<o.length; i++){
             if (o[i].equals("(")){
@@ -176,8 +169,14 @@ public abstract class Expression extends Command {
                 return parse(Cool);
             }
         }
+        if (o.length==3){//Assume that the middle one is an operator
+            Expression First=parse(new Object[]{o[0]});
+            String s=(String) o[1];
+            Expression Last=parse(new Object[]{o[2]});
+            return new ExpressionOperator(First,s,Last);
+        }
         //Functions
-        for (int i=0; i<o.length; i++){
+        for (int i=0; i<o.length-1; i++){
             if (o[i] instanceof String){
                 String s=(String) o[i];
                 if (let(s)&&o[i+1] instanceof Expression){
@@ -230,18 +229,23 @@ public abstract class Expression extends Command {
         throw new RuntimeException("ERROR WHILE PARSING");
     }
     @Override
-    public final int getCommandID(){
+    public final byte getCommandID(){
         return 0;
     }
     @Override
     protected final void doWrite(DataOutputStream out) throws IOException{
-        out.writeInt(getExpressionID());
         writeExpression(out);
     }
-    protected abstract void writeExpression(DataOutputStream out) throws IOException;
-    public abstract int getExpressionID();
+    protected final void writeExpression(DataOutputStream out) throws IOException{
+        System.out.println("Writing exp with id "+getExpressionID()+", "+this);
+        out.writeByte(getExpressionID());
+        doWriteExpression(out);
+    }
+    protected abstract void doWriteExpression(DataOutputStream out) throws IOException;
+    public abstract byte getExpressionID();
     public static Expression readExpression(DataInputStream in) throws IOException{
-        int expressionID=in.readInt();
+        byte expressionID=in.readByte();
+        System.out.println("Reading expression ID"+expressionID);
         Expression result=readExpressionWithID(in,expressionID);
         if (result==null){
             return null;//Or throw exception, haven't decided yet
@@ -249,9 +253,10 @@ public abstract class Expression extends Command {
         if (result.getExpressionID()!=expressionID){
             throw new IOException("Failed to read properly");
         }
+        System.out.println("Parsed "+result);
         return result;
     }
-    private static Expression readExpressionWithID(DataInputStream in,int expressionID) throws IOException{
+    private static Expression readExpressionWithID(DataInputStream in,byte expressionID) throws IOException{
         switch (expressionID){
             case 1:
                 return new Chase(in);
@@ -263,7 +268,8 @@ public abstract class Expression extends Command {
                 return new ExpressionGetVariable(in);
             case 5:
                 return new ExpressionOperator(in);
-                
+            case 6:
+                return new ExpressionSetVariable(in);
             default:
                 return null;
         }

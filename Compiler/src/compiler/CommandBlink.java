@@ -8,12 +8,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-
 /**
  *
  * @author leijurv
  */
-public class CommandBlink extends Command{
+public class CommandBlink extends Command {
     private final Expression condition;
     private final ArrayList<Command> ifTrue;
     private final ArrayList<Command> ifFalse;
@@ -36,14 +35,14 @@ public class CommandBlink extends Command{
         Context local=c.subContext();
         Boolean b=isTrue(exp);
         if (b){
-            for (Command com:ifTrue){
+            for (Command com : ifTrue){
                 if (com.execute(local)){
                     c.Pounce(local.getPounce());
                     return true;
                 }
             }
         }else{
-            for (Command com:ifFalse){
+            for (Command com : ifFalse){
                 if (com.execute(local)){
                     c.Pounce(local.getPounce());
                     return true;
@@ -54,14 +53,12 @@ public class CommandBlink extends Command{
     }
     @Override
     public String toString(){
-        return "blink"+condition+"{"+ifTrue+"}"+(ifFalse.isEmpty() ? "" : "else{"+ifFalse+"}");
+        return "blink"+condition+"{"+ifTrue+"}"+(ifFalse.isEmpty()?"":"else{"+ifFalse+"}");
     }
-
     @Override
-    public int getCommandID(){
+    public byte getCommandID(){
         return 1;
     }
-
     @Override
     protected void doWrite(DataOutputStream out) throws IOException{
         condition.writeExpression(out);

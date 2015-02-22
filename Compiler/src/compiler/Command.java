@@ -19,26 +19,27 @@ public abstract class Command {
     protected static boolean isTrue(Object exp){
         return exp instanceof Boolean?(Boolean) exp:!exp.equals(0);
     }
-    public abstract int getCommandID();
+    public abstract byte getCommandID();
     protected abstract void doWrite(DataOutputStream out) throws IOException;
     public final void writeCommand(DataOutputStream out) throws IOException{
-        System.out.println("Writing id"+getCommandID());
-        out.writeInt(getCommandID());
+        System.out.println("Writing command with ID "+getCommandID()+", "+this);
+        out.writeByte(getCommandID());
         doWrite(out);
     }
     public static Command readCommand(DataInputStream in) throws IOException{
-        int commandID=in.readInt();
+        byte commandID=in.readByte();
+        System.out.println("Command ID: "+commandID);
         Command result=readCommandWithID(in,commandID);
-        if(result==null){
+        if (result==null){
             return null;//Or throw exception, haven't decided yet
         }
-        if(result.getCommandID()!=commandID){
+        if (result.getCommandID()!=commandID){
             throw new IOException("Failed to read properly");
         }
         System.out.println(result);
         return result;
     }
-    private static Command readCommandWithID(DataInputStream in,int commandID) throws IOException{
+    private static Command readCommandWithID(DataInputStream in,byte commandID) throws IOException{
         switch (commandID){
             case 0:
                 return Expression.readExpression(in);
@@ -46,14 +47,16 @@ public abstract class Command {
                 return new CommandBlink(in);
             case 2:
                 return new CommandPounce(in);
+            case 3:
+                return new CommandPurr(in);
             default:
-                System.out.println(commandID);
+                System.out.println("RETURNING NULL"+commandID);
                 return null;
         }
     }
     public static ArrayList<Command> readmultiple(DataInputStream in) throws IOException{
         int amt=in.readInt();
-        System.out.println("AMT: "+amt);
+        System.out.println("Reading "+amt+" commands");
         ArrayList<Command> commands=new ArrayList<>(amt);
         for (int i=0; i<amt; i++){
             commands.add(readCommand(in));
@@ -61,6 +64,7 @@ public abstract class Command {
         return commands;
     }
     public static void writemultiple(DataOutputStream out,ArrayList<Command> commands) throws IOException{
+        System.out.println("Writing "+commands.size()+" commands, "+commands);
         out.writeInt(commands.size());
         for (Command c : commands){
             c.writeCommand(out);

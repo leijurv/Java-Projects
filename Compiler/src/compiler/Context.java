@@ -37,13 +37,13 @@ public class Context {
         values[values.length-1].put(name,value);
     }
     public void set(String name,Object value){
-        for (int i=values.length-1; i>=0; i--){
-            if (values[i].get(name)!=null){
-                values[i].put(name,value);
+        for (int i=values.length-1; i>=0; i--){//Start at lowest context
+            if (values[i].get(name)!=null){//If this variable is defined here
+                values[i].put(name,value);//Overwrite it
                 return;
             }
         }
-        defineLocal(name,value);
+        defineLocal(name,value);//Otherwise define it as local
     }
     public Object get(String name){
         for (int i=values.length-1; i>=0; i--){

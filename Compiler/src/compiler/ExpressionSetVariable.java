@@ -4,16 +4,14 @@
  * and open the template in the editor.
  */
 package compiler;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
 /**
  *
  * @author leijurv
  */
-public class ExpressionSetVariable extends Expression{
+public class ExpressionSetVariable extends Expression {
     private final String variablename;
     private final Expression value;
     public ExpressionSetVariable(String varname,Expression val){
@@ -34,15 +32,13 @@ public class ExpressionSetVariable extends Expression{
     public String toString(){
         return "~set~ "+variablename+"="+value;
     }
-
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         out.writeUTF(variablename);
         value.writeExpression(out);
     }
-
     @Override
-    public int getExpressionID(){
+    public byte getExpressionID(){
         return 6;
     }
 }

@@ -4,16 +4,14 @@
  * and open the template in the editor.
  */
 package compiler;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
 /**
  *
  * @author leijurv
  */
-public class CommandPounce extends Command{
+public class CommandPounce extends Command {
     private final Expression toReturn;
     public CommandPounce(Expression toReturn){
         this.toReturn=toReturn;
@@ -30,12 +28,10 @@ public class CommandPounce extends Command{
     public String toString(){
         return "$pounce "+toReturn+"$";
     }
-
     @Override
-    public int getCommandID(){
+    public byte getCommandID(){
         return 2;
     }
-
     @Override
     protected void doWrite(DataOutputStream out) throws IOException{
         toReturn.writeExpression(out);

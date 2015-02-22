@@ -28,11 +28,11 @@ public class ExpressionConstant extends Expression {
         return "~constant "+value+"~";
     }
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         out.writeInt((Integer) value);//TODO I'm lazy
     }
-
-    public int getExpressionID(){
+    @Override
+    public byte getExpressionID(){
         return 3;
     }
 }

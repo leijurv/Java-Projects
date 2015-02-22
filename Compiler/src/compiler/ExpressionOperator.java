@@ -21,13 +21,13 @@ public class ExpressionOperator extends Expression {
         after=readExpression(in);
     }
     @Override
-    protected void writeExpression(DataOutputStream out) throws IOException{
+    protected void doWriteExpression(DataOutputStream out) throws IOException{
         out.writeInt(operator.ordinal());
         before.writeExpression(out);
         after.writeExpression(out);
     }
     @Override
-    public int getExpressionID(){
+    public byte getExpressionID(){
         return 5;
     }
     private static enum Operator {
@@ -78,13 +78,16 @@ public class ExpressionOperator extends Expression {
                     return o;
                 }
             }
-            throw new RuntimeException("Unknown operator "+operation);
+            return null;
         }
     }
     public ExpressionOperator(Expression before,String operator,Expression after){
         this.operator=Operator.get(operator);
         this.before=before;
         this.after=after;
+        if (this.operator==null){
+            throw new RuntimeException("Unknown operator "+operator+" trying to be applied to "+before+" and "+after);
+        }
     }
     @Override
     public Object evaluate(Context c){
