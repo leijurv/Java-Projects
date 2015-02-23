@@ -17,9 +17,9 @@ public class Compiler {
      */
     public static void main(String[] args) throws IOException {
         String program2 = "chase main(abc){sum=0;i=0;purr(i<1000){if(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
-        String program3 = "chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}meow(5+5.5)";
+        String program3 = "chase main(abc){i=sum=0;purr(i<1000){if(i%5!=0){if(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
         String program1 = "chase fac(r){if (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); if ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
-        String program = "chase main ( abc ) { meow ( 5 + 5^2 );if(5.2^2<27){meow(55+1)}a=(abc==3);a=a||false;meow(a)if(a){meow(55)}else{meow(66)} if(true){meow(1)}} ";
+        String program = "chase main ( kush ) { meow ( 5 + 5^2 );if(5.2^2>27){meow(55+1)}a=(abc>=4);meow(a);a=a||false;a=a&&true;meow(a)if(a){meow(55)}else{meow(66)} if(true){meow(1)};meow(5.0==5)} ";
         System.out.println("STARTING TO PARSE: " + program);
         System.out.println();
         long time = System.currentTimeMillis();
@@ -34,6 +34,32 @@ public class Compiler {
         System.out.println();
         byte[] compiled = compile(prograaa);
         runProgram(compiled);
+    }
+    public static void runProgram(byte[] compiled) throws IOException {
+        System.out.println();
+        System.out.println("Pre-reading program...");
+        long time = System.currentTimeMillis();
+        ByteArrayInputStream in = new ByteArrayInputStream(compiled);
+        ArrayList<Command> progra = Command.readmultiple(new DataInputStream(in));
+        System.out.println();
+        System.out.println("Done pre-reading. Took " + (System.currentTimeMillis() - time) + "ms");
+        System.out.println("Reading program...");
+        time = System.currentTimeMillis();
+        Context c = new Context();
+        for (Command cc : progra) {
+            cc.execute(c);
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println("Done reading. Took " + (System.currentTimeMillis() - time) + "ms");
+        System.out.println("PROGRAM: " + c);
+        System.out.println();
+        ArrayList<Expression> prey = new ArrayList<>();
+        prey.add(new ExpressionConstant(4));
+        System.out.println("Running program with prey " + prey);
+        time = System.currentTimeMillis();
+        new ExpressionBeginChase("main",prey).evaluate(c);
+        System.out.println("Running took " + (System.currentTimeMillis() - time) + "ms");
     }
     public static byte[] compile(ArrayList<Command> program) throws IOException {
         long time = System.currentTimeMillis();
@@ -259,6 +285,7 @@ public class Compiler {
         expressions(temp);
         return temp;
     }
+    @SuppressWarnings("unchecked")//It *is* checked, but netbeans just doesn't realize that
     public static ArrayList<Object> checkIsArrayList(Object o,String message,String type) {
         if (!(o instanceof ArrayList)) {
             throw new IllegalStateException("Expected " + o + " to be an instance of ArrayList<" + type + ">. " + message);

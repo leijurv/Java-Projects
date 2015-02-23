@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 /**
  *
  * @author leijurv
@@ -113,9 +114,7 @@ public abstract class Expression extends Command {
     private static Expression Do(Object[] o,int i) {//Evaluate the operator at i in o,
         //replace a*b with the result, then evaluate that recursively
         Object[] N = new Object[3];
-        for (int m = i - 1; m < i + 2; m++) {
-            N[m - (i - 1)] = o[m];
-        }
+        System.arraycopy(o,i - 1,N,0,3);
         Object[] result = new Object[o.length - 2];
         System.arraycopy(o,0,result,0,i - 1);
         System.arraycopy(o,i + 2,result,i,o.length - (i + 2));
@@ -129,6 +128,32 @@ public abstract class Expression extends Command {
         constants.put("false",false);
         constants.put("55","DANK SWAMP KUSH");
     }
+    public static Expression parse(Object o) {
+        if (o instanceof Object[]) {
+            Object[] O = (Object[]) o;
+            return parse(O);
+        }
+        if (o instanceof Expression) {
+            return (Expression) o;
+        }
+        String s = (String) o;
+        Object constant = constants.get(s);
+        if (constant != null) {
+            System.out.println("Replacing '" + s + "' with predefined constant " + constant);
+            return new ExpressionConstant(constant);
+        }
+        try {
+            int r = Integer.parseInt(s);//Try int first, because all ints are also valid doubles, and if there isn't a . then we want it to assume it's an int
+            return new ExpressionConstant(r);//If it can be parsed as an int without throwing an exception, it's an int!
+        } catch (NumberFormatException e) {
+            try {
+                double r = Double.parseDouble(s);
+                return new ExpressionConstant(r);//If it can be parsed as a double without throwing an exception, it's a double!
+            } catch (NumberFormatException E) {
+                return new ExpressionGetVariable(s);
+            }
+        }
+    }
     public static Expression parse(Object[] o) {//I TOTALLY didn't copy this from my derivative project
         System.out.print("Parsing expression ");
         for (Object k : o) {
@@ -136,26 +161,7 @@ public abstract class Expression extends Command {
         }
         System.out.println();
         if (o.length == 1) {
-            if (o[0] instanceof Expression) {
-                return (Expression) o[0];
-            }
-            String s = (String) o[0];
-            Object constant = constants.get(s);
-            if (constant != null) {
-                System.out.println("Replacing '" + s + "' with predefined constant " + constant);
-                return new ExpressionConstant(constant);
-            }
-            try {
-                int r = Integer.parseInt(s);//Try int first, because all ints are also valid doubles, and if there isn't a . then we want it to assume it's an int
-                return new ExpressionConstant(r);//If it can be parsed as an int without throwing an exception, it's an int!
-            } catch (NumberFormatException e) {
-                try {
-                    double r = Double.parseDouble(s);
-                    return new ExpressionConstant(r);//If it can be parsed as a double without throwing an exception, it's a double!
-                } catch (NumberFormatException E) {
-                    return new ExpressionGetVariable(s);
-                }
-            }
+            return parse(o[0]);
         }
         if (o.length > 2 && o[1] instanceof String && ((String) o[1]).equals("=")) {//must be setting a variable if second item is "="
             Object[] Cool = new Object[o.length - 2];
@@ -183,21 +189,21 @@ public abstract class Expression extends Command {
                         n--;
                     }
                 }
-                Object[] N = new Object[j - i - 2];
-                for (int m = i + 1; m < j - 1; m++) {
-                    N[m - i - 1] = o[m];
+                Object[] parenContents = new Object[j - i - 2];
+                for (int m = 0; m < j - 1 - (i + 1); m++) {
+                    parenContents[m] = o[m + i + 1];
                 }
-                Object[] Cool = new Object[o.length - (N.length + 1)];
-                System.arraycopy(o,0,Cool,0,i);
-                System.arraycopy(o,j,Cool,i + 1,o.length - j);
-                Cool[i] = parse(N);
-                return parse(Cool);
+                Object[] leftover = new Object[o.length - (parenContents.length + 1)];
+                System.arraycopy(o,0,leftover,0,i);
+                System.arraycopy(o,j,leftover,i + 1,o.length - j);
+                leftover[i] = parse(parenContents);
+                return parse(leftover);
             }
         }
         if (o.length == 3) {//Assume that the middle one is an operator
-            Expression First = parse(new Object[] {o[0]});
+            Expression First = parse(new Object[] {(Object) (new Object[] {o[0]})});
             String s = (String) o[1];
-            Expression Last = parse(new Object[] {o[2]});
+            Expression Last = parse(new Object[] {(Object) (new Object[] {o[2]})});
             return new ExpressionOperator(First,s,Last);
         }
         //Functions
@@ -217,34 +223,19 @@ public abstract class Expression extends Command {
             }
         }
         //Operators, using order of operations. Between * and /, 5*6/7 would be (5*6)/7, going left to right
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals("%")) {
-                return Do(o,i);
-            }
-        }
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals("^")) {
-                return Do(o,i);
-            }
-        }
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals("*") || o[i].equals("/")) {
-                return Do(o,i);
-            }
-        }
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals("+") || o[i].equals("-")) {
-                return Do(o,i);
-            }
-        }
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals(">") || o[i].equals("<") || o[i].equals("==") || o[i].equals("!=") || o[i].equals("<=") || o[i].equals(">=")) {
-                return Do(o,i);
-            }
-        }
-        for (int i = 0; i < o.length; i++) {
-            if (o[i].equals("||") || o[i].equals("&&")) {
-                return Do(o,i);
+        ArrayList<List<String>> orderOfOperations = new ArrayList<>();
+        orderOfOperations.add(Arrays.asList(new String[] {"%"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"^"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"*","/"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"+","-"}));
+        orderOfOperations.add(Arrays.asList(new String[] {">","<","==","!=","<=",">="}));
+        orderOfOperations.add(Arrays.asList(new String[] {"||","&&"}));
+        for (int op = 0; op < orderOfOperations.size(); op++) {
+            List<String> ops = orderOfOperations.get(op);
+            for (int i = 0; i < o.length; i++) {
+                if (ops.contains(o[i])) {
+                    return Do(o,i);
+                }
             }
         }
         System.out.print("ERROR WHILE PARSING");

@@ -31,7 +31,7 @@ public class ExpressionOperator extends Expression {
         return 5;
     }
     public static enum Operator {
-        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), TOTHEPOWER("^"), GREATER(">"), LESSER("<"), EQUAL("=="), AND("&&"), OR("||"), NOTEQUAL("!="), GREATEROREQUAL(">="), LESSEROREQUAL("<=");
+        ADD("+"), SUBTRACT("-"), MULTIPLY("*"), DIVIDE("/"), MOD("%"), TOTHEPOWER("^"), GREATER(">"), LESSER("<"), GREATEROREQUAL(">="), LESSEROREQUAL("<="), EQUAL("=="), AND("&&"), OR("||"), NOTEQUAL("!=");
         private final String opcode;
         private Operator(String opcode) {
             this.opcode = opcode;
@@ -53,13 +53,58 @@ public class ExpressionOperator extends Expression {
                     if (a instanceof Integer && b instanceof Integer) {
                         return (Integer) a + (Integer) b;
                     }
+                    if (a instanceof String || b instanceof String) {
+                        return a.toString() + b.toString();
+                    }
                     break;
                 case SUBTRACT:
-                    return (Integer) a - (Integer) b;
+                    if (a instanceof Double) {
+                        if (b instanceof Double) {
+                            return (Double) a - (Double) b;
+                        }
+                        if (b instanceof Integer) {
+                            return (Double) a - (Integer) b;
+                        }
+                    }
+                    if (b instanceof Double && a instanceof Integer) {
+                        return (Integer) a - (Double) b;
+                    }
+                    if (a instanceof Integer && b instanceof Integer) {
+                        return (Integer) a - (Integer) b;
+                    }
+                    break;
                 case MULTIPLY:
-                    return (Integer) a * (Integer) b;
+                    if (a instanceof Double) {
+                        if (b instanceof Double) {
+                            return (Double) a * (Double) b;
+                        }
+                        if (b instanceof Integer) {
+                            return (Double) a * (Integer) b;
+                        }
+                    }
+                    if (b instanceof Double && a instanceof Integer) {
+                        return (Integer) a * (Double) b;
+                    }
+                    if (a instanceof Integer && b instanceof Integer) {
+                        return (Integer) a * (Integer) b;
+                    }
+                    break;
                 case DIVIDE:
-                    return (Integer) a / (Integer) b;
+                    if (a instanceof Double) {
+                        if (b instanceof Double) {
+                            return (Double) a / (Double) b;
+                        }
+                        if (b instanceof Integer) {
+                            return (Double) a / (Integer) b;
+                        }
+                    }
+                    if (b instanceof Double && a instanceof Integer) {
+                        return (Integer) a / (Double) b;
+                    }
+                    if (a instanceof Integer && b instanceof Integer) {
+                        return (Integer) a / (Integer) b;
+                    }
+                    break;
                 case MOD:
                     return (Integer) a % (Integer) b;
                 case TOTHEPOWER:
@@ -67,39 +112,51 @@ public class ExpressionOperator extends Expression {
                     if (Math.floor(result) == result) {//If it's a round number, return an int just because
                         return (int) result;
                     }
-                    //System.out.println(A + "^" + B + "=" + result);
                     return result;
                 case GREATER:
                     return compare(a,b) == 1;
                 case LESSER:
                     return compare(a,b) == -1;
+                case GREATEROREQUAL:
+                    return compare(a,b) != -1;
+                case LESSEROREQUAL:
+                    return compare(a,b) != 1;
                 case EQUAL:
-                    return b.equals(a);
+                    return compare(a,b) == 0;
                 case AND:
                     return (Boolean) b && (Boolean) a;
                 case OR:
                     return (Boolean) b || (Boolean) a;
                 case NOTEQUAL:
-                    return !a.equals(b);
-                case GREATEROREQUAL:
-                    return compare(a,b) != -1;
-                case LESSEROREQUAL:
-                    return compare(a,b) != 1;
+                    if (a == null || b == null) {
+                        return a == null ^ b == null;
+                    }
+                    return compare(a,b) != 0;
                 default:
-                    //This is null??
-                    return null;
+                    throw new IllegalStateException("Amount of dank swamp kush too low. Aquire more from Shrek then continue.");
             }
             throw new IllegalStateException("Unable to preform operation " + this + " on '" + a + "' and '" + b + "'");
         }
         private static int compare(Object a,Object b) {
+            if (a == null || b == null) {
+                if (a == null && b == null) {
+                    return 0;
+                }
+                throw new NullPointerException("Unable to compare a null value and " + b + ", silly.");
+            }
+            if (!(a instanceof Comparable && b instanceof Comparable)) {//If they aren't comparable,
+                if (a.equals(b)) {
+                    return 0;
+                }
+            }
             try {
                 return ((Comparable) a).compareTo((Comparable) b);
-            } catch (ClassCastException E) {
+            } catch (Exception E) {
                 if ((a instanceof Double || a instanceof Integer) && (b instanceof Integer || b instanceof Double)) {
                     return compare(toDouble(a),toDouble(b));
                 }
-                throw new RuntimeException("#LOLNO you can't compare " + a + " and " + b + ", silly.");
             }
+            throw new RuntimeException("#LOLNO you can't compare " + a + " and " + b + ", silly.");
         }
         private static double toDouble(Object a) {
             return (a instanceof Integer) ? (double) (((Integer) a)) : (Double) a;
