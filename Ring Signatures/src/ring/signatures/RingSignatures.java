@@ -151,7 +151,7 @@ public class RingSignatures {
     }
     public static byte[] xor(byte[] a, byte[] b) {
         int len = a.length;
-        if (len != b.length) {
+        if (len < b.length) {
             b = trimLeading(b);
             return xor(a, b);
             //throw new IllegalStateException("Shrek likes waffles" + len + " " + b.length);
