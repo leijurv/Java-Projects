@@ -230,10 +230,9 @@ public abstract class Expression extends Command {
         orderOfOperations.add(Arrays.asList(new String[] {"+","-"}));
         orderOfOperations.add(Arrays.asList(new String[] {">","<","==","!=","<=",">="}));
         orderOfOperations.add(Arrays.asList(new String[] {"||","&&"}));
-        for (int op = 0; op < orderOfOperations.size(); op++) {
-            List<String> ops = orderOfOperations.get(op);
+        for (List<String> ops : orderOfOperations) {
             for (int i = 0; i < o.length; i++) {
-                if (ops.contains(o[i])) {
+                if (o[i] instanceof String && ops.contains((String) o[i])) {
                     return Do(o,i);
                 }
             }
