@@ -9,12 +9,12 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Random;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 /**
  *
@@ -24,16 +24,12 @@ public class RingSignatures {
     public static byte[] encrypt(byte[] key, byte[] input) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-        byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
         return cipher.doFinal(input);
     }
     public static byte[] decrypt(byte[] key, byte[] input) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-        byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
         cipher.init(Cipher.DECRYPT_MODE, keySpec);
         return cipher.doFinal(input);
     }
@@ -41,12 +37,10 @@ public class RingSignatures {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.update(message);
         byte[] d = digest.digest();
-        byte[] res = new byte[size / 8];
+        byte[] res = new byte[size / 8];//Extend this hash out to however long it needs to be
         int dlen = d.length;
         for (int i = 0; i < res.length / dlen; i++) {
-            for (int j = 0; j < dlen; j++) {
-                res[i * dlen + j] = d[j];
-            }
+            System.arraycopy(d, 0, res, i * dlen, dlen);
         }
         return res;
     }
@@ -63,17 +57,37 @@ public class RingSignatures {
          byte[] input = new BigInteger("5021").toByteArray(); // TODO
          byte[] output = encrypt(hash(key), input);
          System.out.println(new BigInteger(decrypt(hash(key), encrypt(hash(key), input))));*/
-        Random r = new Random();
-        RSAKeyPair[] keys = new RSAKeyPair[10];
+        ArrayList<RSAKeyPair> keyOptions = new ArrayList<RSAKeyPair>();
         int bitlength = 1024;
-        int s = 2;
-        for (int i = 0; i < keys.length; i++) {
-            keys[i] = RSAKeyPair.generate(new BigInteger(bitlength / 2 - 4, 10, r), new BigInteger(bitlength / 2, 10, r));
-            if (i != s) {
-                keys[i].pri = null;
+        Random r = new Random(5021);
+        for (int i = 0; i < 1000; i++) {
+            System.out.println(i);
+            keyOptions.add(RSAKeyPair.generate(new BigInteger(bitlength / 2 - 3, 8, r), new BigInteger(bitlength / 2, 8, r)));
+        }
+        while (true) {
+            int numKeys = r.nextInt(100) + 1;
+            RSAKeyPair[] keys = new RSAKeyPair[numKeys];
+            int s = r.nextInt(numKeys);
+            byte[] message = new byte[8];
+            r.nextBytes(message);
+            for (int i = 0; i < keys.length; i++) {
+                keys[i] = keyOptions.remove(r.nextInt(keyOptions.size()));
+                if (i != s) {
+                    keys[i] = keys[i].withoutPriv();//We only need one of the private keys
+                }
+            }
+            System.out.println("Creating and verifying");
+            long time = System.currentTimeMillis();
+            byte[][] sig = genRing(keys, message, bitlength, r);
+            boolean b = verify(sig, keys, message, bitlength);
+            System.out.println(b + " " + numKeys + " " + s + " " + (System.currentTimeMillis() - time));
+            if (!b) {
+                return;
             }
         }
-        byte[][] sig = genRing(keys, "kush".getBytes(), 1024, r);
+    }
+    public static boolean verify(byte[][] sig, RSAKeyPair[] keys, byte[] message, int bitlength) throws Exception {
+        byte[] k = hash(message, 256);
         byte[] v = sig[sig.length - 1];
         BigInteger[] x = new BigInteger[sig.length - 1];
         BigInteger[] y = new BigInteger[x.length];
@@ -81,13 +95,14 @@ public class RingSignatures {
             x[i] = new BigInteger(leadingZero(sig[i]));
             y[i] = keys[i].encode(x[i], bitlength);
         }
-        System.out.println("If this is a 0 it worked: " + new BigInteger(runCKV(hash("kush".getBytes(), 256), v, y)).compareTo(new BigInteger(v)));
+        byte[] res = runCKV(k, v, y);
+        return new BigInteger(res).equals(new BigInteger(v));
     }
     public static byte[][] genRing(RSAKeyPair[] keys, byte[] message, int b, Random r) throws Exception {
         byte[] k = hash(message, 256);
         int s = -1;
         for (int i = 0; i < keys.length; i++) {
-            if (keys[i].pri != null) {//Find the one that we have the private key to
+            if (keys[i].hasPrivate()) {//Find the one that we have the private key to
                 if (s != -1) {
                     throw new IllegalStateException("Too many private keyssss");
                 }
@@ -114,7 +129,10 @@ public class RingSignatures {
         x[s] = keys[s].decode(y[s], b);
         //System.out.println("YS: " + y[s]);
         byte[] check = runCKV(k, v, y);
-        System.out.println("If this is a 0 it worked: " + new BigInteger(check).compareTo(new BigInteger(v)));
+        int d = new BigInteger(check).compareTo(new BigInteger(v));
+        if (d != 0) {
+            throw new IllegalStateException("Shrek");
+        }
         byte[][] result = new byte[keys.length + 1][];
         for (int i = 0; i < keys.length; i++) {
             byte[] X = x[i].toByteArray();
@@ -151,10 +169,17 @@ public class RingSignatures {
     }
     public static byte[] xor(byte[] a, byte[] b) {
         int len = a.length;
-        if (len < b.length) {
+        if (len != 128) {
+            throw new IllegalStateException("Can't xor anything other than 128 bites");
+        }
+        while (len < b.length) {
             b = trimLeading(b);
-            return xor(a, b);
+            //return xor(a, b);
             //throw new IllegalStateException("Shrek likes waffles" + len + " " + b.length);
+        }
+        while (len > b.length) {
+            b = leadingZero(b);
+            //return xor(a, b);
         }
         byte[] result = new byte[len];
         for (int i = 0; i < len; i++) {
@@ -163,6 +188,9 @@ public class RingSignatures {
         return result;
     }
     public static byte[] trimLeading(byte[] b) {
+        if (b[0] != 0) {
+            throw new IllegalStateException("Attempting to trim " + b[0]);
+        }
         byte[] res = new byte[b.length - 1];
         for (int i = 0; i < res.length; i++) {
             res[i] = b[i + 1];

@@ -8,7 +8,7 @@ public class RSAKeyPair {
     public static final BigInteger zero = BigInteger.ZERO;
     public final BigInteger modulus;
     public final BigInteger pub;
-    public BigInteger pri;
+    private final BigInteger pri;
     public static RSAKeyPair generate(BigInteger p, BigInteger q) {
         return generate(p, q, defaultPub);
     }
@@ -18,13 +18,22 @@ public class RSAKeyPair {
     protected RSAKeyPair(BigInteger modulus) {
         pub = defaultPub;
         this.modulus = modulus;
+        pri = null;
     }
     protected RSAKeyPair(BigInteger pri, BigInteger modulus) {
         pub = defaultPub;
         this.pri = pri;
         this.modulus = modulus;
     }
+    protected RSAKeyPair(BigInteger pri, BigInteger pub, BigInteger modulus) {
+        this.pri = pri;
+        this.pub = pub;
+        this.modulus = modulus;
+    }
     protected RSAKeyPair(BigInteger p, BigInteger q, BigInteger e, boolean update) {
+        this(p, q, e, update, false);
+    }
+    protected RSAKeyPair(BigInteger p, BigInteger q, BigInteger e, boolean update, boolean delPriv) {
         if (update) {
             System.out.println("Assuming P and Q are prime...");
             System.out.println("Generating KeyPair with updates. P=" + p.toString() + ",Q=" + q.toString() + ",E=" + e.toString());
@@ -35,7 +44,7 @@ public class RSAKeyPair {
             System.out.println("Calculated t: " + t.toString());
             System.out.println("Finding closest prime to e...");
         }
-        while (t.compareTo(e) == -1 || !prime(e)) {
+        while (t.compareTo(e) == -1 || !prime(e) || t.mod(e).equals(zero)) {
             e = e.subtract(one);
         }
         if (update) {
@@ -60,14 +69,18 @@ public class RSAKeyPair {
          while (!(((k.multiply(t)).add(one)).mod(e)).equals(zero)) {
          k = k.add(one);
          }*/
-        if (update) {
-            //System.out.println("Calculated k: " + k.toString());
-            System.out.println("Calculating d...");
-        }
-        //pri = k.multiply(t).add(one).divide(e);
-        pri = e.modPow(zero.subtract(one), t);
-        if (update) {
-            System.out.println("Calculated d: " + pri.toString());
+        if (!delPriv) {
+            if (update) {
+                //System.out.println("Calculated k: " + k.toString());
+                System.out.println("Calculating d...");
+            }
+            //pri = k.multiply(t).add(one).divide(e);
+            pri = e.modPow(zero.subtract(one), t);
+            if (update) {
+                System.out.println("Calculated d: " + pri.toString());
+            }
+        } else {
+            pri = null;
         }
     }
     public String toString() {
@@ -124,7 +137,7 @@ public class RSAKeyPair {
         if (quotient.add(one).multiply(modulus).compareTo(p) != 1) {//(Q+1)*N<=2^bits
             return quotient.multiply(modulus).add(encode(remainder));
         }
-        throw new IllegalStateException("Not enough dank kush");
+        return thing;
     }
     public BigInteger decode(BigInteger thing, int numbits) {
         BigInteger p = two.pow(numbits);//this is pretty inefficient i think
@@ -134,6 +147,12 @@ public class RSAKeyPair {
         if (quotient.add(one).multiply(modulus).compareTo(p) != 1) {//(Q+1)*N<=2^bits
             return quotient.multiply(modulus).add(decode(remainder));
         }
-        throw new IllegalStateException("Not enough dank kush");
+        throw new IllegalStateException("dank");
+    }
+    public boolean hasPrivate() {
+        return pri != null;
+    }
+    public RSAKeyPair withoutPriv() {
+        return new RSAKeyPair(null, pub, modulus);
     }
 }
