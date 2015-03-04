@@ -130,7 +130,7 @@ public class RSAKeyPair {
         return thing.modPow(pub, modulus);
     }
     public BigInteger encode(BigInteger thing, int numbits) {
-        BigInteger p = two.pow(numbits);//this is pretty inefficient i think
+        BigInteger p = one.shiftLeft(numbits);//this is pretty inefficient i think
         BigInteger[] div = thing.divideAndRemainder(modulus);
         BigInteger quotient = div[0];
         BigInteger remainder = div[1];
@@ -140,7 +140,7 @@ public class RSAKeyPair {
         return thing;
     }
     public BigInteger decode(BigInteger thing, int numbits) {
-        BigInteger p = two.pow(numbits);//this is pretty inefficient i think
+        BigInteger p = one.shiftLeft(numbits);//this is pretty inefficient i think
         BigInteger[] div = thing.divideAndRemainder(modulus);
         BigInteger quotient = div[0];
         BigInteger remainder = div[1];

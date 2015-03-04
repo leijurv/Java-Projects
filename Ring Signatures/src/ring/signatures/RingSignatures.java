@@ -9,7 +9,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Random;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -57,21 +56,16 @@ public class RingSignatures {
          byte[] input = new BigInteger("5021").toByteArray(); // TODO
          byte[] output = encrypt(hash(key), input);
          System.out.println(new BigInteger(decrypt(hash(key), encrypt(hash(key), input))));*/
-        ArrayList<RSAKeyPair> keyOptions = new ArrayList<RSAKeyPair>();
         int bitlength = 1024;
         Random r = new Random(5021);
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(i);
-            keyOptions.add(RSAKeyPair.generate(new BigInteger(bitlength / 2 - 3, 8, r), new BigInteger(bitlength / 2, 8, r)));
-        }
         while (true) {
-            int numKeys = r.nextInt(100) + 1;
+            int numKeys = r.nextInt(10) + 1;
             RSAKeyPair[] keys = new RSAKeyPair[numKeys];
             int s = r.nextInt(numKeys);
             byte[] message = new byte[8];
             r.nextBytes(message);
             for (int i = 0; i < keys.length; i++) {
-                keys[i] = keyOptions.remove(r.nextInt(keyOptions.size()));
+                keys[i] = RSAKeyPair.generate(new BigInteger(bitlength / 2 - 4, 8, r), new BigInteger(bitlength / 2, 8, r));
                 if (i != s) {
                     keys[i] = keys[i].withoutPriv();//We only need one of the private keys
                 }
@@ -188,6 +182,9 @@ public class RingSignatures {
         return result;
     }
     public static byte[] trimLeading(byte[] b) {
+        if (b.length % 128 == 0) {
+            return b;
+        }
         if (b[0] != 0) {
             throw new IllegalStateException("Attempting to trim " + b[0]);
         }

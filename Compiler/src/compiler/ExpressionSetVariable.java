@@ -12,29 +12,32 @@ import java.io.IOException;
  * @author leijurv
  */
 public class ExpressionSetVariable extends Expression {
-    private final String variablename;
+    private final Settable set;
     private final Expression value;
-    public ExpressionSetVariable(String varname,Expression val) {
-        variablename = varname;
-        value = val;
+    public ExpressionSetVariable(String varname, Expression val) {
+        this(new ExpressionVariable(varname), val);
+    }
+    public ExpressionSetVariable(Settable set, Expression value) {
+        this.set = set;
+        this.value = value;
     }
     protected ExpressionSetVariable(DataInputStream in) throws IOException {
-        variablename = in.readUTF();
+        set = new ExpressionVariable(in.readUTF());
         value = readExpression(in);
     }
     @Override
     public Object evaluate(Context c) {
         Object o = value.evaluate(c);
-        c.set(variablename,o);
+        set.set(c, o);
         return o;
     }
     @Override
     public String toString() {
-        return "~set~ " + variablename + "=" + value;
+        return "~set~ " + set + "=" + value;
     }
     @Override
     protected void doWriteExpression(DataOutputStream out) throws IOException {
-        out.writeUTF(variablename);
+        out.writeUTF(((ExpressionVariable) set).getVarname());
         value.writeExpression(out);
     }
     @Override

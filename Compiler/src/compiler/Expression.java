@@ -16,19 +16,28 @@ import java.util.List;
  * @author leijurv
  */
 public abstract class Expression extends Command {
+    static final ArrayList<List<String>> orderOfOperations = new ArrayList<>();
+    static{
+        orderOfOperations.add(Arrays.asList(new String[] {"%"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"^"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"*", "/"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"+", "-"}));
+        orderOfOperations.add(Arrays.asList(new String[] {">", "<", "==", "!=", "<=", ">="}));
+        orderOfOperations.add(Arrays.asList(new String[] {"||", "&&"}));
+    }
     @Override
     public boolean execute(Context c) {
         evaluate(c);
         return false;
     }
     public abstract Object evaluate(Context c);
-    private static final String[] let = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","y","z"};
+    private static final String[] let = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "y", "z"};
     private static boolean let(Object o) {//Does o consist of letters?
         if (o instanceof String) {
             String r = (String) o;
             if (r.length() > 1) {
                 for (int i = 0; i < r.length(); i++) {
-                    if (!let(r.substring(i,i + 1))) {
+                    if (!let(r.substring(i, i + 1))) {
                         return false;
                     }
                 }
@@ -59,14 +68,14 @@ public abstract class Expression extends Command {
     }
     private static boolean eq(Object o) {
         if (o instanceof String) {
-            return ((((String) o).replace(">","").length() == 0) || (((String) o).replace("<","").length() == 0) || ((String) o).replace("!","").length() == 0) || (((String) o).replace("=","").length() == 0) || (((String) o).replace("|","").length() == 0) || (((String) o).replace("&","").length() == 0);
+            return ((((String) o).replace(">", "").length() == 0) || (((String) o).replace("<", "").length() == 0) || ((String) o).replace("!", "").length() == 0) || (((String) o).replace("=", "").length() == 0) || (((String) o).replace("|", "").length() == 0) || (((String) o).replace("&", "").length() == 0);
         }
         return false;
     }
     public static ArrayList<Object> lex(String s) {
         Object[] objects = new Object[s.length()];
         for (int i = 0; i < objects.length; i++) {
-            objects[i] = s.substring(i,i + 1);
+            objects[i] = s.substring(i, i + 1);
         }
         int numItemsRemoved = 0;
         for (int i = 0; i < objects.length; i++) {
@@ -80,19 +89,19 @@ public abstract class Expression extends Command {
                 objects[i + 1] = (String) objects[i] + (String) objects[i + 1];
                 objects[i] = null;
                 numItemsRemoved++;
-                i = Math.max(i - 2,0);
+                i = Math.max(i - 2, 0);
             }
             if (objects[i] != null && objects[i + 1] != null && let(objects[i]) && let(objects[i + 1])) {
                 objects[i + 1] = (String) objects[i] + (String) objects[i + 1];
                 objects[i] = null;
                 numItemsRemoved++;
-                i = Math.max(i - 2,0);
+                i = Math.max(i - 2, 0);
             }
             if (objects[i] != null && objects[i + 1] != null && num(objects[i]) && num(objects[i + 1])) {
                 objects[i + 1] = (String) objects[i] + (String) objects[i + 1];
                 objects[i] = null;
                 numItemsRemoved++;
-                i = Math.max(i - 2,0);
+                i = Math.max(i - 2, 0);
             }
         }
         for (int i = 0; i < objects.length - 1; i++) {
@@ -106,27 +115,27 @@ public abstract class Expression extends Command {
             }
         }
         Object[] N = new Object[objects.length - numItemsRemoved];
-        System.arraycopy(objects,0,N,0,N.length);
+        System.arraycopy(objects, 0, N, 0, N.length);
         return new ArrayList<>(Arrays.asList(N));
         //Grouping together sequences of letters and numbers. e.g. 4,5,+,j,r,*,x becomes 45,+,jr,*,x
         //Note: x does not group it says by itself
     }
-    private static Expression Do(Object[] o,int i) {//Evaluate the operator at i in o,
+    private static Expression Do(Object[] o, int i) {//Evaluate the operator at i in o,
         //replace a*b with the result, then evaluate that recursively
         Object[] N = new Object[3];
-        System.arraycopy(o,i - 1,N,0,3);
+        System.arraycopy(o, i - 1, N, 0, 3);
         Object[] result = new Object[o.length - 2];
-        System.arraycopy(o,0,result,0,i - 1);
-        System.arraycopy(o,i + 2,result,i,o.length - (i + 2));
+        System.arraycopy(o, 0, result, 0, i - 1);
+        System.arraycopy(o, i + 2, result, i, o.length - (i + 2));
         result[i - 1] = parse(N);
         return parse(result);
     }
-    private static final HashMap<String,Object> constants;
+    private static final HashMap<String, Object> constants;
     static{
         constants = new HashMap<>();
-        constants.put("true",true);
-        constants.put("false",false);
-        constants.put("55","DANK SWAMP KUSH");
+        constants.put("true", true);
+        constants.put("false", false);
+        constants.put("55", new Object[] {1, 2, 3, 5, 6, 67, 7});
     }
     public static Expression parse(Object o) {
         if (o instanceof Object[]) {
@@ -150,7 +159,7 @@ public abstract class Expression extends Command {
                 double r = Double.parseDouble(s);
                 return new ExpressionConstant(r);//If it can be parsed as a double without throwing an exception, it's a double!
             } catch (NumberFormatException E) {
-                return new ExpressionGetVariable(s);
+                return new ExpressionVariable(s);
             }
         }
     }
@@ -168,12 +177,15 @@ public abstract class Expression extends Command {
             for (int i = 0; i < Cool.length; i++) {
                 Cool[i] = o[i + 2];
             }
-            String varname = (String) o[0];
             Expression set = parse(Cool);
-            if (constants.get(varname) != null) {
-                throw new UnsupportedOperationException("Unable to set constant " + varname + " to " + set);
+            if (o[0] instanceof String) {
+                if (constants.get((String) o[0]) != null) {
+                    throw new UnsupportedOperationException("Unable to set constant " + o[0] + " to " + set);
+                }
+                o[0] = new ExpressionVariable((String) o[0]);
             }
-            return new ExpressionSetVariable(varname,set);
+            Settable varname = (Settable) o[0];
+            return new ExpressionSetVariable(varname, set);
         }
         //System.out.println(o.length);
         //Parenthesis
@@ -194,17 +206,19 @@ public abstract class Expression extends Command {
                     parenContents[m] = o[m + i + 1];
                 }
                 Object[] leftover = new Object[o.length - (parenContents.length + 1)];
-                System.arraycopy(o,0,leftover,0,i);
-                System.arraycopy(o,j,leftover,i + 1,o.length - j);
+                System.arraycopy(o, 0, leftover, 0, i);
+                System.arraycopy(o, j, leftover, i + 1, o.length - j);
                 leftover[i] = parse(parenContents);
                 return parse(leftover);
             }
+        }
+        if ((o[0] instanceof String) && ((String) o[0]).equals("[")) {//Defining an array
         }
         if (o.length == 3) {//Assume that the middle one is an operator
             Expression First = parse(new Object[] {(Object) (new Object[] {o[0]})});
             String s = (String) o[1];
             Expression Last = parse(new Object[] {(Object) (new Object[] {o[2]})});
-            return new ExpressionOperator(First,s,Last);
+            return new ExpressionOperator(First, s, Last);
         }
         //Functions
         for (int i = 0; i < o.length - 1; i++) {
@@ -212,28 +226,49 @@ public abstract class Expression extends Command {
                 String s = (String) o[i];
                 if (let(s) && o[i + 1] instanceof Expression) {
                     Object[] Cool = new Object[o.length - 1];
-                    System.arraycopy(o,0,Cool,0,i);
-                    System.arraycopy(o,i + 1,Cool,i,o.length - (i + 1));
+                    System.arraycopy(o, 0, Cool, 0, i);
+                    System.arraycopy(o, i + 1, Cool, i, o.length - (i + 1));
                     Expression f = parse(new Object[] {o[i + 1]});
                     ArrayList<Expression> args = new ArrayList<>();
                     args.add(f);
-                    Cool[i] = new ExpressionBeginChase(s,args);
+                    Cool[i] = new ExpressionBeginChase(s, args);
                     return parse(Cool);
                 }
             }
         }
+        for (int i = 1; i < o.length - 1; i++) {
+            if (o[i] instanceof String && o[i].equals("[")) {
+                String varname = (String) o[i - 1];
+                int n = 1;
+                int j;
+                for (j = i + 1; j < o.length && n > 0; j++) {
+                    if (o[j].equals("[")) {
+                        n++;
+                    }
+                    if (o[j].equals("]")) {
+                        n--;
+                    }
+                }
+                Object[] parenContents = new Object[j - i - 2];
+                for (int m = 0; m < j - 1 - (i + 1); m++) {
+                    parenContents[m] = o[m + i + 1];
+                }
+                Object[] leftover = new Object[o.length - (parenContents.length + 2)];
+                for (int k = 0; k < i - 1; k++) {
+                    leftover[k] = o[k];
+                }
+                for (int k = j; k < o.length; k++) {
+                    leftover[k - j + i] = o[k];
+                }
+                leftover[i - 1] = new ExpressionArray(varname, parse(parenContents));
+                return parse(leftover);
+            }
+        }
         //Operators, using order of operations. Between * and /, 5*6/7 would be (5*6)/7, going left to right
-        ArrayList<List<String>> orderOfOperations = new ArrayList<>();
-        orderOfOperations.add(Arrays.asList(new String[] {"%"}));
-        orderOfOperations.add(Arrays.asList(new String[] {"^"}));
-        orderOfOperations.add(Arrays.asList(new String[] {"*","/"}));
-        orderOfOperations.add(Arrays.asList(new String[] {"+","-"}));
-        orderOfOperations.add(Arrays.asList(new String[] {">","<","==","!=","<=",">="}));
-        orderOfOperations.add(Arrays.asList(new String[] {"||","&&"}));
         for (List<String> ops : orderOfOperations) {
             for (int i = 0; i < o.length; i++) {
                 if (o[i] instanceof String && ops.contains((String) o[i])) {
-                    return Do(o,i);
+                    return Do(o, i);
                 }
             }
         }
@@ -261,7 +296,7 @@ public abstract class Expression extends Command {
     public static Expression readExpression(DataInputStream in) throws IOException {
         byte expressionID = in.readByte();
         System.out.println("Reading expression ID" + expressionID);
-        Expression result = readExpressionWithID(in,expressionID);
+        Expression result = readExpressionWithID(in, expressionID);
         if (result == null) {
             return null;//Or throw exception, haven't decided yet
         }
@@ -271,7 +306,7 @@ public abstract class Expression extends Command {
         System.out.println("Parsed " + result);
         return result;
     }
-    private static Expression readExpressionWithID(DataInputStream in,byte expressionID) throws IOException {
+    private static Expression readExpressionWithID(DataInputStream in, byte expressionID) throws IOException {
         switch (expressionID) {
             case 1:
                 return new Chase(in);
@@ -280,11 +315,13 @@ public abstract class Expression extends Command {
             case 3:
                 return new ExpressionConstant(in);
             case 4:
-                return new ExpressionGetVariable(in);
+                return new ExpressionVariable(in);
             case 5:
                 return new ExpressionOperator(in);
             case 6:
                 return new ExpressionSetVariable(in);
+            case 7:
+                return new ExpressionArray(in);
             default:
                 return null;
         }

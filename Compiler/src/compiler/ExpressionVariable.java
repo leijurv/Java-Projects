@@ -11,12 +11,12 @@ import java.io.IOException;
  *
  * @author leijurv
  */
-public class ExpressionGetVariable extends Expression {
+public class ExpressionVariable extends Expression implements Settable {
     private final String varname;
-    public ExpressionGetVariable(String varname) {
+    public ExpressionVariable(String varname) {
         this.varname = varname;
     }
-    protected ExpressionGetVariable(DataInputStream in) throws IOException {
+    protected ExpressionVariable(DataInputStream in) throws IOException {
         varname = in.readUTF();
     }
     @Override
@@ -34,5 +34,12 @@ public class ExpressionGetVariable extends Expression {
     @Override
     public byte getExpressionID() {
         return 4;
+    }
+    @Override
+    public void set(Context c, Object value) {
+        c.set(varname, value);
+    }
+    public String getVarname() {
+        return varname;
     }
 }
