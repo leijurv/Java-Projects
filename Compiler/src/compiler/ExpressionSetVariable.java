@@ -15,14 +15,16 @@ public class ExpressionSetVariable extends Expression {
     private final Settable set;
     private final Expression value;
     public ExpressionSetVariable(String varname, Expression val) {
-        this(new ExpressionVariable(varname), val);
+        ExpressionVariable v = new ExpressionVariable(varname);
+        set = v;
+        this.value = val;
     }
     public ExpressionSetVariable(Settable set, Expression value) {
         this.set = set;
         this.value = value;
     }
     protected ExpressionSetVariable(DataInputStream in) throws IOException {
-        set = new ExpressionVariable(in.readUTF());
+        set = (Settable) readExpression(in);
         value = readExpression(in);
     }
     @Override
@@ -37,7 +39,7 @@ public class ExpressionSetVariable extends Expression {
     }
     @Override
     protected void doWriteExpression(DataOutputStream out) throws IOException {
-        out.writeUTF(((ExpressionVariable) set).getVarname());
+        set.writeExpression(out);
         value.writeExpression(out);
     }
     @Override

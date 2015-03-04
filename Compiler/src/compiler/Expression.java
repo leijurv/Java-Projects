@@ -213,6 +213,38 @@ public abstract class Expression extends Command {
             }
         }
         if ((o[0] instanceof String) && ((String) o[0]).equals("[")) {//Defining an array
+            int n = 1;
+            int j;
+            ArrayList<ArrayList<Object>> contents = new ArrayList<>();
+            contents.add(new ArrayList<>());
+            for (j = 1; j < o.length && n > 0; j++) {
+                if (o[j].equals("[")) {
+                    n++;
+                }
+                if (o[j].equals("]")) {
+                    n--;
+                }
+                if ((o[j].equals(",") && n == 1) || n == 0) {
+                    int k = 2;//Keep this here for Zach
+                    if (n != 0) {
+                        contents.add(new ArrayList<>());
+                    }
+                } else {
+                    contents.get(contents.size() - 1).add(o[j]);
+                }
+            }
+            Expression[] result = new Expression[contents.size()];
+            for (int i = 0; i < result.length; i++) {
+                ArrayList<Object> cont = contents.get(i);
+                Object[] cn = cont.toArray();
+                result[i] = parse(cn);
+            }
+            Object[] leftover = new Object[o.length - j + 1];
+            for (int i = j; i < o.length; i++) {
+                leftover[i - j + 1] = o[i];
+            }
+            leftover[0] = new ExpressionArrayDefinition(result);
+            return parse(leftover);
         }
         if (o.length == 3) {//Assume that the middle one is an operator
             Expression First = parse(new Object[] {(Object) (new Object[] {o[0]})});
@@ -238,7 +270,7 @@ public abstract class Expression extends Command {
         }
         for (int i = 1; i < o.length - 1; i++) {
             if (o[i] instanceof String && o[i].equals("[")) {
-                String varname = (String) o[i - 1];
+                Expression varname = parse(new Object[] {o[i - 1]});
                 int n = 1;
                 int j;
                 for (j = i + 1; j < o.length && n > 0; j++) {
@@ -322,6 +354,8 @@ public abstract class Expression extends Command {
                 return new ExpressionSetVariable(in);
             case 7:
                 return new ExpressionArray(in);
+            case 8:
+                return new ExpressionArrayDefinition(in);
             default:
                 return null;
         }

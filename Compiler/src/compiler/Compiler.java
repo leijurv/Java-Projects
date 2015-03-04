@@ -11,16 +11,17 @@ import java.util.ArrayList;
  * @author leijurv
  */
 public class Compiler {
+    static final String programFloatingPointTesting = "chase main ( kush ) { meow ( 5 + 5^2 );blink(5.2^2>27){meow(55+1)}a=(kush>=4);meow(a);a=a||false;a=a&&true;meow(a)blink(a){meow(55)}else{meow(66)} blink(true){meow(1)};meow(5.0==5)} ";
+    static final String programArrayTesting = "chase main(kush){a=[1,3,[5],6,67];meow(a[1]);meow(a[2]);meow(a[2][0]);meow(a[1]);a[1]=[4,5];meow(a[1][0]);a[1][0]=7;meow(a[1][0]);meow([5,[6]][1][0])}";
+    static final String programEuler1 = "chase main(abc){sum=0;i=0;purr(i<1000){blink(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
+    static final String programOtherEuler1 = "chase main(abc){i=sum=0;purr(i<1000){blink(i%5!=0){blink(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
+    static final String programChaseTesting = "chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); blink ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-        String program2 = "chase main(abc){sum=0;i=0;purr(i<1000){blink(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
-        String program3 = "chase main(abc){i=sum=0;purr(i<1000){blink(i%5!=0){blink(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
-        String program1 = "chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); blink ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
-        String program4 = "chase main ( kush ) { meow ( 5 + 5^2 );blink(5.2^2>27){meow(55+1)}a=(kush>=4);meow(a);a=a||false;a=a&&true;meow(a)blink(a){meow(55)}else{meow(66)} blink(true){meow(1)};meow(5.0==5)} ";
-        String program = "chase main(kush){a=55;meow(a[1]);b=5+a[1];meow(b);meow(a[1]);meow(a[a[1]+1]);a[a[1]-1]=a[a[1]+1];meow(a[1]);}";
+        String program = programArrayTesting;
         System.out.println("STARTING TO PARSE: " + program);
         System.out.println();
         long time = System.currentTimeMillis();
@@ -33,9 +34,9 @@ public class Compiler {
         System.out.println("Compiling...");
         System.out.println();
         System.out.println();
-        //byte[] compiled = compile(prograaa);
-        //runProgram(compiled);
-        run(prograaa);
+        byte[] compiled = compile(prograaa);
+        runProgram(compiled);
+        //run(prograaa);
     }
     public static byte[] compile(ArrayList<Command> program) throws IOException {
         long time = System.currentTimeMillis();

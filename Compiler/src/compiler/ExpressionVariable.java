@@ -11,7 +11,7 @@ import java.io.IOException;
  *
  * @author leijurv
  */
-public class ExpressionVariable extends Expression implements Settable {
+public class ExpressionVariable extends Settable {
     private final String varname;
     public ExpressionVariable(String varname) {
         this.varname = varname;

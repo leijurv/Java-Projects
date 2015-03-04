@@ -8,8 +8,6 @@ package compiler;
  *
  * @author leijurv
  */
-public interface Settable {
-    public void set(Context c, Object value);
-    @Override
-    public String toString();
+public abstract class Settable extends Expression {
+    public abstract void set(Context c, Object value);
 }

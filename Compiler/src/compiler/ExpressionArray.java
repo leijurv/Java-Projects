@@ -11,26 +11,26 @@ import java.io.IOException;
  *
  * @author leijurv
  */
-public class ExpressionArray extends Expression implements Settable {
-    String var;
-    Expression index;
-    public ExpressionArray(String var, Expression index) {
+public class ExpressionArray extends Settable {
+    private final Expression var;
+    private final Expression index;
+    public ExpressionArray(Expression var, Expression index) {
         this.var = var;
         this.index = index;
     }
     protected ExpressionArray(DataInputStream in) throws IOException {
-        var = in.readUTF();
+        var = readExpression(in);
         index = readExpression(in);
     }
     @Override
     public Object evaluate(Context c) {
-        Object[] dank = (Object[]) c.get(var);
+        Object[] dank = (Object[]) var.evaluate(c);
         int ind = (Integer) index.evaluate(c);
         return dank[ind];
     }
     @Override
     protected void doWriteExpression(DataOutputStream out) throws IOException {
-        out.writeUTF(var);
+        var.writeExpression(out);
         index.writeExpression(out);
     }
     @Override
@@ -39,11 +39,11 @@ public class ExpressionArray extends Expression implements Settable {
     }
     @Override
     public String toString() {
-        return var + "[" + index + "]";
+        return "%" + var + "[" + index + "]";
     }
     @Override
     public void set(Context c, Object value) {
-        Object[] dank = (Object[]) c.get(var);
+        Object[] dank = (Object[]) var.evaluate(c);
         int ind = (Integer) index.evaluate(c);
         dank[ind] = value;
     }
