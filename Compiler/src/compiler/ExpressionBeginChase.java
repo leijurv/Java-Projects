@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 /**
  *
  * @author leijurv
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 public class ExpressionBeginChase extends Expression {
     private final String chasename;
     private final ArrayList<Expression> prey;
-    public ExpressionBeginChase(String chasename,ArrayList<Expression> prey) {
+    public ExpressionBeginChase(String chasename, ArrayList<Expression> prey) {
         this.prey = prey;
         this.chasename = chasename;
     }
@@ -34,13 +35,26 @@ public class ExpressionBeginChase extends Expression {
             preyVals.add(prey.get(i).evaluate(c));
         }
         if (chasename.equals("meow")) {
-            System.out.println("MEOWING " + preyVals);
+            if (preyVals.size() > 1) {
+                throw new IllegalStateException("Can't meow more than 1 thing. Use an array.");
+            }
+            Object o = preyVals.get(0);
+            if (o instanceof Object[]) {
+                o = (Arrays.asList((Object[]) o));
+            }
+            System.out.println("MEOWING " + o);
             return preyVals;
         }
+        if (chasename.equals("len")) {
+            return ((Object[]) preyVals.get(0)).length;
+        }
+        if (chasename.equals("array")) {
+            return new Object[(Integer) preyVals.get(0)];
+        }
+        System.out.println("BEGINNING " + chasename + " " + " with prey " + prey + " and context " + c);
         Chase f = (Chase) (c.get(chasename));
-        System.out.println("BEGINNING " + chasename + " " + f + " with prey " + prey + " and context " + c);
         System.out.println("Evaluated args as: " + preyVals);
-        return f.run(c,preyVals);
+        return f.run(c, preyVals);
     }
     @Override
     public String toString() {

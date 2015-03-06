@@ -12,16 +12,20 @@ import java.util.ArrayList;
  */
 public class Compiler {
     static final String programFloatingPointTesting = "chase main ( kush ) { meow ( 5 + 5^2 );blink(5.2^2>27){meow(55+1)}a=(kush>=4);meow(a);a=a||false;a=a&&true;meow(a)blink(a){meow(55)}else{meow(66)} blink(true){meow(1)};meow(5.0==5)} ";
-    static final String programArrayTesting = "chase main(kush){a=[1,3,[5],6,67];meow(a[1]);meow(a[2]);meow(a[2][0]);meow(a[1]);a[1]=[4,5];meow(a[1][0]);a[1][0]=7;meow(a[1][0]);meow([5,[6]][1][0])}";
+    static final String programArrayTesting = "chase main(kush){a=[1,3,[5],6,67];meow(a[1]);meow(a[2]);meow(a[2][0]);meow(a[1]);a[1]=[4,5];meow(a[1][0]);a[1][0]=7;meow(a[1][0]);meow([5,[6]][1][0]);meow(len(array(100)));}";
     static final String programEuler1 = "chase main(abc){sum=0;i=0;purr(i<1000){blink(i%5==0||i%3==0){sum=sum+i}i=i+1};meow(sum)}";
     static final String programOtherEuler1 = "chase main(abc){i=sum=0;purr(i<1000){blink(i%5!=0){blink(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
     static final String programChaseTesting = "chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); blink ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
+    static final String programMapTest = "chase map(f,a){i=0;l=len(a);r=array(l);purr(i<l){r[i]=f(a[i]);i=i+1};pounce r} chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}} chase main(r){a=[4,5,6];b=map(fac,a);meow(b);meow(b+1);}";
+    static final String programSettingTesting = "chase main(abc){x=[5,6];[x[0],x[1]]=[x[1],x];meow(x);[a,b]=[1,2];[b,a]=[a,b];meow([a,b]);meow(1==[a,b]);meow(1==[a,b]-1)}";
+    static final String programFibbonacciTest = "chase main(abc){prev=1;current=1;purr(current<abc){meow(current);[prev,current]=[current,prev+current];}}";
+    static final String programReverseTest = "chase reverse(a){[i,l]=[0,len(a)];r=array(l);purr(i<l){r[i]=a[l-i-1];i=i+1}pounce r} chase main(abc){x=[1,2,3,4];meow(x);meow(reverse(x))}";
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-        String program = programArrayTesting;
+        String program = programReverseTest;
         System.out.println("STARTING TO PARSE: " + program);
         System.out.println();
         long time = System.currentTimeMillis();
@@ -72,7 +76,7 @@ public class Compiler {
         System.out.println("PROGRAM: " + c);
         System.out.println();
         ArrayList<Expression> prey = new ArrayList<>();
-        prey.add(new ExpressionConstant(3));
+        prey.add(new ExpressionConstant(100));
         System.out.println("Running program with prey " + prey);
         time = System.currentTimeMillis();
         new ExpressionBeginChase("main", prey).evaluate(c);
@@ -126,6 +130,7 @@ public class Compiler {
                 for (int j = 0; j < keyWords.length; j++) {
                     if (s.startsWith(keyWords[j])) {
                         key = j;
+                        break;
                     }
                 }
                 if (key == -1) {
@@ -217,7 +222,7 @@ public class Compiler {
             if (temp1 instanceof Command) {
                 res.add((Command) (temp1));
             } else {
-                throw new IllegalStateException("Expected " + temp1 + " to be a command. " + failMessage);
+                throw new ClassCastException("Expected " + temp1 + " to be a command. " + failMessage);
             }
         }
         return res;

@@ -16,10 +16,10 @@ import java.util.List;
  * @author leijurv
  */
 public abstract class Expression extends Command {
-    static final ArrayList<List<String>> orderOfOperations = new ArrayList<>();
+    static final ArrayList<List<String>> orderOfOperations = new ArrayList<>();//TODO: merge this with the Operator enum in ExpressionOperator.
     static{
-        orderOfOperations.add(Arrays.asList(new String[] {"%"}));
         orderOfOperations.add(Arrays.asList(new String[] {"^"}));
+        orderOfOperations.add(Arrays.asList(new String[] {"%"}));
         orderOfOperations.add(Arrays.asList(new String[] {"*", "/"}));
         orderOfOperations.add(Arrays.asList(new String[] {"+", "-"}));
         orderOfOperations.add(Arrays.asList(new String[] {">", "<", "==", "!=", "<=", ">="}));
@@ -68,7 +68,15 @@ public abstract class Expression extends Command {
     }
     private static boolean eq(Object o) {
         if (o instanceof String) {
-            return ((((String) o).replace(">", "").length() == 0) || (((String) o).replace("<", "").length() == 0) || ((String) o).replace("!", "").length() == 0) || (((String) o).replace("=", "").length() == 0) || (((String) o).replace("|", "").length() == 0) || (((String) o).replace("&", "").length() == 0);
+            String s = (String) o;
+            for (int i = orderOfOperations.size() - 1; i >= orderOfOperations.size() - 2; i--) {
+                List<String> dank = orderOfOperations.get(i);
+                for (String k : dank) {
+                    if (k.contains(s)) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
@@ -120,6 +128,18 @@ public abstract class Expression extends Command {
         //Grouping together sequences of letters and numbers. e.g. 4,5,+,j,r,*,x becomes 45,+,jr,*,x
         //Note: x does not group it says by itself
     }
+    public static boolean isOperator(Object o) {
+        if (!(o instanceof String)) {
+            return false;
+        }
+        String s = (String) o;
+        for (List<String> O : orderOfOperations) {
+            if (O.contains(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
     private static Expression Do(Object[] o, int i) {//Evaluate the operator at i in o,
         //replace a*b with the result, then evaluate that recursively
         Object[] N = new Object[3];
@@ -163,7 +183,47 @@ public abstract class Expression extends Command {
             }
         }
     }
-    public static Expression parse(Object[] o) {//I TOTALLY didn't copy this from my derivative project
+    public static Object[] parseParen(Object[] o, int i, String sb, String eb, String sp, String ep) {
+        int n = 1;
+        int j;
+        int numSquare = 0;//We have to keep track of both kinds of brackets because otherwise [a,function(1,2)] would be parsed as [a  ,  function(1   ,   2)]
+        ArrayList<ArrayList<Object>> contents = new ArrayList<>();
+        contents.add(new ArrayList<>());
+        for (j = i + 1; j < o.length && n > 0; j++) {
+            if (o[j].equals(sb)) {
+                n++;
+            }
+            if (o[j].equals(eb)) {
+                n--;
+            }
+            if (o[j].equals(sp)) {
+                numSquare++;
+            }
+            if (o[j].equals(ep)) {
+                numSquare--;
+            }
+            if (n != 0) {//If n==0 then this is the last time running and o[j]= ) and we don't want that to be parsed
+                if (o[j].equals(",") && n == 1 && numSquare == 0) {
+                    int k = 2;//Keep this here for Zach
+                    contents.add(new ArrayList<>());
+                } else {
+                    contents.get(contents.size() - 1).add(o[j]);
+                }
+            }
+        }
+        System.out.println("MEOWWW " + contents);
+        Expression[] result = new Expression[contents.size()];
+        for (int k = 0; k < result.length; k++) {
+            ArrayList<Object> cont = contents.get(k);
+            Object[] cn = cont.toArray();
+            result[k] = parse(cn);
+        }
+        Object[] leftover = new Object[o.length - j + 1 + i];
+        System.arraycopy(o, j, leftover, 1 + i, o.length - j);
+        System.arraycopy(o, 0, leftover, 0, i);
+        return new Object[] {result, leftover};
+    }
+    public static Expression parse(Object[] o) {
         System.out.print("Parsing expression ");
         for (Object k : o) {
             System.out.print(k + "       ");
@@ -191,58 +251,17 @@ public abstract class Expression extends Command {
         //Parenthesis
         for (int i = 0; i < o.length; i++) {
             if (o[i].equals("(")) {
-                int n = 1;
-                int j;
-                for (j = i + 1; j < o.length && n > 0; j++) {
-                    if (o[j].equals("(")) {
-                        n++;
-                    }
-                    if (o[j].equals(")")) {
-                        n--;
-                    }
-                }
-                Object[] parenContents = new Object[j - i - 2];
-                for (int m = 0; m < j - 1 - (i + 1); m++) {
-                    parenContents[m] = o[m + i + 1];
-                }
-                Object[] leftover = new Object[o.length - (parenContents.length + 1)];
-                System.arraycopy(o, 0, leftover, 0, i);
-                System.arraycopy(o, j, leftover, i + 1, o.length - j);
-                leftover[i] = parse(parenContents);
+                Object[] r = parseParen(o, i, "(", ")", "[", "]");
+                Expression[] result = (Expression[]) r[0];
+                Object[] leftover = (Object[]) r[1];
+                leftover[i] = result.length == 0 ? result[0] : result;
                 return parse(leftover);
             }
         }
         if ((o[0] instanceof String) && ((String) o[0]).equals("[")) {//Defining an array
-            int n = 1;
-            int j;
-            ArrayList<ArrayList<Object>> contents = new ArrayList<>();
-            contents.add(new ArrayList<>());
-            for (j = 1; j < o.length && n > 0; j++) {
-                if (o[j].equals("[")) {
-                    n++;
-                }
-                if (o[j].equals("]")) {
-                    n--;
-                }
-                if ((o[j].equals(",") && n == 1) || n == 0) {
-                    int k = 2;//Keep this here for Zach
-                    if (n != 0) {
-                        contents.add(new ArrayList<>());
-                    }
-                } else {
-                    contents.get(contents.size() - 1).add(o[j]);
-                }
-            }
-            Expression[] result = new Expression[contents.size()];
-            for (int i = 0; i < result.length; i++) {
-                ArrayList<Object> cont = contents.get(i);
-                Object[] cn = cont.toArray();
-                result[i] = parse(cn);
-            }
-            Object[] leftover = new Object[o.length - j + 1];
-            for (int i = j; i < o.length; i++) {
-                leftover[i - j + 1] = o[i];
-            }
+            Object[] r = parseParen(o, 0, "[", "]", "(", ")");
+            Expression[] result = (Expression[]) r[0];
+            Object[] leftover = (Object[]) r[1];
             leftover[0] = new ExpressionArrayDefinition(result);
             return parse(leftover);
         }
@@ -256,23 +275,30 @@ public abstract class Expression extends Command {
         for (int i = 0; i < o.length - 1; i++) {
             if (o[i] instanceof String) {
                 String s = (String) o[i];
-                if (let(s) && o[i + 1] instanceof Expression) {
+                if (let(s) && (o[i + 1] instanceof Expression || o[i + 1] instanceof Expression[])) {
                     Object[] Cool = new Object[o.length - 1];
                     System.arraycopy(o, 0, Cool, 0, i);
                     System.arraycopy(o, i + 1, Cool, i, o.length - (i + 1));
-                    Expression f = parse(new Object[] {o[i + 1]});
                     ArrayList<Expression> args = new ArrayList<>();
-                    args.add(f);
+                    if (o[i + 1] instanceof Expression) {
+                        args.add((Expression) o[i + 1]);
+                    } else {
+                        args = new ArrayList<>(Arrays.asList((Expression[]) (o[i + 1])));
+                    }
                     Cool[i] = new ExpressionBeginChase(s, args);
                     return parse(Cool);
                 }
             }
         }
-        for (int i = 1; i < o.length - 1; i++) {
-            if (o[i] instanceof String && o[i].equals("[")) {
+        for (int i = 1; i < o.length - 1; i++) {//Item of array
+            if (o[i].equals("[")) {
+                if (isOperator(o[i - 1])) {
+                    continue;
+                }
                 Expression varname = parse(new Object[] {o[i - 1]});
                 int n = 1;
                 int j;
+                boolean b = false;
                 for (j = i + 1; j < o.length && n > 0; j++) {
                     if (o[j].equals("[")) {
                         n++;
@@ -280,19 +306,29 @@ public abstract class Expression extends Command {
                     if (o[j].equals("]")) {
                         n--;
                     }
+                    if (o[j].equals(",")) {//Abort, this is an array definition
+                        b = true;
+                        break;
+                    }
+                }
+                if (b) {
+                    continue;
                 }
                 Object[] parenContents = new Object[j - i - 2];
-                for (int m = 0; m < j - 1 - (i + 1); m++) {
-                    parenContents[m] = o[m + i + 1];
-                }
+                System.arraycopy(o, i + 1, parenContents, 0, j - 2 - i);
                 Object[] leftover = new Object[o.length - (parenContents.length + 2)];
-                for (int k = 0; k < i - 1; k++) {
-                    leftover[k] = o[k];
-                }
-                for (int k = j; k < o.length; k++) {
-                    leftover[k - j + i] = o[k];
-                }
+                System.arraycopy(o, 0, leftover, 0, i - 1);
+                System.arraycopy(o, j, leftover, i, o.length - j);
                 leftover[i - 1] = new ExpressionArray(varname, parse(parenContents));
+                return parse(leftover);
+            }
+        }
+        for (int i = 0; i < o.length; i++) {//Array definitons that are on the right side of an operator, like 1+[2,5]
+            if (o[i].equals("[")) {
+                Object[] r = parseParen(o, i, "[", "]", "(", ")");
+                Expression[] result = (Expression[]) r[0];
+                Object[] leftover = (Object[]) r[1];
+                leftover[i] = new ExpressionArrayDefinition(result);
                 return parse(leftover);
             }
         }

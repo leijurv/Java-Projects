@@ -36,7 +36,7 @@ public class ExpressionOperator extends Expression {
         private Operator(String opcode) {
             this.opcode = opcode;
         }
-        public Object run(Object a,Object b) {
+        public Object run(Object a, Object b) {
             switch (this) {
                 case ADD:
                     if (a instanceof Double) {
@@ -53,10 +53,7 @@ public class ExpressionOperator extends Expression {
                     if (a instanceof Integer && b instanceof Integer) {
                         return (Integer) a + (Integer) b;
                     }
-                    if (a instanceof String || b instanceof String) {
-                        return a.toString() + b.toString();
-                    }
-                    break;
+                    return a.toString() + b.toString();
                 case SUBTRACT:
                     if (a instanceof Double) {
                         if (b instanceof Double) {
@@ -108,36 +105,36 @@ public class ExpressionOperator extends Expression {
                 case MOD:
                     return (Integer) a % (Integer) b;
                 case TOTHEPOWER:
-                    double result = Math.pow(toDouble(a),toDouble(b));
+                    double result = Math.pow(toDouble(a), toDouble(b));
                     if (Math.floor(result) == result) {//If it's a round number, return an int just because
                         return (int) result;
                     }
                     return result;
                 case GREATER:
-                    return compare(a,b) == 1;
+                    return compare(a, b) == 1;
                 case LESSER:
-                    return compare(a,b) == -1;
+                    return compare(a, b) == -1;
                 case GREATEROREQUAL:
-                    return compare(a,b) != -1;
+                    return compare(a, b) != -1;
                 case LESSEROREQUAL:
-                    return compare(a,b) != 1;
+                    return compare(a, b) != 1;
                 case EQUAL:
-                    return compare(a,b) == 0;
+                    return compare(a, b) == 0;
                 case AND:
-                    return (Boolean) b && (Boolean) a;
+                    return isTrue(b) && isTrue(a);
                 case OR:
-                    return (Boolean) b || (Boolean) a;
+                    return isTrue(b) || isTrue(a);
                 case NOTEQUAL:
                     if (a == null || b == null) {
-                        return a == null ^ b == null;
+                        return (a == null) != (b == null);
                     }
-                    return compare(a,b) != 0;
+                    return compare(a, b) != 0;
                 default:
                     throw new IllegalStateException("Amount of dank swamp kush too low. Aquire more from Shrek then continue.");
             }
             throw new IllegalStateException("Unable to preform operation " + this + " on '" + a + "' and '" + b + "'");
         }
-        private static int compare(Object a,Object b) {
+        private static int compare(Object a, Object b) {
             if (a == null || b == null) {
                 if (a == null && b == null) {
                     return 0;
@@ -153,7 +150,7 @@ public class ExpressionOperator extends Expression {
                 return ((Comparable) a).compareTo((Comparable) b);
             } catch (Exception E) {
                 if ((a instanceof Double || a instanceof Integer) && (b instanceof Integer || b instanceof Double)) {
-                    return compare(toDouble(a),toDouble(b));
+                    return compare(toDouble(a), toDouble(b));
                 }
             }
             throw new RuntimeException("#LOLNO you can't compare " + a + " and " + b + ", silly.");
@@ -173,7 +170,7 @@ public class ExpressionOperator extends Expression {
             return null;
         }
     }
-    public ExpressionOperator(Expression before,String operator,Expression after) {
+    public ExpressionOperator(Expression before, String operator, Expression after) {
         this.operator = Operator.get(operator);
         this.before = before;
         this.after = after;
@@ -185,7 +182,24 @@ public class ExpressionOperator extends Expression {
     public Object evaluate(Context c) {
         Object beforeEvaluated = before.evaluate(c);
         Object afterEvaluated = after.evaluate(c);
-        return operator.run(beforeEvaluated,afterEvaluated);
+        if (beforeEvaluated instanceof Object[]) {
+            return apply(operator, afterEvaluated, (Object[]) beforeEvaluated, false);
+        }
+        if (afterEvaluated instanceof Object[]) {
+            return apply(operator, beforeEvaluated, (Object[]) afterEvaluated, true);
+        }
+        return operator.run(beforeEvaluated, afterEvaluated);
+    }
+    private static Object[] apply(Operator operator, Object a, Object[] b, boolean aBefore) {
+        Object[] res = new Object[b.length];
+        for (int i = 0; i < b.length; i++) {
+            if (aBefore) {
+                res[i] = operator.run(a, b[i]);
+            } else {
+                res[i] = operator.run(b[i], a);
+            }
+        }
+        return res;
     }
     @Override
     public String toString() {
