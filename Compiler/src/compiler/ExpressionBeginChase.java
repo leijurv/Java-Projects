@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package compiler;
+import static compiler.Compiler.verbose;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -51,10 +52,14 @@ public class ExpressionBeginChase extends Expression {
         if (chasename.equals("array")) {
             return new Object[(Integer) preyVals.get(0)];
         }
-        System.out.println("BEGINNING " + chasename + " " + " with prey " + prey + " and context " + c);
+        if (verbose) {
+            System.out.println("BEGINNING " + chasename + " " + " with prey " + preyVals + " and context " + c);
+        }
         Chase f = (Chase) (c.get(chasename));
-        System.out.println("Evaluated args as: " + preyVals);
-        return f.run(c, preyVals);
+        if (verbose) {
+            System.out.println("Evaluated args as: " + preyVals);
+        }
+        return f.run(c.topContext(), preyVals);
     }
     @Override
     public String toString() {

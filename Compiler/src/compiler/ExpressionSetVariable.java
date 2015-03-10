@@ -15,9 +15,7 @@ public class ExpressionSetVariable extends Expression {
     private final Settable set;
     private final Expression value;
     public ExpressionSetVariable(String varname, Expression val) {
-        ExpressionVariable v = new ExpressionVariable(varname);
-        set = v;
-        this.value = val;
+        this(new ExpressionVariable(varname), val);
     }
     public ExpressionSetVariable(Settable set, Expression value) {
         this.set = set;

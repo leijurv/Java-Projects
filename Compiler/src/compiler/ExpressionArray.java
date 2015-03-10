@@ -7,6 +7,7 @@ package compiler;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 /**
  *
  * @author leijurv
@@ -45,6 +46,11 @@ public class ExpressionArray extends Settable {
     public void set(Context c, Object value) {
         Object[] dank = (Object[]) var.evaluate(c);
         int ind = (Integer) index.evaluate(c);
-        dank[ind] = value;
+        try {
+            dank[ind] = value;
+        } catch (Exception e) {
+            System.out.println(Arrays.asList(dank) + "," + index + "," + ind);
+            throw e;
+        }
     }
 }
