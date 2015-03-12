@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 public class Mandelbrot extends JComponent implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
@@ -17,8 +19,8 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static ArrayList<Color> colors = new ArrayList<Color>();
     static int iterationLimit = 1000;
     static double yScale = 0.0035;
-    static JComboBox rightClickCombo;
-    static JComboBox colorSchemeCombo;
+    static JComboBox<String> rightClickCombo;
+    static JComboBox<String> colorSchemeCombo;
     static int yWidth = 500;
     static double centerX = 0;
     static double centerY = 0;
@@ -34,24 +36,25 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static boolean julia = false;
     static double juliaX = -0.6724375;
     static int rightClickAction = 4;
-    static JComboBox leftClickCombo;
+    static JComboBox<String> leftClickCombo;
     static double orbitLimit = 4;
     static final String[] ClickOptions = {"Zooms in", "Zooms out", "Shows orbit", "Shows julia set", "Does nothing"};
     static final String[] colorSchemes = {"Hue", "Black and white", "Rotating scheme"};
     static double lastClickedX = 0;
     static JButton DecExponentButton;
     static double lastClickedY = 0;
-    static JComboBox orbitLimitCombo;
-    static JComboBox iterationLimitCombo;
-    static JComboBox Smooth;
+    static JComboBox<String> orbitLimitCombo;
+    static JComboBox<String> iterationLimitCombo;
+    static JComboBox<String> Smooth;
     static int exponent = 2;
     static JButton IncExponentButton;
     static boolean drawThreadRunning = false;
     static boolean smooth = true;
     static BufferedImage export;
     static boolean exporting = false;
+    static boolean animated = false;
     static final int[] iterationCombs = new int[] {100, 500, 1000, 5000, 10000};
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         M.addMouseListener(M);
         M.addMouseMotionListener(M);
         setupColors();
@@ -65,12 +68,12 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         colors.add(Color.ORANGE);
         colors.add(Color.RED);
     }
-    public static void setupScreen() throws InterruptedException {
+    public static void setupScreen() throws Exception {
         frame = new JFrame("Leif's Mandelbrot Set Of Awesomeness");
         M.setFocusable(true);
         (frame).setContentPane(M);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 10));
-        Smooth = new JComboBox(new String[] {"Smooth", "Jagged"});
+        Smooth = new JComboBox<String>(new String[] {"Smooth", "Jagged"});
         Smooth.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -79,7 +82,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             }
         });
         frame.add(Smooth);
-        orbitLimitCombo = new JComboBox(new String[] {"0", "1", "2", "3", "4", "5"});
+        orbitLimitCombo = new JComboBox<String>(new String[] {"0", "1", "2", "3", "4", "5"});
         orbitLimitCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -95,7 +98,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         for (int i = 0; i < iterationCombs.length; i++) {
             iterationC[i] = Integer.toString(iterationCombs[i]);
         }
-        iterationLimitCombo = new JComboBox(iterationC);
+        iterationLimitCombo = new JComboBox<String>(iterationC);
         iterationLimitCombo.setSelectedIndex(2);
         iterationLimitCombo.addActionListener(new ActionListener() {
             @Override
@@ -104,8 +107,8 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 (new redraw()).start();
             }
         });
-        leftClickCombo = new JComboBox(ClickOptions);
-        rightClickCombo = new JComboBox(ClickOptions);
+        leftClickCombo = new JComboBox<String>(ClickOptions);
+        rightClickCombo = new JComboBox<String>(ClickOptions);
         leftClickCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -122,7 +125,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         leftClickCombo.setSelectedIndex(leftClickAction);
         frame.add(leftClickCombo);
         frame.add(rightClickCombo);
-        colorSchemeCombo = new JComboBox(colorSchemes);
+        colorSchemeCombo = new JComboBox<String>(colorSchemes);
         colorSchemeCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -164,6 +167,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             @Override
             public void actionPerformed(ActionEvent ae) {
                 new Thread() {
+                    @Override
                     public void run() {
                         export();
                     }
@@ -185,6 +189,102 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         ImageBuffer = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
         export = new BufferedImage(frame.getWidth() * 4, frame.getHeight() * 4, BufferedImage.TYPE_INT_RGB);
         (new redraw()).start();
+        if (!animated) {
+            return;
+        }
+        long start = System.currentTimeMillis();
+        julia = true && animated;
+        double startX = -1.309;
+        boolean radd = true;
+        double endX = 0.1295;
+        double startY = -0.1155;
+        double endY = -0.812;
+        double ccenterX = (0.25 + 0.315) / 2;
+        double ccenterY = (-0.5 + (-0.557)) / 2;
+        double rad = Math.sqrt((ccenterX - 0.25) * (ccenterX - 0.25) + (ccenterY + 0.5) * (ccenterY + 0.5)) * 1.05;
+        double total = 60 * 1000;/*
+         double[] points = {1., 0., 1.00462, 0.000302492, 1.01833, 0.00241267, 1.04073,
+         0.00810198, 1.07116, 0.01907, 1.1087, 0.0369098, 1.15221, 0.0630754,
+         1.20032, 0.0988507, 1.25148, 0.145322, 1.30398, 0.203352, 1.35595,
+         0.273561, 1.40546, 0.356307, 1.45049, 0.451674, 1.48898, 0.559462,
+         1.51889, 0.679185, 1.53823, 0.810068, 1.54508, 0.951057, 1.53766,
+         1.10082, 1.5143, 1.25778, 1.47357, 1.42012, 1.41421, 1.58579,
+         1.33526, 1.75256, 1.23598, 1.91807, 1.11595, 2.07979, 0.975062,
+         2.23514, 0.81352, 2.38146, 0.631863, 2.5161, 0.430962, 2.63644,
+         0.212021, 2.73992, -0.0234337, 2.8241, -0.273561, 2.88669, -0.536226,
+         2.92559, -0.809017, 2.93893, -1.08928, 2.9251, -1.37412, 2.88278,
+         -1.6605, 2.81099, -1.94519, 2.70906, -2.22488, 2.57672, -2.49617,
+         2.41404, -2.75568, 2.22151, -3., 2., -3.22583, 1.75076, -3.42996,
+         1.47544, -3.60934, 1.17605, -3.76115, 0.854962, -3.88278, 0.514889,
+         -3.97192, 0.15884, -4.02657, -0.209894, -4.04508, -0.587785,
+         -4.02621, -0.971102, -3.96908, -1.35595, -3.87325, -1.73834,
+         -3.73873, -2.11418, -3.56595, -2.4794, -3.35581, -2.82994, -3.10962,
+         -3.16182, -2.82916, -3.4712, -2.51662, -3.75443, -2.17458, -4.00806,
+         -1.80601, -4.22894, -1.41421, -4.41421, -1.00281, -4.56139,
+         -0.575694, -4.66835, -0.136983, -4.7334, 0.309017, -4.75528, 0.75787,
+         -4.73321, 1.20505, -4.66685, 1.64602, -4.55638, 2.07622, -4.40243,
+         2.49123, -4.20613, 2.88669, -3.96908, 3.25846, -3.69334, 3.60262,
+         -3.38139, 3.91552, -3.03614, 4.19383, -2.66087, 4.43458, -2.25919,
+         4.63518, -1.83503, 4.79349, -1.39257, 4.9078, -0.936194, 4.97689,
+         -0.470452, 5., 0., 4.97689, 0.470452, 4.9078, 0.936194, 4.79349,
+         1.39257, 4.63518, 1.83503, 4.43458, 2.25919, 4.19383, 2.66087,
+         3.91552, 3.03614, 3.60262, 3.38139, 3.25846, 3.69334, 2.88669,
+         3.96908, 2.49123, 4.20613, 2.07622, 4.40243, 1.64602, 4.55638,
+         1.20505, 4.66685, 0.75787, 4.73321, 0.309017, 4.75528, -0.136983,
+         4.7334, -0.575694, 4.66835, -1.00281, 4.56139, -1.41421, 4.41421,
+         -1.80601, 4.22894, -2.17458, 4.00806, -2.51662, 3.75443, -2.82916,
+         3.4712, -3.10962, 3.16182, -3.35581, 2.82994, -3.56595, 2.4794,
+         -3.73873, 2.11418, -3.87325, 1.73834, -3.96908, 1.35595, -4.02621,
+         0.971102, -4.04508, 0.587785, -4.02657, 0.209894, -3.97192, -0.15884,
+         -3.88278, -0.514889, -3.76115, -0.854962, -3.60934, -1.17605,
+         -3.42996, -1.47544, -3.22583, -1.75076, -3., -2., -2.75568, -2.22151,
+         -2.49617, -2.41404, -2.22488, -2.57672, -1.94519, -2.70906, -1.6605,
+         -2.81099, -1.37412, -2.88278, -1.08928, -2.9251, -0.809017, -2.93893,
+         -0.536226, -2.92559, -0.273561, -2.88669, -0.0234337, -2.8241,
+         0.212021, -2.73992, 0.430962, -2.63644, 0.631863, -2.5161, 0.81352,
+         -2.38146, 0.975062, -2.23514, 1.11595, -2.07979, 1.23598, -1.91807,
+         1.33526, -1.75256, 1.41421, -1.58579, 1.47357, -1.42012, 1.5143,
+         -1.25778, 1.53766, -1.10082, 1.54508, -0.951057, 1.53823, -0.810068,
+         1.51889, -0.679185, 1.48898, -0.559462, 1.45049, -0.451674, 1.40546,
+         -0.356307, 1.35595, -0.273561, 1.30398, -0.203352, 1.25148,
+         -0.145322, 1.20032, -0.0988507, 1.15221, -0.0630754, 1.1087,
+         -0.0369098, 1.07116, -0.01907, 1.04073, -0.00810198, 1.01833,
+         -0.00241267, 1.00462, -0.000302492, 1., 0.};*/
+
+        String name = radd ? "julia radius " + rad + " around " + ccenterX + "," + ccenterY : "julia_" + startX + "," + startY + "_to_" + endX + "," + endY;
+        //name = "julia zack's points over 4";
+        ImageOutputStream output = new FileImageOutputStream(new File("/Users/leijurv/Documents/" + name + ".gif"));
+        GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_RGB, 1, true);
+        int percent = 0;
+        while (animated) {
+            //double time = System.currentTimeMillis() - start;
+            //double p = time / total;
+            double p = percent++;
+            //p /= points.length;
+            //p /= 2;
+            p /= 100;
+            if (p >= 1) {
+                break;
+            }
+            if (radd) {
+                juliaX = Math.cos(p * Math.PI * 2) * rad + ccenterX;
+                juliaY = Math.sin(p * Math.PI * 2) * rad + ccenterY;
+            } else {
+                juliaX = startX + (endX - startX) * p;
+                juliaY = startY + (endY - startY) * p;
+            }
+            //juliaX = points[percent * 2] / 4;
+            //juliaY = points[percent * 2 + 1] / 4;
+            //centerX = juliaX;
+            //centerY = juliaY;
+            System.out.println("Drawing at " + juliaX + "," + juliaY);
+            doActualDraw();
+            writer.writeToSequence(ImageBuffer);
+        }
+        writer.close();
+        output.close();
+        System.out.println("DONE");
+        //System.exit(0);
     }
     public static void export() {
         JProgressBar dj = new JProgressBar(-xWidth * 4, xWidth * 4);
@@ -254,9 +354,9 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     public static void drawMandelbrot() {
         for (int x = -xWidth; x < xWidth && drawThreadRunning; x++) {
             M.repaint();
+            final double cX = ((double) x) * xScale + centerX;
+            double cY = ((double) (-yWidth)) * yScale + centerY;
             for (int y = -yWidth; y < yWidth && drawThreadRunning; y++) {
-                double cX = ((double) x) * xScale + centerX;
-                double cY = ((double) y) * yScale + centerY;
                 double zX = cX;
                 double zY = cY;
                 int its = 0;
@@ -292,6 +392,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                     }
                     ImageBuffer.setRGB(x + xWidth, y + yWidth, colorFromIts(R).getRGB());
                 }
+                cY += yScale;
             }
         }
     }
@@ -440,18 +541,21 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     public static class redraw extends Thread {
         @Override
         public void run() {
-            if (drawThreadRunning) {
-                drawThreadRunning = false;
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                }
-            }
-            drawThreadRunning = true;
-            drawMandelbrot();
-            drawThreadRunning = false;
-            M.repaint();
+            doActualDraw();
         }
+    }
+    public static void doActualDraw() {
+        if (drawThreadRunning) {
+            drawThreadRunning = false;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+            }
+        }
+        drawThreadRunning = true;
+        drawMandelbrot();
+        drawThreadRunning = false;
+        M.repaint();
     }
     @Override
     public void mouseReleased(MouseEvent me) {
