@@ -99,7 +99,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             iterationC[i] = Integer.toString(iterationCombs[i]);
         }
         iterationLimitCombo = new JComboBox<String>(iterationC);
-        iterationLimitCombo.setSelectedIndex(2);
+        iterationLimitCombo.setSelectedIndex(4);
         iterationLimitCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -199,9 +199,9 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         double endX = 0.1295;
         double startY = -0.1155;
         double endY = -0.812;
-        double ccenterX = (0.25 + 0.315) / 2;
-        double ccenterY = (-0.5 + (-0.557)) / 2;
-        double rad = Math.sqrt((ccenterX - 0.25) * (ccenterX - 0.25) + (ccenterY + 0.5) * (ccenterY + 0.5)) * 1.05;
+        double ccenterX = ((-1.14865) + (-1.1243)) / 2;
+        double ccenterY = (-0.26515 + (-0.2159)) / 2;
+        double rad = Math.sqrt((ccenterX - (-1.14865)) * (ccenterX - (-1.14865)) + (ccenterY - (-0.2159)) * (ccenterY - (-0.2159))) * 1.05;
         double total = 60 * 1000;/*
          double[] points = {1., 0., 1.00462, 0.000302492, 1.01833, 0.00241267, 1.04073,
          0.00810198, 1.07116, 0.01907, 1.1087, 0.0369098, 1.15221, 0.0630754,
@@ -253,7 +253,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
 
         String name = radd ? "julia radius " + rad + " around " + ccenterX + "," + ccenterY : "julia_" + startX + "," + startY + "_to_" + endX + "," + endY;
         //name = "julia zack's points over 4";
-        ImageOutputStream output = new FileImageOutputStream(new File("/Users/leijurv/Documents/" + name + ".gif"));
+        ImageOutputStream output = new FileImageOutputStream(new File(System.getProperty("user.home") + "/Documents/" + name + ".gif"));
         GifSequenceWriter writer = new GifSequenceWriter(output, BufferedImage.TYPE_INT_RGB, 1, true);
         int percent = 0;
         while (animated) {
@@ -297,8 +297,8 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 System.out.println(x + "," + xWidth * 4);
             }
             frame.repaint();
+            double cX = ((double) x) * xScale / 4 + centerX;
             for (int y = -yWidth * 4; y < yWidth * 4; y++) {
-                double cX = ((double) x) * xScale / 4 + centerX;
                 double cY = ((double) y) * yScale / 4 + centerY;
                 double zX = cX;
                 double zY = cY;
@@ -309,10 +309,16 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                     double d = zY * zY;
                     double xt = zX;
                     double yt = zY;
-                    for (int i = 0; i < exponent - 1; i++) {
+                    if (exponent == 2) {
                         double xx = xt * zX - yt * zY;
                         yt = xt * zY + yt * zX;
                         xt = xx;
+                    } else {
+                        for (int i = 0; i < exponent - 1; i++) {
+                            double xx = xt * zX - yt * zY;
+                            yt = xt * zY + yt * zX;
+                            xt = xx;
+                        }
                     }
                     xt += (julia ? juliaX : cX);
                     yt += (julia ? juliaY : cY);
@@ -345,7 +351,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 System.out.println(S);
             }
             String name = (julia ? "julia_" + juliaX + "," + juliaY : "mandelbrot");
-            System.out.println(ImageIO.write(export, "jpeg", new File("/Users/leijurv/Desktop/" + name + ".jpeg")));
+            System.out.println(ImageIO.write(export, "jpeg", new File(System.getProperty("user.home") + "/Desktop/" + name + ".jpeg")));
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -356,27 +362,35 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             M.repaint();
             final double cX = ((double) x) * xScale + centerX;
             double cY = ((double) (-yWidth)) * yScale + centerY;
+            double incrementX = (julia ? juliaX : cX);
             for (int y = -yWidth; y < yWidth && drawThreadRunning; y++) {
                 double zX = cX;
                 double zY = cY;
                 int its = 0;
                 boolean done = false;
+                double incrementY = (julia ? juliaY : cY);
                 while (!done) {
                     double c = zX * zX;
                     double d = zY * zY;
                     double xt = zX;
                     double yt = zY;
-                    for (int i = 0; i < exponent - 1; i++) {
+                    if (exponent == 2) {
                         double xx = xt * zX - yt * zY;
                         yt = xt * zY + yt * zX;
                         xt = xx;
+                    } else {
+                        for (int i = 0; i < exponent - 1; i++) {
+                            double xx = xt * zX - yt * zY;
+                            yt = xt * zY + yt * zX;
+                            xt = xx;
+                        }
                     }
-                    xt += (julia ? juliaX : cX);
-                    yt += (julia ? juliaY : cY);
+                    xt += incrementX;
+                    yt += incrementY;
                     zX = xt;
                     zY = yt;
                     its++;
-                    if (!(c + d < orbitLimit && its < Mandelbrot.iterationLimit)) {
+                    if ((c + d >= orbitLimit || its >= Mandelbrot.iterationLimit)) {
                         done = true;
                     }
                 }
