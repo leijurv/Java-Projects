@@ -290,14 +290,16 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 double zY = cY;
                 int its = 0;
                 boolean done = false;
+                double atan = Math.atan2(cY, cX);
+                double sq = cX * cX + cY * cY;
+                double sql = Math.log(sq);
                 while (!done) {
                     double c = zX * zX;
                     double d = zY * zY;
                     double xt = zX;
                     double yt = zY;
-                    double atan = Math.atan2(cY, cX);
-                    double r = Math.pow(cX * cX + cY * cY, xt / 2) * Math.pow(Math.E, -yt * atan);
-                    double theta = xt * atan + 1 / 2 * yt * Math.log(cX * cX + cY * cY);
+                    double r = Math.pow(sq, xt / 2) * Math.pow(Math.E, -yt * atan);
+                    double theta = xt * atan + 1 / 2 * yt * sql;
                     xt = r * Math.cos(theta);
                     yt = r * Math.sin(theta);
                     //z=c^z
@@ -372,14 +374,16 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             g.fillRect((int) ((zX - centerX) / xScale) + xWidth - 2, (int) ((zY - centerY) / yScale) + yWidth - 2, 4, 4);
             int its = 0;
             boolean done = false;
+            double atan = Math.atan2(cY, cX);
+            double sq = cX * cX + cY * cY;
+            double sql = Math.log(sq);
             while (!done) {
                 double xt = zX;
                 double yt = zY;
                 double c = xt * xt;
                 double d = yt * yt;
-                double atan = Math.atan2(cY, cX);
-                double r = Math.pow(cX * cX + cY * cY, xt / 2) * Math.pow(Math.E, -yt * atan);
-                double theta = xt * atan + 1 / 2 * yt * Math.log(cX * cX + cY * cY);
+                double r = Math.pow(sq, xt / 2) * Math.pow(Math.E, -yt * atan);
+                double theta = xt * atan + 1 / 2 * yt * sql;
                 xt = r * Math.cos(theta);
                 yt = r * Math.sin(theta);
                 zX = xt;
@@ -438,14 +442,16 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
                 double zY = cY;
                 int its = 0;
                 boolean done = false;
+                double atan = Math.atan2(cY, cX);
+                double sq = cX * cX + cY * cY;
+                double sql = Math.log(sq);
                 while (!done) {
                     double c = zX * zX;
                     double d = zY * zY;
                     double xt = zX;
                     double yt = zY;
-                    double atan = Math.atan2(cY, cX);
-                    double r = Math.pow(cX * cX + cY * cY, xt / 2) * Math.pow(Math.E, -yt * atan);
-                    double theta = xt * atan + 1 / 2 * yt * Math.log(cX * cX + cY * cY);
+                    double r = Math.pow(sq, xt / 2) * Math.pow(Math.E, -yt * atan);
+                    double theta = xt * atan + 1 / 2 * yt * sql;
                     xt = r * Math.cos(theta);
                     yt = r * Math.sin(theta);
                     zX = xt;
