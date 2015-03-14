@@ -52,7 +52,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static boolean smooth = true;
     static BufferedImage export;
     static boolean exporting = false;
-    static boolean animated = true;
+    static boolean animated = false;
     static final int[] iterationCombs = new int[] {100, 500, 1000, 5000, 10000};
     public static void main(String[] args) throws Exception {
         M.addMouseListener(M);
