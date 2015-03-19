@@ -35,6 +35,12 @@ public class HydroCarbon extends Molecule {
         }
         return doNames[ind % 10] + decNames[ind / 10];
     }
+    public static String getModName(int ind) {
+        if (ind < modNames.length) {
+            return modNames[ind];
+        }
+        return doNames[ind % 10] + decNames[ind / 10];
+    }
     public HydroCarbon(int n) {
         this(n, 1);
     }
@@ -61,6 +67,9 @@ public class HydroCarbon extends Molecule {
         }
         baseBondNum = curBond + 1;
     }
+    public void addMolecule(Molecule molecule, int loc) {
+        addMolecule(new CovalentBond(1), molecule, loc);
+    }
     public void addMolecule(Bond bond, Molecule molecule, int loc) {
         for (int i = 0; i < bonds.size(); i++) {
             if (oth.get(i).equals(molecule)) {
@@ -86,10 +95,7 @@ public class HydroCarbon extends Molecule {
         ArrayList<Integer> oxyLocations = new ArrayList<>();
         ArrayList<String> prefixes = new ArrayList<>();
         for (int i = 0; i < oth.size(); i++) {
-            String modname = "{" + locations.get(i).size() + "ta}";
-            if (locations.get(i).size() < modNames.length) {
-                modname = modNames[locations.get(i).size()];
-            }
+            String modname = getModName(locations.get(i).size());
             locations.get(i).sort(null);
             //System.out.println(oth.get(i) + "," + oth.get(i).equals(Atom.get("oxygen")) + "," + bonds.get(i) + "," + bonds.get(i).contains(new CovalentBond(2)) + "," + locations.get(i));
             if (oth.get(i).equals(Atom.get("oxygen")) && bonds.get(i).contains(new CovalentBond(2))) {
@@ -101,7 +107,7 @@ public class HydroCarbon extends Molecule {
                 continue;
             }
             String ta = toStringWithOnlyCommas(locations.get(i)) + "-" + modname + "%" + oth.get(i).toStringWithin();
-            System.out.println(ta);
+            //System.out.println(ta);
             prefixes.add(ta);
         }
         prefixes.sort(new Comparator() {
@@ -114,12 +120,9 @@ public class HydroCarbon extends Molecule {
         });
         String sf = "";
         if (!prefixes.isEmpty()) {
-            System.out.println(prefixes.toString());
+            //System.out.println(prefixes.toString());
             sf = combine(prefixes.toArray(), "-");
             sf = sf.replace("%", "");
-            if (sf.length() != 0) {
-                sf = sf.substring(0, sf.length() - 1);
-            }
         }
         String base = getBaseName(numCarbon);
         ArrayList<ArrayList<Integer>> extraBondLocations = new ArrayList<>();
@@ -168,7 +171,11 @@ public class HydroCarbon extends Molecule {
                 return base + "yl";
             }
         }
-        return (yl ? "(" : "") + sf + (isCyclic ? "cylco" : "") + base + (addA ? "a" : "") + bondMod + oxy + (yl ? ")" : "");
+        String result = (yl ? "(" : "") + sf + (isCyclic ? "cylco" : "") + base + (addA ? "a" : "") + bondMod + oxy + (yl ? ")" : "");
+        if (isAcid) {
+            result = result.substring(0, result.length() - 1) + "oic acid";
+        }
+        return result;
     }
     @Override
     public String toStringWithin() {
@@ -230,6 +237,12 @@ public class HydroCarbon extends Molecule {
                 othh.get(locations.get(i).get(j) - 1).add(mol);
             }
         }
+        if (isAcid) {
+            bondss.get(0).add(new CovalentBond(2));
+            bondss.get(0).add(new CovalentBond(1));
+            othh.get(0).add(Atom.get("oxygen"));
+            othh.get(0).add(new Hydroxy());
+        }
         for (int i = 0; i < numCarbon; i++) {
             //g.drawString(bondss.get(i) + "," + othh.get(i), screenLocations.get(i)[0], screenLocations.get(i)[1]);
         }
@@ -242,7 +255,7 @@ public class HydroCarbon extends Molecule {
                 double[] a = get(screenLocations, i, isCyclic);
                 double start = a[0];
                 double width = a[1];
-                if ((i == 0 || i == numCarbon - 1) && numBond == 1) {
+                if ((i == 0 || i == numCarbon - 1) && numBond == 1 && !isCyclic) {
                     width /= 2;
                 }
                 for (int j = 0; j < numBond; j++) {
