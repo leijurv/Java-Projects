@@ -5,6 +5,7 @@
  */
 package iupac;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,8 @@ public class HydroCarbon extends Molecule {
     static final String[] modNames = {"", "", "di", "tri", "tetra", "penta", "hexa"};
     static final String[] baseNames = {"", "meth", "eth", "prop", "but", "pent", "hex", "hept", "oct", "non", "dec"};
     static final String[] bondNames = {"", "ane", "ene", "yne"};
+    static final String[] doNames = {"", "un", "do", "tri", "tetra", "penta", "hexa"};
+    static final String[] decNames = {"", "dec", "cos", "triacont", "tetracont", "pentacont"};
     int numCarbon;
     int baseBondNum;
     Bond[] nb;
@@ -26,6 +29,12 @@ public class HydroCarbon extends Molecule {
     ArrayList<ArrayList<Integer>> locations;
     boolean isAcid;
     boolean isCyclic;
+    public static String getBaseName(int ind) {
+        if (ind < baseNames.length) {
+            return baseNames[ind];
+        }
+        return doNames[ind % 10] + decNames[ind / 10];
+    }
     public HydroCarbon(int n) {
         this(n, 1);
     }
@@ -74,48 +83,96 @@ public class HydroCarbon extends Molecule {
         return toString(false);
     }
     public String toString(boolean yl) {
-        String sf = "";
+        ArrayList<Integer> oxyLocations = new ArrayList<>();
+        ArrayList<String> prefixes = new ArrayList<>();
         for (int i = 0; i < oth.size(); i++) {
             String modname = "{" + locations.get(i).size() + "ta}";
             if (locations.get(i).size() < modNames.length) {
                 modname = modNames[locations.get(i).size()];
             }
             locations.get(i).sort(null);
-            sf = sf + toStringWithOnlyCommas(locations.get(i)) + "-" + modname + oth.get(i).toStringWithin() + "-";
+            //System.out.println(oth.get(i) + "," + oth.get(i).equals(Atom.get("oxygen")) + "," + bonds.get(i) + "," + bonds.get(i).contains(new CovalentBond(2)) + "," + locations.get(i));
+            if (oth.get(i).equals(Atom.get("oxygen")) && bonds.get(i).contains(new CovalentBond(2))) {
+                for (int j = 0; j < locations.get(i).size(); j++) {
+                    if (bonds.get(i).get(j).equals(new CovalentBond(2))) {
+                        oxyLocations.add(locations.get(i).get(j));
+                    }
+                }
+                continue;
+            }
+            String ta = toStringWithOnlyCommas(locations.get(i)) + "-" + modname + "%" + oth.get(i).toStringWithin();
+            System.out.println(ta);
+            prefixes.add(ta);
         }
-        if (sf.length() != 0) {
-            sf = sf.substring(0, sf.length() - 1);
+        prefixes.sort(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                String a = (String) o1;
+                String b = (String) o2;
+                return a.split("%")[1].compareTo(b.split("%")[1]);
+            }
+        });
+        String sf = "";
+        if (!prefixes.isEmpty()) {
+            System.out.println(prefixes.toString());
+            sf = combine(prefixes.toArray(), "-");
+            sf = sf.replace("%", "");
+            if (sf.length() != 0) {
+                sf = sf.substring(0, sf.length() - 1);
+            }
         }
-        String base = baseNames[numCarbon];
-        ArrayList<Integer> extraBondLocations = new ArrayList<>();
+        String base = getBaseName(numCarbon);
+        ArrayList<ArrayList<Integer>> extraBondLocations = new ArrayList<>();
         int maxBondNum = 0;
         for (int i = 0; i < nb.length; i++) {
             int numBonds = nb[i].getValenceChange()[0];
             if (numBonds != baseBondNum) {
-                extraBondLocations.add(i + 1);
+                while (extraBondLocations.size() < numBonds + 1) {
+                    extraBondLocations.add(new ArrayList<>());
+                }
+                extraBondLocations.get(numBonds).add(i + 1);
             }
             if (numBonds > maxBondNum) {
                 maxBondNum = numBonds;
             }
         }
-        String bondNum = bondNames[maxBondNum];
         String bondMod = "";
-        if (!extraBondLocations.isEmpty()) {
-            bondMod = extraBondLocations.toString().replace(" ", "");
-            bondMod = bondMod.substring(1, bondMod.length() - 1);
-            bondMod = "-" + bondMod + "-" + modNames[extraBondLocations.size()];
+        boolean addA = false;
+        for (int i = 0; i < extraBondLocations.size(); i++) {
+            if (extraBondLocations.get(i).isEmpty()) {
+                continue;
+            }
+            String bm = toStringWithOnlyCommas(extraBondLocations.get(i));
+            bm = "-" + bm + "-" + modNames[extraBondLocations.get(i).size()] + bondNames[i];
+            if (extraBondLocations.get(i).size() > 1) {
+                addA = true;
+            }
+            bondMod = bondMod + bm;
+        }
+        if (bondMod.equals("")) {
+            bondMod = bondNames[baseBondNum];
+            if (yl) {
+                if (maxBondNum <= 1) {
+                    bondMod = "";
+                }
+                bondMod = bondMod + "yl";
+            }
+        }
+        String oxy = "";
+        if (!oxyLocations.isEmpty()) {
+            oxy = toStringWithOnlyCommas(oxyLocations);
+            oxy = "-" + oxy + "-" + modNames[oxyLocations.size()] + "one";
         }
         if (yl) {
-            if (maxBondNum == 1) {
-                bondNum = "";
+            if (sf.equals("") && bondMod.equals("yl")) {
+                return base + "yl";
             }
-            bondNum = bondNum + "yl";
         }
-        return sf + base + bondMod + bondNum;
+        return (yl ? "(" : "") + sf + (isCyclic ? "cylco" : "") + base + (addA ? "a" : "") + bondMod + oxy + (yl ? ")" : "");
     }
     @Override
     public String toStringWithin() {
-        return "(" + toString(true) + ")";
+        return toString(true);
     }
     @Override
     public boolean equals(Object o) {
@@ -125,23 +182,29 @@ public class HydroCarbon extends Molecule {
         }
         return false;
     }
-    @Override
-    public void draw(Graphics g, int x, int y, double totalAng, Bond b) {
-        int preX = x;
-        int preY = y;
-        double size = 70;
-        double angCh = Math.PI / 7;
-        int curX = preX;
-        int curY = preY;
-        ArrayList<int[]> screenLocations = new ArrayList<>();
+    public static ArrayList<double[]> getLocations(double x, double y, double totalAng, int numCarbon, boolean isCyclic) {
+        double preX = x;
+        double preY = y;
+        double size = 40;
+        double angCh = isCyclic ? ((Math.PI * (numCarbon - 2)) / ((double) numCarbon)) : Math.PI / 7;
+        double curX = preX;
+        double curY = preY;
+        ArrayList<double[]> screenLocations = new ArrayList<>();
         for (int i = 0; i < numCarbon; i++) {
-            screenLocations.add(new int[] {curX, curY});
+            screenLocations.add(new double[] {curX, curY});
             preX = curX;
             preY = curY;
-            int R = (i % 2 == 0) ? 1 : -1;
-            curX = (int) (preX + Math.cos(totalAng + R * angCh) * size);
-            curY = (int) (preY + Math.sin(totalAng + R * angCh) * size);
+            int R = ((i % 2 == 0) ? 1 : -1);
+            double angll = isCyclic ? ((Math.PI - angCh) * i) : R * angCh;
+            angll += totalAng;
+            curX = (preX + Math.cos(angll) * size);
+            curY = (preY + Math.sin(angll) * size);
         }
+        return screenLocations;
+    }
+    @Override
+    public void draw(Graphics g, double x, double y, double totalAng, Bond b) {
+        ArrayList<double[]> screenLocations = getLocations(x, y, totalAng, numCarbon, isCyclic);
         double nameDist = 200;
         double nameAng = totalAng + Math.PI / 2;
         double nameX = Math.cos(nameAng) * nameDist + x;
@@ -150,8 +213,8 @@ public class HydroCarbon extends Molecule {
         if (drawName) {
             g.drawString(toString(), (int) nameX, (int) nameY);
         }
-        for (int i = 0; i < numCarbon - 1; i++) {
-            nb[i].draw(g, screenLocations.get(i)[0], screenLocations.get(i)[1], screenLocations.get(i + 1)[0], screenLocations.get(i + 1)[1]);
+        for (int i = 0; i < numCarbon - (isCyclic ? 0 : 1); i++) {
+            (i == numCarbon - 1 ? new CovalentBond(baseBondNum) : nb[i]).draw(g, screenLocations.get(i)[0], screenLocations.get(i)[1], screenLocations.get((i + 1) % (screenLocations.size()))[0], screenLocations.get((i + 1) % (screenLocations.size()))[1]);
         }
         ArrayList<ArrayList<Bond>> bondss = new ArrayList<>();
         ArrayList<ArrayList<Molecule>> othh = new ArrayList<>();
@@ -174,9 +237,9 @@ public class HydroCarbon extends Molecule {
         for (int i = 0; i < numCarbon; i++) {
             int numBond = bondss.get(i).size();
             if (numBond != 0) {
-                int mlX = screenLocations.get(i)[0];
-                int mlY = screenLocations.get(i)[1];
-                double[] a = get(screenLocations, i);
+                double mlX = screenLocations.get(i)[0];
+                double mlY = screenLocations.get(i)[1];
+                double[] a = get(screenLocations, i, isCyclic);
                 double start = a[0];
                 double width = a[1];
                 if ((i == 0 || i == numCarbon - 1) && numBond == 1) {
@@ -193,28 +256,24 @@ public class HydroCarbon extends Molecule {
             }
         }
     }
-    public static double[] get(ArrayList<int[]> screenLocations, int i) {
-        int mlX = screenLocations.get(i)[0];
-        int mlY = screenLocations.get(i)[1];
-        if (i == 0) {
+    public static double[] get(ArrayList<double[]> screenLocations, int i, boolean cyclic) {
+        double prevX = screenLocations.get((i - 1 + screenLocations.size()) % (screenLocations.size()))[0];
+        double prevY = screenLocations.get((i - 1 + screenLocations.size()) % (screenLocations.size()))[1];
+        double nextX = screenLocations.get((i + 1) % (screenLocations.size()))[0];
+        double nextY = screenLocations.get((i + 1) % (screenLocations.size()))[1];
+        double mlX = screenLocations.get(i)[0];
+        double mlY = screenLocations.get(i)[1];
+        if (i == 0 && !cyclic) {
             if (screenLocations.size() == 1) {
                 return new double[] {0, Math.PI};
             }
-            int nextX = screenLocations.get(i + 1)[0];
-            int nextY = screenLocations.get(i + 1)[1];
             double nd = Math.atan2(nextY - mlY, nextX - mlX);
             return new double[] {nd, Math.PI * 2};
         }
-        if (i == screenLocations.size() - 1) {
-            int prevX = screenLocations.get(i - 1)[0];
-            int prevY = screenLocations.get(i - 1)[1];
+        if (i == screenLocations.size() - 1 && !cyclic) {
             double pd = Math.atan2(prevY - mlY, prevX - mlX);
             return new double[] {pd, Math.PI * 2};
         }
-        int prevX = screenLocations.get(i - 1)[0];
-        int prevY = screenLocations.get(i - 1)[1];
-        int nextX = screenLocations.get(i + 1)[0];
-        int nextY = screenLocations.get(i + 1)[1];
         double nd = Math.atan2(nextY - mlY, nextX - mlX);
         double pd = Math.atan2(prevY - mlY, prevX - mlX);
         double start = nd > pd ? pd : nd;
@@ -224,5 +283,17 @@ public class HydroCarbon extends Molecule {
             start = nd > pd ? nd : pd;
         }
         return new double[] {start, width};
+    }
+    static String combine(Object[] s, String glue) {
+        int k = s.length;
+        if (k == 0) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        out.append(s[0]);
+        for (int x = 1; x < k; ++x) {
+            out.append(glue).append(s[x]);
+        }
+        return out.toString();
     }
 }

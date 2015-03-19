@@ -40,7 +40,7 @@ public class Atom extends Molecule {
         return false;
     }
     @Override
-    public void draw(Graphics g, int x, int y, double ang, Bond b) {
+    public void draw(Graphics g, double x, double y, double ang, Bond b) {
         double centerX = x + Math.cos(ang) * 7;
         double centerY = y + Math.sin(ang) * 7;
         int leftoverV = numValence - b.getValenceUsage()[1];

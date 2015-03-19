@@ -39,15 +39,35 @@ public class IUPAC {
         }
         tetraflourine.addMolecule(new CovalentBond(2), Atom.get("flourine"), 1);
         tetraflourine.addMolecule(new CovalentBond(1), Atom.get("flourine"), 6);
-        HydroCarbon t = new HydroCarbon(6);
-        t.addMolecule(new CovalentBond(2), Atom.get("oxygen"), 3);
+        HydroCarbon benzene = new HydroCarbon(6);
+        //t.addMolecule(new CovalentBond(2), Atom.get("oxygen"), 3);
+        benzene.addBond(1);
+        benzene.addBond(3);
+        benzene.addBond(5);
+        benzene.isCyclic = true;
+        HydroCarbon big = new HydroCarbon(24);
+        big.addBond(6);
+        big.addBond(13);
+        big.addBond(19);
+        big.addBond(19);
+        big.addMolecule(new CovalentBond(2), Atom.get("oxygen"), 3);
+        big.addMolecule(new CovalentBond(2), Atom.get("oxygen"), 9);
+        big.addMolecule(new CovalentBond(1), new HydroCarbon(2), 4);
+        big.addMolecule(new CovalentBond(1), new HydroCarbon(2), 8);
+        big.addMolecule(new CovalentBond(1), new HydroCarbon(4), 12);
+        big.addMolecule(new CovalentBond(1), new HydroCarbon(1), 15);
+        big.addMolecule(new CovalentBond(1), Atom.get("bromine"), 18);
+        big.addMolecule(new CovalentBond(1), Atom.get("chlorine"), 11);
+        big.addMolecule(new CovalentBond(1), new Hydroxy(), 5);
+        System.out.println(demo);
         JFrame frame = new JFrame("dank");
         frame.setContentPane(new JComponent() {
             public void paintComponent(Graphics g) {
                 g.setFont(new Font("Courier", Font.PLAIN, 12));
-                tetraflourine.draw(g, 200, 200, 0, null);
-                demo.draw(g, 500, 500, 0, null);
-                t.draw(g, 600, 100, 0, null);
+                /*tetraflourine.draw(g, 200, 200, 0, null);
+                 demo.draw(g, 500, 500, 0, null);
+                 benzene.draw(g, 600, 100, 0, null);*/
+                big.draw(g, 100, 100, 0, null);
             }
         });
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

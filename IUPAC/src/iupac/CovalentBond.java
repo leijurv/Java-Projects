@@ -27,18 +27,25 @@ public class CovalentBond extends Bond {
         return new int[] {numBonds, numBonds};
     }
     @Override
-    public void draw(Graphics g, int startX, int startY, int endX, int endY) {
+    public void draw(Graphics g, double startX, double startY, double endX, double endY) {
         double lineDist = 4;
-        int dx = endX - startX;
-        int dy = endY - startY;
+        double dx = endX - startX;
+        double dy = endY - startY;
         double ang = Math.atan2(dy, dx);
         double sX = startX - Math.cos(Math.PI / 2 + ang) * lineDist * (numBonds - 1) / 2;
         double sY = startY - Math.sin(Math.PI / 2 + ang) * lineDist * (numBonds - 1) / 2;
         for (int i = 0; i < numBonds; i++) {
             double Y = sY + Math.sin(Math.PI / 2 + ang) * lineDist * i;
             double X = sX + Math.cos(Math.PI / 2 + ang) * lineDist * i;
-            g.drawLine((int) X, (int) Y, (int) X + dx, (int) (Y) + dy);
+            g.drawLine((int) X, (int) Y, (int) (X + dx), (int) (Y + dy));
         }
         //g.drawString(numBonds + "", (endX + startX) / 2, (endY + startY) / 2);
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof CovalentBond) {
+            return ((CovalentBond) o).numBonds == numBonds;
+        }
+        return false;
     }
 }

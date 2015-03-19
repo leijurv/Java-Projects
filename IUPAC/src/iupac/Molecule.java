@@ -17,5 +17,5 @@ public abstract class Molecule {
     public abstract String toString();
     public abstract String toStringWithin();
     public abstract boolean equals(Object o);
-    public abstract void draw(Graphics g, int x, int y, double angle, Bond bond);
+    public abstract void draw(Graphics g, double x, double y, double angle, Bond bond);
 }

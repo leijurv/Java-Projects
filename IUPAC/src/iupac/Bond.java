@@ -16,5 +16,6 @@ import javax.swing.*;
 public abstract class Bond {
     public abstract int[] getValenceChange();
     public abstract int[] getValenceUsage();
-    public abstract void draw(Graphics g, int startX, int startY, int endX, int endY);
+    public abstract void draw(Graphics g, double startX, double startY, double endX, double endY);
+    public abstract boolean equals(Object o);
 }
