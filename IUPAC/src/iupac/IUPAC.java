@@ -7,20 +7,16 @@ package iupac;
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.util.Random;
 import javax.swing.*;
 /**
  *
  * @author leijurv
  */
 public class IUPAC {
-    static int s = 0;
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        ArrayList<Molecule> demos = new ArrayList<Molecule>();
+    static Molecule editing;
+    static boolean stuff;
+    public static ArrayList<Molecule> getDemos() {
+        ArrayList<Molecule> demos = new ArrayList<>();
         HydroCarbon demo = new HydroCarbon(6);
         demo.addMolecule(Atom.get("flourine"), 1);
         demo.addBond(2);
@@ -116,30 +112,91 @@ public class IUPAC {
         demos.add(big);
         demos.add(demo);
         demos.add(side);
-        JFrame frame = new JFrame("dank");
-        JComponent M = new JComponent() {
-            public void paintComponent(Graphics g) {
-                g.setFont(new Font("Courier", Font.PLAIN, 12));
-                demos.get(s).draw(g, 100, 100, 0, null);
-            }
-        };
-        M.setLayout(new FlowLayout());
+        return demos;
+    }
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        ArrayList<Molecule> demos = getDemos();
+        editing = demos.get(0);
         String[] names = new String[demos.size()];
         for (int i = 0; i < names.length; i++) {
             names[i] = demos.get(i).toString();
         }
-        JComboBox<String> jc = new JComboBox(names);
-        jc.addActionListener(new ActionListener() {
+        JFrame frame = new JFrame("Molecule editor");
+        JCheckBox showNum = new JCheckBox("Show carbon numbers?");
+        JComboBox<String> jc = new JComboBox<>(names);
+        JComponent M = new JComponent() {
+            private static final long serialVersionUID = 1L;
             @Override
-            public void actionPerformed(ActionEvent e) {
-                s = jc.getSelectedIndex();
+            public void paintComponent(Graphics g) {
+                g.setFont(new Font("Courier", Font.PLAIN, 12));
+                editing.draw(g, 100, 100, 0, null, showNum.isSelected());
+                String s = editing.toString();
+                int i = jc.getSelectedIndex();
+                if (!s.equals(jc.getItemAt(i))) {
+                    stuff = true;
+                    jc.removeItemAt(i);
+                    jc.insertItemAt(s, i);
+                    jc.setSelectedIndex(i);
+                    stuff = false;
+                }
+            }
+        };
+        M.setLayout(new FlowLayout());
+        showNum.addActionListener((ActionEvent e)->{
+            frame.repaint();
+        });
+        JButton addBond = new JButton("Add Bond");
+        addBond.addActionListener((ActionEvent e)->{
+            ((HydroCarbon) editing).addBond(getBondLocation());
+            frame.repaint();
+        });
+        JButton addSideMolecule = new JButton("Add side molecule");
+        addSideMolecule.addActionListener((ActionEvent e)->{
+            HydroCarbon c = (HydroCarbon) editing;
+            int loc = getBondLocation();
+            String res = JOptionPane.showInputDialog("What side molecule? Put in a number for a hydrocarbon, or an atom name for an atom.");
+            try {
+                int numCarbon = Integer.parseInt(res);
+                c.addMolecule(new HydroCarbon(numCarbon), loc);
+            } catch (Exception u) {
+                c.addMolecule(Atom.get(res), loc);
+            }
+            frame.repaint();
+        });
+        JCheckBox isCyclic = new JCheckBox("Is Cyclic?");
+        isCyclic.addActionListener((ActionEvent e)->{
+            ((HydroCarbon) editing).isCyclic = isCyclic.isSelected();
+            frame.repaint();
+        });
+        JCheckBox isAcid = new JCheckBox("Is Acid?");
+        isAcid.addActionListener((ActionEvent e)->{
+            ((HydroCarbon) editing).isAcid = isAcid.isSelected();
+            frame.repaint();
+        });
+        jc.addActionListener((ActionEvent e)->{
+            if (!stuff) {
+                editing = demos.get(jc.getSelectedIndex());
+                isAcid.setSelected(((HydroCarbon) editing).isAcid);
+                isCyclic.setSelected(((HydroCarbon) editing).isCyclic);
                 frame.repaint();
             }
         });
         M.add(jc);
+        M.add(addBond);
+        M.add(addSideMolecule);
+        M.add(isCyclic);
+        M.add(isAcid);
+        M.add(showNum);
         frame.setContentPane(M);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(100000, 10000);
         frame.setVisible(true);
+    }
+    public static int getBondLocation() {
+        int bondLocation = Integer.parseInt(JOptionPane.showInputDialog("Where should the bond be?"));
+        return bondLocation;
     }
 }

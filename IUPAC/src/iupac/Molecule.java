@@ -5,17 +5,15 @@
  */
 package iupac;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.util.Random;
-import javax.swing.*;
 /**
  *
  * @author leijurv
  */
 public abstract class Molecule {
+    @Override
     public abstract String toString();
     public abstract String toStringWithin();
+    @Override
     public abstract boolean equals(Object o);
-    public abstract void draw(Graphics g, double x, double y, double angle, Bond bond);
+    public abstract void draw(Graphics g, double x, double y, double angle, Bond bond, boolean showNumbers);
 }

@@ -23,7 +23,7 @@ public class Nitro extends Molecule {
         return o instanceof Nitro;
     }
     @Override
-    public void draw(Graphics g, double x, double y, double ang, Bond bond) {
+    public void draw(Graphics g, double x, double y, double ang, Bond bond, boolean show) {
         double centerX = x + Math.cos(ang) * 12;
         double centerY = y + Math.sin(ang) * 12;
         double start = ang + Math.PI;

@@ -5,10 +5,6 @@
  */
 package iupac;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.util.Random;
-import javax.swing.*;
 /**
  *
  * @author leijurv
@@ -40,7 +36,7 @@ public class Atom extends Molecule {
         return false;
     }
     @Override
-    public void draw(Graphics g, double x, double y, double ang, Bond b) {
+    public void draw(Graphics g, double x, double y, double ang, Bond b, boolean show) {
         double centerX = x + Math.cos(ang) * 7;
         double centerY = y + Math.sin(ang) * 7;
         int leftoverV = numValence - b.getValenceUsage()[1];
@@ -62,6 +58,6 @@ public class Atom extends Molecule {
                 return new Atom(i);
             }
         }
-        return null;
+        throw new IllegalStateException("Atom " + name + " does not exist");
     }
 }
