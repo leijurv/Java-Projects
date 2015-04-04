@@ -83,11 +83,11 @@ public abstract class Expression extends Command {
     public static ArrayList<Object> lex(String s) {
         Object[] objects = new Object[s.length()];
         for (int i = 0; i < objects.length; i++) {
-            objects[i] = s.substring(i, i + 1);
+            objects[i] = new String(new char[] {s.charAt(i)});
         }
         int numItemsRemoved = 0;
         for (int i = 0; i < objects.length; i++) {
-            if (objects[i].equals(" ")) {
+            if (objects[i].equals(" ") || objects[i].equals("\n")) {
                 objects[i] = null;
                 numItemsRemoved++;
             }

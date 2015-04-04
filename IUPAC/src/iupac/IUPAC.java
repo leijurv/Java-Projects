@@ -18,14 +18,14 @@ public class IUPAC {
     public static ArrayList<Molecule> getDemos() {
         ArrayList<Molecule> demos = new ArrayList<>();
         HydroCarbon demo = new HydroCarbon(6);
-        demo.addMolecule(Atom.get("flourine"), 1);
+        demo.addMolecule(Atom.get("fluorine"), 1);
         demo.addBond(2);
         demo.addBond(2);
         demo.addBond(4);
         demo.addBond(4);
         demo.addMolecule(Atom.get("bromine"), 1);
-        demo.addMolecule(Atom.get("flourine"), 3);
-        demo.addMolecule(Atom.get("flourine"), 3);
+        demo.addMolecule(Atom.get("fluorine"), 3);
+        demo.addMolecule(Atom.get("fluorine"), 3);
         HydroCarbon side = new HydroCarbon(2);
         side.addBond(1);
         demo.addMolecule(side, 3);
@@ -33,11 +33,11 @@ public class IUPAC {
         HydroCarbon tetraflourine = new HydroCarbon(6);
         for (int i = 1; i <= 6; i++) {
             for (int j = 0; j < 2; j++) {
-                tetraflourine.addMolecule(Atom.get("flourine"), i);
+                tetraflourine.addMolecule(Atom.get("fluorine"), i);
             }
         }
-        tetraflourine.addMolecule(Atom.get("flourine"), 1);
-        tetraflourine.addMolecule(Atom.get("flourine"), 6);
+        tetraflourine.addMolecule(Atom.get("fluorine"), 1);
+        tetraflourine.addMolecule(Atom.get("fluorine"), 6);
         HydroCarbon benzene = new HydroCarbon(6);
         //t.addMolecule(new CovalentBond(2), Atom.get("oxygen"), 3);
         benzene.addBond(1);
@@ -71,15 +71,15 @@ public class IUPAC {
         hexanoic.isAcid = true;
         demos.add(hexanoic);
         HydroCarbon diflouro = new HydroCarbon(2);
-        diflouro.addMolecule(Atom.get("flourine"), 1);
-        diflouro.addMolecule(Atom.get("flourine"), 1);
+        diflouro.addMolecule(Atom.get("fluorine"), 1);
+        diflouro.addMolecule(Atom.get("fluorine"), 1);
         demos.add(diflouro);
         HydroCarbon pentaflouro = new HydroCarbon(3);
-        pentaflouro.addMolecule(Atom.get("flourine"), 1);
-        pentaflouro.addMolecule(Atom.get("flourine"), 1);
-        pentaflouro.addMolecule(Atom.get("flourine"), 1);
-        pentaflouro.addMolecule(Atom.get("flourine"), 3);
-        pentaflouro.addMolecule(Atom.get("flourine"), 3);
+        pentaflouro.addMolecule(Atom.get("fluorine"), 1);
+        pentaflouro.addMolecule(Atom.get("fluorine"), 1);
+        pentaflouro.addMolecule(Atom.get("fluorine"), 1);
+        pentaflouro.addMolecule(Atom.get("fluorine"), 3);
+        pentaflouro.addMolecule(Atom.get("fluorine"), 3);
         demos.add(pentaflouro);
         demos.add(tetraflourine);
         HydroCarbon but = new HydroCarbon(5);
@@ -112,6 +112,20 @@ public class IUPAC {
         demos.add(big);
         demos.add(demo);
         demos.add(side);
+        HydroCarbon cmc = new HydroCarbon(6);
+        cmc.addMolecule(new HydroCarbon(1), 2);
+        cmc.addMolecule(new HydroCarbon(1), 6);
+        cmc.addMolecule(new HydroCarbon(1), 6);
+        cmc.addBond(1);
+        cmc.isCyclic = true;
+        demos.add(cmc);
+        HydroCarbon carotene = new HydroCarbon(18);
+        carotene.addMolecule(cmc, 1);
+        carotene.addMolecule(cmc, 18);
+        for (int i = 1; i <= 17; i += 2) {
+            carotene.addBond(i);
+        }
+        demos.add(carotene);
         return demos;
     }
     /**
@@ -147,6 +161,18 @@ public class IUPAC {
         M.setLayout(new FlowLayout());
         showNum.addActionListener((ActionEvent e)->{
             frame.repaint();
+        });
+        JButton newMolecule = new JButton("New molecule");
+        newMolecule.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int numCarbon = Integer.parseInt(JOptionPane.showInputDialog("How many carbon atoms?"));
+                HydroCarbon cc = new HydroCarbon(numCarbon);
+                demos.add(cc);
+                jc.addItem(cc.toString());
+                jc.setSelectedIndex(demos.size() - 1);
+                frame.repaint();
+            }
         });
         JButton addBond = new JButton("Add Bond");
         addBond.addActionListener((ActionEvent e)->{
@@ -186,6 +212,7 @@ public class IUPAC {
         });
         M.add(jc);
         M.add(addBond);
+        M.add(newMolecule);
         M.add(addSideMolecule);
         M.add(isCyclic);
         M.add(isAcid);

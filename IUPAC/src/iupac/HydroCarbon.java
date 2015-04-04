@@ -11,10 +11,10 @@ import java.awt.*;
  * @author leijurv
  */
 public class HydroCarbon extends Molecule {
-    static final String[] modNames = {"", "", "di", "tri", "tetra", "penta", "hexa"};
+    static final String[] modNames = {"", "", "di", "tri", "tetra", "penta", "hexa", "hepta", "octa", "nona"};
     static final String[] baseNames = {"", "meth", "eth", "prop", "but", "pent", "hex", "hept", "oct", "non", "dec"};
     static final String[] bondNames = {"", "ane", "ene", "yne"};
-    static final String[] doNames = {"", "un", "do", "tri", "tetra", "penta", "hexa"};
+    static final String[] doNames = {"", "un", "do", "tri", "tetra", "penta", "hexa", "hepta", "octa", "nona"};
     static final String[] decNames = {"", "dec", "cos", "triacont", "tetracont", "pentacont"};
     int numCarbon;
     int baseBondNum;
@@ -130,12 +130,13 @@ public class HydroCarbon extends Molecule {
                 continue;
             }
             String bm = toStringWithOnlyCommas(extraBondLocations.get(i));
-            bm = "-" + bm + "-" + modNames[extraBondLocations.get(i).size()] + bondNames[i];
+            bm = "-" + bm + "-" + getModName(extraBondLocations.get(i).size()) + bondNames[i];
             if (extraBondLocations.get(i).size() > 1) {//If including 2,3-diene for example, add an A
                 addA = true;
             }
             bondMod = bondMod + bm;
         }
+        addA = false;
         if (bondMod.equals("")) {//If there are no bond modifiers
             bondMod = bondNames[baseBondNum];//Add the base one, e.g. ethANE
             if (yl) {//But if in YL mode
@@ -149,6 +150,11 @@ public class HydroCarbon extends Molecule {
         if (!oxyLocations.isEmpty()) {
             oxy = toStringWithOnlyCommas(oxyLocations);
             oxy = "-" + oxy + "-" + modNames[oxyLocations.size()] + "one";
+            /*if (bondNames[baseBondNum].equals(bondMod)) {
+             bondMod = "";
+             } else {*/
+            bondMod = bondMod.substring(0, bondMod.length() - 1);
+            //}
         }
         if (yl) {
             if (sf.equals("") && bondMod.equals("yl")) {//If no prefixes and in yl mode
@@ -205,7 +211,7 @@ public class HydroCarbon extends Molecule {
             g.drawString(toString(), (int) nameX, (int) nameY);
         }
         for (int i = 0; i < numCarbon - (isCyclic ? 0 : 1); i++) {
-            (i == numCarbon - 1 ? new CovalentBond(baseBondNum) : internalBonds[i]).draw(g, screenLocations.get(i)[0], screenLocations.get(i)[1], screenLocations.get((i + 1) % (screenLocations.size()))[0], screenLocations.get((i + 1) % (screenLocations.size()))[1]);
+            (i == numCarbon - 1 ? new CovalentBond(baseBondNum) : internalBonds[i]).draw(g, screenLocations.get(i)[0], screenLocations.get(i)[1], screenLocations.get((i + 1) % (screenLocations.size()))[0], screenLocations.get((i + 1) % (screenLocations.size()))[1], Atom.get("carbon"), Atom.get("carbon"));
         }
         ArrayList<ArrayList<Bond>> bondss = new ArrayList<>();
         ArrayList<ArrayList<Molecule>> othh = new ArrayList<>();
@@ -249,8 +255,9 @@ public class HydroCarbon extends Molecule {
                     int X = (int) (Math.cos(an) * rad + mlX);
                     int Y = (int) (Math.sin(an) * rad + mlY);
                     Bond bond = bondss.get(i).get(j);
-                    bond.draw(g, mlX, mlY, X, Y);
-                    othh.get(i).get(j).draw(g, X, Y, an, bond, false);
+                    Molecule mol = othh.get(i).get(j);
+                    bond.draw(g, mlX, mlY, X, Y, Atom.get("carbon"), mol);
+                    mol.draw(g, X, Y, an, bond, false);
                 }
             }
         }

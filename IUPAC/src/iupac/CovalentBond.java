@@ -23,7 +23,7 @@ public class CovalentBond extends Bond {
         return new int[] {numBonds, numBonds};
     }
     @Override
-    public void draw(Graphics g, double startX, double startY, double endX, double endY) {
+    public void draw(Graphics g, double startX, double startY, double endX, double endY, Molecule start, Molecule finish) {
         double lineDist = 4;
         double dx = endX - startX;
         double dy = endY - startY;

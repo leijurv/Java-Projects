@@ -142,26 +142,24 @@ public class PerlinNoise {
                 frame.repaint();
             }
         });
-        frame.add(show);
-        /*
-         JSlider j = new JSlider(1, 10, 5);
-         JSlider p = new JSlider(1, 100, 100);
-         JCheckBox dank = new JCheckBox();
-         ChangeListener dankk = new ChangeListener() {
-         @Override
-         public void stateChanged(ChangeEvent e) {
-         b = gen(GeneratePerlinNoise(genWhiteNoise(width, height, 0), j.getValue(), dank.isSelected(), ((float) p.getValue()) / 100));
-         frame.repaint();
-         }
-         };
-         j.addChangeListener(dankk);
-         dank.addChangeListener(dankk);
-         p.addChangeListener(dankk);
-
-         frame.add(j);
-         frame.add(dank);
-         frame.add(p);
-         frame.repaint();*/
+        //frame.add(show);
+        JSlider j = new JSlider(1, 10, 5);
+        JSlider p = new JSlider(1, 100, 100);
+        JCheckBox dank = new JCheckBox();
+        ChangeListener dankk = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                b = gen(GeneratePerlinNoise(genWhiteNoise(width, height, 0), j.getValue(), dank.isSelected(), ((float) p.getValue()) / 100));
+                frame.repaint();
+            }
+        };
+        j.addChangeListener(dankk);
+        dank.addChangeListener(dankk);
+        p.addChangeListener(dankk);
+        frame.add(j);
+        frame.add(dank);
+        frame.add(p);
+        frame.repaint();
     }
     public static BufferedImage gen(float[][] dank) {
         int width = dank.length;
