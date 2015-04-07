@@ -31,18 +31,36 @@ public class Steganography {
     static String password = null;
     static File importLocation = null;
     static File exportLocation = null;
+    static final JLabel dataLabel = new JLabel("Data:");
+    static final JLabel data = new JLabel("");
+    static JPanel dataPanel = new JPanel(new FlowLayout());
+    static JLabel image = new JLabel("", new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB)), JLabel.LEFT);
+    static final int numBytes = 3;
+    static final int numBitsModifiable = 3;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
+        dataPanel.add(dataLabel);
+        dataPanel.add(data);
+        data.setBorder(BorderFactory.createLineBorder(Color.black));
         final JFileChooser fc = new JFileChooser();
         JFrame frame = new JFrame("Steganography");
         JComponent M = new JComponent() {
             public void paintComponent(Graphics g) {
                 g.drawString((seed == null) ? "Password not set" : "Password set to " + password, 10, 10);
                 if (withData != null && seed != null) {
-                    String data = readString();
-                    g.drawString(data == null ? "No data" : "Data: " + data, 300, 300);
+                    String d = readString();
+                    if (d != null) {
+                        d = String.format("<html><div WIDTH=%d>%s</div><html>", (frame.getWidth() * 2) / 3, d);
+                        data.setText(d);
+                        dataLabel.setText("Data:");
+                    } else {
+                        data.setText(new String(doRead(100)));
+                        dataLabel.setText("No data/unreadable data");
+                    }
+                } else {
+                    dataLabel.setText("No data yet");
                 }
             }
         };
@@ -63,14 +81,14 @@ public class Steganography {
                         importLocation = file;
                         exportLocation = new File(file.getParent() + File.separatorChar + file.getName().split("\\.")[0] + "Output.bmp");
                         scaledOriginal = originalImage.getScaledInstance(200, -1, Image.SCALE_SMOOTH);
-                        JLabel orig = new JLabel("Original", new ImageIcon(scaledOriginal), JLabel.LEFT);
-                        orig.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
-                        M.add(orig);
+                        image.setText("Original");
+                        image.setIcon(new ImageIcon(scaledOriginal));
+                        image.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
                     } catch (IOException ex) {
                         Logger.getLogger(Steganography.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }//Silently ignore if user cancelled choose file dialog
-                frame.repaint();
+                frame.setSize(frame.getWidth() - 1, frame.getHeight() - 1);
             }
         });
         M.add(open);
@@ -95,6 +113,9 @@ public class Steganography {
             @Override
             public void actionPerformed(ActionEvent e) {
                 password = JOptionPane.showInputDialog("What is teh passwurd?");
+                if (password == null) {
+                    return;
+                }
                 seed = seedFromString(password);
                 frame.repaint();
             }
@@ -123,6 +144,8 @@ public class Steganography {
         M.add(setPassword);
         M.add(encodeData);
         M.add(export);
+        M.add(image);
+        M.add(dataPanel);
         frame.setContentPane(M);
         frame.setSize(10000, 10000);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -162,14 +185,23 @@ public class Steganography {
             return null;
         }
     }
+    public static byte[] doRead(int numBytes) {
+        SteganographicInputStream in = new SteganographicInputStream(seed, withData);
+        byte[] result = new byte[numBytes];
+        try {
+            in.read(result);
+        } catch (IOException ex) {
+        }
+        return result;
+    }
     public static class SteganographicOutputStream extends OutputStream {
         final Random r;
         final BufferedImage a;
-        final boolean[][] modified;
+        final boolean[][][] modified;
         public SteganographicOutputStream(long seed, BufferedImage a) {
             this.r = new Random(seed);
             this.a = a;
-            this.modified = new boolean[a.getWidth()][a.getHeight()];
+            this.modified = new boolean[a.getWidth()][a.getHeight()][numBytes * numBitsModifiable];
         }
         @Override
         public void write(int b) throws IOException {
@@ -183,11 +215,11 @@ public class Steganography {
     public static class SteganographicInputStream extends InputStream {
         final Random r;
         final BufferedImage a;
-        final boolean[][] modified;
+        final boolean[][][] modified;
         public SteganographicInputStream(long seed, BufferedImage a) {
             this.r = new Random(seed);
             this.a = a;
-            this.modified = new boolean[a.getWidth()][a.getHeight()];
+            this.modified = new boolean[a.getWidth()][a.getHeight()][numBytes * numBitsModifiable];
         }
         @Override
         public int read() throws IOException {
@@ -199,18 +231,20 @@ public class Steganography {
             return X;
         }
     }
-    public static int[] getRandomLocation(Random r, BufferedImage a, boolean[][] modified) {
+    public static int[] getRandomLocation(Random r, BufferedImage a, boolean[][][] modified) {
         int x = r.nextInt(a.getWidth());
         int y = r.nextInt(a.getHeight());
-        if (modified[x][y]) {
+        int Byte = r.nextInt(numBytes);
+        int Bit = r.nextInt(numBitsModifiable);
+        if (modified[x][y][Byte * numBitsModifiable + Bit]) {
             //System.out.println("Already hit " + x + "," + y + " skipping");
             return getRandomLocation(r, a, modified);//We don't want to overwrite previous data, so choose again if we've already hit this pixel
         }
-        int bit = r.nextInt(3) * 8 + r.nextInt(3);//Last 4 bits of any of the 3 RGB bytes
-        modified[x][y] = true;
+        int bit = Byte * 8 + Bit;
+        modified[x][y][Byte * numBitsModifiable + Bit] = true;
         return new int[] {x, y, bit};
     }
-    public static void writeData(Random r, BufferedImage a, byte b, boolean[][] modified) {
+    public static void writeData(Random r, BufferedImage a, byte b, boolean[][][] modified) {
         for (int i = 0; i < 8; i++) {
             boolean bit = ((b >> i) & 1) == 1;
             //System.out.println("Bit " + i + " is " + bit);
@@ -224,7 +258,7 @@ public class Steganography {
             a.setRGB(x, y, newColor);
         }
     }
-    public static byte readData(Random r, BufferedImage a, boolean[][] modified) {
+    public static byte readData(Random r, BufferedImage a, boolean[][][] modified) {
         byte c = 0;
         for (int i = 0; i < 8; i++) {
             int[] location = getRandomLocation(r, a, modified);
