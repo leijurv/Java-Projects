@@ -36,9 +36,11 @@ public class Steganography {
     static final JLabel data = new JLabel("");
     static JPanel dataPanel = new JPanel(new FlowLayout());
     static JLabel image = new JLabel("", new ImageIcon(new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB)), JLabel.LEFT);
+    static final JLabel currentBorder = new JLabel("");
     static final int numBytes = 3;
     static final int numBitsModifiable = 3;
     static final boolean writePayload = false;
+    static int borderRadius = 0;
     /**
      * @param args the command line arguments
      */
@@ -46,6 +48,7 @@ public class Steganography {
         dataPanel.add(dataLabel);
         dataPanel.add(data);
         data.setBorder(BorderFactory.createLineBorder(Color.black));
+        currentBorder.setBorder(BorderFactory.createLineBorder(Color.black));
         JFrame frame = new JFrame("Stegnawgraphie");
         JComponent M = new JComponent() {
             private static final long serialVersionUID = 1L;//because netbeans gets pissed if i dont have this
@@ -61,11 +64,12 @@ public class Steganography {
                         dataLabel.setText("Data:");
                     } else {
                         data.setText(new String(doRead(100)));//If it's unreadable, show the first 100 bytes in case only part of it is corrupted
-                        dataLabel.setText("No data/unreadable data");
+                        dataLabel.setText("No data/unreadable data (wrong password/wrong border radius)");
                     }
                 } else {
                     dataLabel.setText("No data yet");
                 }
+                currentBorder.setText("Current border: " + borderRadius);
             }
         };
         M.setLayout(new FlowLayout());
@@ -134,6 +138,21 @@ public class Steganography {
                 frame.repaint();
             }
         });
+        JButton setBorder = new JButton("set bordr");
+        setBorder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String data = null;
+                if (seed != null && withData != null) {
+                    data = readString();
+                }
+                borderRadius = Integer.parseInt(JOptionPane.showInputDialog("How many pixels around the edge should be ignored?"));
+                if (data != null) {
+                    writeString(data);
+                }
+                frame.repaint();
+            }
+        });
         JButton setPassword = new JButton("set pathwurd");
         setPassword.addActionListener(new ActionListener() {
             @Override
@@ -168,6 +187,8 @@ public class Steganography {
             }
         });
         M.add(setPassword);
+        M.add(setBorder);
+        M.add(currentBorder);
         M.add(encodeData);
         M.add(export);
         M.add(image);
@@ -259,8 +280,8 @@ public class Steganography {
         //TODO override some of the other read functions
     }
     public static int[] getRandomLocation(Random r, BufferedImage a, boolean[][][] modified) {
-        int x = r.nextInt(a.getWidth());
-        int y = r.nextInt(a.getHeight());
+        int x = r.nextInt(a.getWidth() - 2 * borderRadius) + borderRadius;//so as not to modify some... things... that are right at the edge of the
+        int y = r.nextInt(a.getHeight() - 2 * borderRadius) + borderRadius;//image which need to be pixel perfect
         int Byte = r.nextInt(numBytes);
         int Bit = r.nextInt(numBitsModifiable);
         if (modified[x][y][Byte * numBitsModifiable + Bit]) {
