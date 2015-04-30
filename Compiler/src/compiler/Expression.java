@@ -87,7 +87,7 @@ public abstract class Expression extends Command {
         }
         int numItemsRemoved = 0;
         for (int i = 0; i < objects.length; i++) {
-            if (objects[i].equals(" ") || objects[i].equals("\n")) {
+            if (objects[i].equals(" ") || objects[i].equals("\n") || objects[i].equals("	")) {
                 objects[i] = null;
                 numItemsRemoved++;
             }
@@ -168,7 +168,7 @@ public abstract class Expression extends Command {
         String s = (String) o;
         Object constant = constants.get(s);
         if (constant != null) {
-            System.out.println("Replacing '" + s + "' with predefined constant " + constant);
+            Gooey.println("Replacing '" + s + "' with predefined constant " + constant);
             return new ExpressionConstant(constant);
         }
         try {
@@ -211,7 +211,7 @@ public abstract class Expression extends Command {
                 }
             }
         }
-        System.out.println("MEOWWW " + contents);
+        Gooey.println("MEOWWW " + contents);
         Expression[] result = new Expression[contents.size()];
         for (int k = 0; k < result.length; k++) {
             ArrayList<Object> cont = contents.get(k);
@@ -224,11 +224,11 @@ public abstract class Expression extends Command {
         return new Object[] {result, leftover};
     }
     public static Expression parse(Object[] o) {
-        System.out.print("Parsing expression ");
+        Gooey.print("Parsing expression ");
         for (Object k : o) {
-            System.out.print(k + "       ");
+            Gooey.print(k + "       ");
         }
-        System.out.println();
+        Gooey.println();
         if (o.length == 1) {
             return parse(o[0]);
         }
@@ -247,7 +247,7 @@ public abstract class Expression extends Command {
             Settable varname = (Settable) o[0];
             return new ExpressionSetVariable(varname, set);
         }
-        //System.out.println(o.length);
+        //Gooey.println(o.length);
         //Parenthesis
         for (int i = 0; i < o.length; i++) {
             if (o[i].equals("(")) {
@@ -340,9 +340,9 @@ public abstract class Expression extends Command {
                 }
             }
         }
-        System.out.print("ERROR WHILE PARSING");
+        Gooey.print("ERROR WHILE PARSING");
         for (Object k : o) {
-            System.out.print(k);
+            Gooey.print(k.toString());
         }
         throw new RuntimeException("ERROR WHILE PARSING");
     }
@@ -355,7 +355,7 @@ public abstract class Expression extends Command {
         writeExpression(out);
     }
     protected final void writeExpression(DataOutputStream out) throws IOException {
-        System.out.println("Writing expression with id " + getExpressionID() + ", " + this);
+        Gooey.println("Writing expression with id " + getExpressionID() + ", " + this);
         out.writeByte(getExpressionID());
         doWriteExpression(out);
     }
@@ -363,7 +363,7 @@ public abstract class Expression extends Command {
     public abstract byte getExpressionID();
     public static Expression readExpression(DataInputStream in) throws IOException {
         byte expressionID = in.readByte();
-        System.out.println("Reading expression ID" + expressionID);
+        Gooey.println("Reading expression ID" + expressionID);
         Expression result = readExpressionWithID(in, expressionID);
         if (result == null) {
             return null;//Or throw exception, haven't decided yet
@@ -371,7 +371,7 @@ public abstract class Expression extends Command {
         if (result.getExpressionID() != expressionID) {
             throw new IOException("Failed to read properly");
         }
-        System.out.println("Parsed " + result);
+        Gooey.println("Parsed " + result);
         return result;
     }
     private static Expression readExpressionWithID(DataInputStream in, byte expressionID) throws IOException {

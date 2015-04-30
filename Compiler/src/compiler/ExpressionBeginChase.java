@@ -43,7 +43,8 @@ public class ExpressionBeginChase extends Expression {
             if (o instanceof Object[]) {
                 o = (Arrays.asList((Object[]) o));
             }
-            System.out.println("MEOWING " + o);
+            Gooey.printlnP(o + "");
+            Gooey.println("MEOWING " + o);
             return preyVals;
         }
         if (chasename.equals("len")) {

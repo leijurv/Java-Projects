@@ -32,6 +32,9 @@ public class Chase extends Expression {
     public Object evaluate(Context c) {//foo=    > chase(bar){blah} <      this is defining a chase not running it
         return this;
     }
+    public int getNumPrey() {
+        return preyNames.size();
+    }
     public Object run(Context c, ArrayList<Object> prey) {
         Context local = c.subContext();
         for (int i = 0; i < prey.size(); i++) {

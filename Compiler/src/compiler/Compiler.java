@@ -6,6 +6,7 @@
 package compiler;
 import java.io.*;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 /**
  *
  * @author leijurv
@@ -13,93 +14,103 @@ import java.util.ArrayList;
 public class Compiler {
     static final boolean verbose = false;
     static final String programFloatingPointTesting = "chase main ( kush ) { meow ( 5 + 5^2 );blink(5.2^2>27){meow(55+1)}a=(kush>=4);meow(a);a=a||false;a=a&&true;meow(a)blink(a){meow(55)}else{meow(66)} blink(true){meow(1)};meow(5.0==5)} ";
-    static final String programArrayTesting = "chase main(kush){a=[1,3,[5],6,67];meow(a[1]);meow(a[2]);meow(a[2][0]);meow(a[1]);a[1]=[4,5];meow(a[1][0]);a[1][0]=7;meow(a[1][0]);meow([5,[6]][1][0]);meow(len(array(100)));}";
-    static final String programEuler1 = "chase main(abc){"
-            + "sum=0;"
-            + "i=0;"
-            + "purr(i<1000){"
-            + "blink(i%5==0||i%3==0){"
-            + "sum=sum+i"
-            + "}"
-            + "i=i+1"
-            + "};"
-            + "meow(sum)"
+    static final String programArrayTesting = "chase main(){a=[1,3,[5],6,67];meow(a[1]);meow(a[2]);meow(a[2][0]);meow(a[1]);a[1]=[4,5];meow(a[1][0]);a[1][0]=7;meow(a[1][0]);meow([5,[6]][1][0]);meow(len(array(100)));}";
+    static final String programEuler1 = "chase main(){\n"
+            + "sum=0;\n"
+            + "i=0;\n"
+            + "purr(i<1000){\n"
+            + "blink(i%5==0||i%3==0){\n"
+            + "sum=sum+i\n"
+            + "}\n"
+            + "i=i+1\n"
+            + "};\n"
+            + "meow(sum)\n"
             + "}";
-    static final String programOtherEuler1 = "chase main(abc){i=sum=0;purr(i<1000){blink(i%5!=0){blink(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
+    static final String programOtherEuler1 = "chase main(){i=sum=0;purr(i<1000){blink(i%5!=0){blink(i%3==0){sum=sum+i}}else{sum=sum+i};i=i+1};meow(sum)}";
     static final String programChaseTesting = "chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}}  chase main(abc){ br=1+(ab=fac(abc+ 3)*(5-abc)); meow(ab); meow(abc); meow(br); blink ( br < ab ) { meow(5);}else{meow(6)};me=meow(br);meow(me)}";
     static final String programMapTest = "chase map(f,a){i=0;l=len(a);r=array(l);purr(i<l){r[i]=f(a[i]);i=i+1};pounce r} chase fac(r){blink (r>=1) {pounce r *fac(r-1);} else {pounce (1);}} chase main(r){a=[4,5,6];b=map(fac,a);meow(b);meow(b+1);}";
     static final String programSettingTesting = "chase main(abc){x=[5,6];[x[0],x[1]]=[x[1],x];meow(x);[a,b]=[1,2];[b,a]=[a,b];meow([a,b]);meow(1==[a,b]);meow(1==[a,b]-1);c=[5,6];c[(c=1)]=5;meow(c)}";
-    static final String programFibbonacciTest = "chase main(abc){"
-            + "prev=1;"
-            + "current=1;"
-            + "purr(current<abc){"
-            + "meow(current);"
-            + "[prev,current]=[current,prev+current];"
-            + "}";
+    static final String programFibbonacciTest = "chase main(abc){\n"
+            + "prev=1;\n"
+            + "current=1;\n"
+            + "purr(current<abc){\n"
+            + "meow(current);\n"
+            + "[prev,current]=[current,prev+current];\n"
+            + "}\n}";
     static final String programReverseTest = "chase reverse(a){[i,l]=[0,len(a)];r=array(l);purr(i<l){r[i]=a[l-i-1];i=i+1}pounce r} chase main(abc){x=[1,2,3,4];meow(x);meow(reverse(x))}";
     static final String programReverseMapTest = "chase reverse(a){[i,l]=[0,len(a)];r=array(l);purr(i<l){r[i]=a[l-i-1];i=i+1}pounce r} chase map(f,a){i=0;l=len(a);r=array(l);purr(i<l){r[i]=f(a[i]);i=i+1};pounce r} chase main(abc){a=[[1,2],[4,7,5]];meow(map(reverse,a))}";
     static final String programJenTest = "chase main(abc){x=[5,6];y=x;x[0]=3;meow(x);meow(y)}";
+    static final String[] examples = {programFibbonacciTest, programFloatingPointTesting, programArrayTesting, programEuler1, programOtherEuler1, programChaseTesting, programMapTest, programSettingTesting, programReverseTest, programReverseMapTest, programJenTest};
+    static final String[] exampleNames = {"Fibbonacci numbers up to input", "Floating point testing", "Array testing", "Project Euler #1", "Other way of Project Euler #1", "Chase testing", "Map testing", "Setting testing", "Reverse testing", "Reverse Map testing", "Jen testing"};
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main1(String[] args) throws IOException {
         String program = programEuler1;
-        System.out.println("STARTING TO PARSE: " + program);
-        System.out.println();
+        println("STARTING TO PARSE: " + program);
+        println();
         long time = System.currentTimeMillis();
         ArrayList<Command> prograaa = toCommandList(parse(program));
-        System.out.println();
-        System.out.println("Parsed program: " + prograaa);
-        System.out.println("Took " + (System.currentTimeMillis() - time) + "ms");
-        System.out.println();
-        System.out.println();
-        System.out.println("Compiling...");
-        System.out.println();
-        System.out.println();
+        println();
+        println("Parsed program: " + prograaa);
+        println("Took " + (System.currentTimeMillis() - time) + "ms");
+        println();
+        println();
+        println("Compiling...");
+        println();
+        println();
         byte[] compiled = compile(prograaa);
         runProgram(compiled);
         //run(prograaa);
+    }
+    public static void main(String[] args) {
+        Gooey.setup();
     }
     public static byte[] compile(ArrayList<Command> program) throws IOException {
         long time = System.currentTimeMillis();
         ByteArrayOutputStream ou = new ByteArrayOutputStream();
         Command.writemultiple(new DataOutputStream(ou), program);
         byte[] compiled = ou.toByteArray();
-        System.out.println();
-        System.out.println();
-        System.out.println("Done compiling. Took " + (System.currentTimeMillis() - time) + "ms");
-        System.out.println("Compiled program: " + new String(compiled));
+        println();
+        println();
+        println("Done compiling. Took " + (System.currentTimeMillis() - time) + "ms");
+        println("Compiled program: " + new String(compiled));
         return compiled;
     }
     public static void runProgram(byte[] compiled) throws IOException {
-        System.out.println();
-        System.out.println("Pre-reading program...");
+        println();
+        println("Pre-reading program...");
         long time = System.currentTimeMillis();
         ByteArrayInputStream in = new ByteArrayInputStream(compiled);
         ArrayList<Command> progra = Command.readmultiple(new DataInputStream(in));
-        System.out.println();
-        System.out.println("Done pre-reading. Took " + (System.currentTimeMillis() - time) + "ms");
+        println();
+        println("Done pre-reading. Took " + (System.currentTimeMillis() - time) + "ms");
         run(progra);
     }
     public static void run(ArrayList<Command> progra) {
-        System.out.println("Reading program...");
+        println("Reading program...");
         long time = System.currentTimeMillis();
         Context c = new Context();
         for (Command cc : progra) {
             cc.execute(c);
         }
-        System.out.println();
-        System.out.println();
-        System.out.println("Done reading. Took " + (System.currentTimeMillis() - time) + "ms");
-        System.out.println("PROGRAM: " + c);
-        System.out.println();
+        println();
+        println();
+        println("Done reading. Took " + (System.currentTimeMillis() - time) + "ms");
+        println("PROGRAM: " + c);
+        println();
         ArrayList<Expression> prey = new ArrayList<>();
-        prey.add(new ExpressionConstant(100));
-        System.out.println("Running program with prey " + prey);
+        Chase main = (Chase) c.get("main");
+        if (main.getNumPrey() != 0) {
+            String pr = JOptionPane.showInputDialog("What should the input to the main function be?");
+            prey.add(new ExpressionConstant(Integer.parseInt(pr)));
+        }
+        ExpressionBeginChase toCall = new ExpressionBeginChase("main", prey);
+        println("Running program with prey " + prey);
         time = System.currentTimeMillis();
-        new ExpressionBeginChase("main", prey).evaluate(c);
-        System.out.println("Running took " + (System.currentTimeMillis() - time) + "ms");
+        toCall.evaluate(c);
+        println("Running took " + (System.currentTimeMillis() - time) + "ms");
     }
     public static ArrayList<Object> curlyBrackets(ArrayList<Object> temp) {
         int firstBracket = -1;
@@ -114,18 +125,18 @@ public class Compiler {
             if (temp.get(i).equals("}")) {
                 numBrackets--;
                 if (numBrackets == 0) {
-                    //System.out.println("aoeuaoeu"+temp);
+                    //println("aoeuaoeu"+temp);
                     ArrayList<Object> before = new ArrayList<>(temp.subList(0, firstBracket));//no curly brackets
                     ArrayList<Object> during = new ArrayList<>(temp.subList(firstBracket + 1, i));//maybe curly brackets, needs to be parsed seprately
                     ArrayList<Object> after = new ArrayList<>(temp.subList(i + 1, temp.size()));//maybe curly brackets
-                    //System.out.println("aoeuaoeu1"+before);
-                    //System.out.println("aoeuaoeu2"+during);
-                    //System.out.println("aoeuaoeu3"+after);
+                    //println("aoeuaoeu1"+before);
+                    //println("aoeuaoeu2"+during);
+                    //println("aoeuaoeu3"+after);
                     ArrayList<Object> result = new ArrayList<>();
                     result.addAll(before);
                     result.add(postparse(during));
                     result.addAll(curlyBrackets(after));
-                    //System.out.println("aoeuaoeu4"+result);
+                    //println("aoeuaoeu4"+result);
                     return result;
                 }
             }
@@ -155,7 +166,7 @@ public class Compiler {
                 if (key == -1) {
                     continue;
                 }
-                System.out.println("Found " + keyWords[key] + " block");
+                println("Found " + keyWords[key] + " block");
                 int numParen = 0;
                 ArrayList<String> paren = new ArrayList<>();
                 boolean b = false;//Has reached first ( yet
@@ -183,8 +194,8 @@ public class Compiler {
                         throw new RuntimeException("Non string");
                     }
                 }
-                //System.out.println(paren);
-                //System.out.println(temp);
+                //println(paren);
+                //println(temp);
                 Expression inParen = null;
                 if (key != 0) {//If key#0, chase, paren is the list of prey names, which is not an expression
                     inParen = Expression.parse(paren.toArray());
@@ -264,28 +275,28 @@ public class Compiler {
             }
             if (!t.isEmpty()) {
                 temp.add(i, "**EXPRESSION LOCATION**");
-                System.out.println("Found expression " + t + " within " + temp);
+                println("Found expression " + t + " within " + temp);
                 temp.set(i, Expression.parse(t.toArray()));
                 t = new ArrayList<>();
             }
         }
         if (!t.isEmpty()) {//Finished going through, ends with an expression
             temp.add("**EXPRESSION LOCATION**");//Add to end
-            System.out.println("Found expression " + t + " within " + temp);
+            println("Found expression " + t + " within " + temp);
             temp.set(temp.size() - 1, Expression.parse(t.toArray()));//Replace end
         }
     }
     public static ArrayList<Object> parse(String p) {
         ArrayList<Object> temp = Expression.lex(p);
-        System.out.println("Lexed " + temp);
+        println("Lexed " + temp);
         return postparse(temp);
     }
     public static ArrayList<Object> postparse(ArrayList<Object> temp) {
-        System.out.println("Starting to find curly brackets in" + temp);
+        println("Starting to find curly brackets in" + temp);
         temp = curlyBrackets(temp);
-        System.out.println("Starting to find blocks in" + temp);
+        println("Starting to find blocks in" + temp);
         findBlocks(temp);
-        System.out.println("Starting to find expressions in" + temp);
+        println("Starting to find expressions in" + temp);
         expressions(temp);
         return temp;
     }
@@ -301,5 +312,11 @@ public class Compiler {
     }
     public static ArrayList<Command> checkIsCommandList(Object o, String messageIfNotArrayList, String messageIfNotCommandList) {
         return toCommandList(checkIsArrayList(o, messageIfNotArrayList, "Command"), messageIfNotCommandList);
+    }
+    public static void println() {
+        Gooey.println();
+    }
+    public static void println(String m) {
+        Gooey.println(m);
     }
 }
