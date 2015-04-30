@@ -51,8 +51,9 @@ public class Gooey {
                 new Thread() {
                     public void run() {
                         try {
-                            printText.setText("");
-                            debugText.setText("");
+                            output = "";
+                            debug = "";
+                            update();
                             String program = codeText.getText();
                             println("STARTING TO PARSE: " + program);
                             println();
@@ -133,19 +134,38 @@ public class Gooey {
         frame.setSize(2000, 2000);
         frame.setVisible(true);
     }
+    static String debug = "";
+    static String output = "";
     public static void println() {
         System.out.println();
-        debugText.append("\n");
+        debug = debug + "\n";
+        update();
+        //debugText.append("\n");
     }
     public static void println(String s) {
         System.out.println(s);
-        debugText.append(s + "\n");
+        debug = debug + s + "\n";
+        update();
+        //debugText.append(s + "\n");
     }
     public static void print(String s) {
         System.out.print(s);
-        debugText.append(s);
+        debug = debug + s;
+        update();
+        //debugText.append(s);
     }
-    public static void printlnP(String s) {
-        printText.append(s + "\n");
+    public static void printlnP(final String s) {
+        output = output + s + "\n";
+        //printText.append(s + "\n");
+        update();
+    }
+    public static void update() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                printText.setText(output);
+                debugText.setText(debug);
+            }
+        });
     }
 }
