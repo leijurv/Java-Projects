@@ -4,9 +4,7 @@
  * and open the template in the editor.
  */
 package jankyproxyu;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 /**
  *
@@ -14,50 +12,93 @@ import java.net.Socket;
  */
 public class JankyProxyU {
     static String DLoc = "10.1.10.102";
-    static int DPort = 12345;
-    static Socket s;
-    static Socket ssh;
+    static int DPort;
+    static int MPort;
+    static volatile int numEmptyConn = 0;//number of connections to D that are currently empty, and don't have a matching
+    static volatile int numSSHConn = 0;//number of ssh connections to localhost
+    static PrintWriter logOut;
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws InterruptedException {
-        while (true) {
+    public static void main(String[] args) {
+        DPort = Integer.parseInt(args[0]);
+        MPort = Integer.parseInt(args[1]);
+        String file = System.getProperty("user.home") + "/log" + DPort + "-" + MPort + ".log";
+        try {
+            logOut = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+        } catch (IOException e) {
+        }
+        new Connector().start();
+        new Connector().start();
+    }
+    public static class Connector extends Thread {
+        Socket s;
+        Socket ssh;
+        public void doIt() {
+            boolean dc = true;
             try {
+                logOut.println("Trying to connect");
+                logOut.flush();
                 s = new Socket(DLoc, DPort);
                 ssh = null;
-                InputStream fromDown = s.getInputStream();
+                final InputStream fromDown = s.getInputStream();
                 OutputStream toDown = s.getOutputStream();
+                dc = false;
+                numEmptyConn++;
+                logOut.println("!NE: " + numEmptyConn + "  NS: " + numSSHConn);
+                logOut.flush();
+                if (numEmptyConn < 2) {
+                    logOut.println("starting");
+                    logOut.flush();
+                    new Connector().start();
+                }
+                int firstByte = fromDown.read();//wait for first byte before creating ssh
+                numEmptyConn--;
+                if (firstByte < 0) {
+                    return;
+                }
+                toDown.write(5);
+                if (numEmptyConn < 2) {
+                    logOut.println("starting");
+                    logOut.flush();
+                    new Connector().start();
+                }
+                logOut.println("Creating ssh");
+                logOut.flush();
+                ssh = new Socket("localhost", MPort);
+                numSSHConn++;
+                logOut.println("#NE: " + numEmptyConn + "  NS: " + numSSHConn);
+                logOut.flush();
+                final OutputStream toLoc = ssh.getOutputStream();
                 new Thread() {
+                    @Override
                     public void run() {
-                        OutputStream toLoc = null;
                         while (true) {
                             try {
                                 int i = fromDown.read();
                                 if (i < 0) {
-                                    System.out.println("fromdown returned " + i);
+                                    logOut.println("fromdown returned " + i);
+                                    logOut.flush();
                                     s.close();
-                                    s = null;
+                                    ssh.close();
+                                    logOut.println("successfully closed both");
+                                    logOut.flush();
                                     break;
-                                }
-                                if (ssh == null) {
-                                    System.out.println("Creating ssh");
-                                    ssh = new Socket("localhost", 22);
-                                    toLoc = ssh.getOutputStream();
-                                }
-                                if (toLoc == null) {
-                                    toLoc = ssh.getOutputStream();
                                 }
                                 toLoc.write(i);
                             } catch (IOException io) {
                                 if (ssh != null) {
                                     try {
-                                        System.out.println("Closing ssh");
+                                        logOut.println("Closing ssh because of fromdown exception " + io);
+                                        logOut.flush();
                                         ssh.close();
                                     } catch (IOException ex) {
                                     }
                                 }
                                 if (s != null) {
                                     try {
+                                        logOut.println("Closing down because of thing " + io);
+                                        logOut.flush();
                                         s.close();
                                     } catch (IOException ex) {
                                     }
@@ -67,20 +108,12 @@ public class JankyProxyU {
                         }
                     }
                 }.start();
-                while (ssh == null && s != null) {
-                    Thread.sleep(100);
-                }
-                if (s == null) {
-                    if (ssh != null) {
-                        System.out.println("Closing ssh");
-                        ssh.close();
-                    }
-                }
                 InputStream fromLoc = ssh.getInputStream();
                 while (true) {
                     int i = fromLoc.read();
                     if (i < 0) {
-                        System.out.println("fromLoc returned " + i);
+                        logOut.println("fromLoc returned " + i);
+                        logOut.flush();
                         s.close();
                         break;
                     }
@@ -94,12 +127,32 @@ public class JankyProxyU {
                 } catch (Exception ex) {
                 }
                 try {
-                    System.out.println("Closing ssh");
+                    logOut.println("Closing ssh as cleanup");
+                    logOut.flush();
                     ssh.close();
                 } catch (Exception ex) {
                 }
-                Thread.sleep(5000);
+                logOut.println("wait: " + dc);
+                logOut.flush();
+                if (dc) {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                    }
+                }
             }
+        }
+        @Override
+        public void run() {
+            doIt();
+            if (ssh != null) {
+                numSSHConn--;
+            }
+            if (numEmptyConn < 2) {
+                new Connector().start();
+            }
+            logOut.println("@NE: " + numEmptyConn + "  NS: " + numSSHConn);
+            logOut.flush();
         }
     }
 }

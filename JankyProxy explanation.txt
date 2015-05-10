@@ -17,3 +17,6 @@ Every byte the raspberry pi receives from its connection to JankyProxyU gets for
 So now I have a connection to JankyProxyU running on my laptop, with everything being forwarded through the raspberry pi.
 Other than keeping a connection to JankyProxyD open, JankyProxyU also does another feature: the first time it receives data from JankyProxyD, it opens a connection to localhost:22, and starts forwarding bytes the same way. 
 Now I have a connection to my laptop behind by firewall, being forwarded though two java programs and a raspberry pi. And it works. (but a little slow)
+
+
+I like that a
