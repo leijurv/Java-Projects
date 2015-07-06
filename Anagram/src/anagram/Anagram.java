@@ -8,11 +8,11 @@ import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
 public class Anagram {
     public static void main(String[] args) throws Exception {
-        String beginning = "cole becker";
-        String ending = "be cockerel";
+        String beginning = "samdonahue.me";
+        String ending = "homemadean.us";
         char[] begin = beginning.toLowerCase().toCharArray();
         char[] end = ending.toLowerCase().toCharArray();
-        ArrayList<Character> endd = new ArrayList<>();
+        ArrayList<Character> endd = new ArrayList<>(end.length);
         for (char c : end) {
             endd.add(c);
         }
