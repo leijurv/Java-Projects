@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package cat;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,13 +22,11 @@ import java.util.logging.Logger;
  * @author leijurv
  */
 public class CAT {
-
     byte[] state;
     int i;
     int n;
     MessageDigest md;
     byte[] origState;
-
     public CAT(byte[] pwd, boolean streaming, MessageDigest M, int N) {
         md = M;
         md.reset();
@@ -41,23 +39,18 @@ public class CAT {
         i = 0;
         n = N;
     }
-
     public CAT(byte[] pwd, boolean streaming, MessageDigest M) {
         this(pwd, streaming, M, M.getDigestLength() / 2);
     }
-
     public CAT(byte[] pwd, boolean streaming) {
         this(pwd, streaming, getDefaultMessageDigest());
     }
-
     public CAT(byte[] pwd) {
         this(pwd, true);
     }
-
     public CAT(String pwd) {
         this(pwd.getBytes());
     }
-
     public static MessageDigest getDefaultMessageDigest() {
         try {
             return MessageDigest.getInstance("SHA-512");
@@ -65,7 +58,6 @@ public class CAT {
         }
         return null;
     }
-
     public byte encode(byte input) {
         byte result = (byte) (input ^ state[i]);
         state[i] = input;
@@ -78,7 +70,6 @@ public class CAT {
         }
         return result;
     }
-
     public byte decode(byte input) {
         byte result = (byte) (input ^ state[i]);
         state[i] = result;
@@ -91,7 +82,6 @@ public class CAT {
         }
         return result;
     }
-
     private byte[] encode1(byte[] input) {
         if (origState != null) {
             resetState();
@@ -117,7 +107,6 @@ public class CAT {
         }
         return result;
     }
-
     private byte[] decode1(byte[] input) {
         if (origState != null) {
             resetState();
@@ -143,7 +132,6 @@ public class CAT {
         }
         return result;
     }
-
     private byte[] encode2(byte[] input) {
         if (origState != null) {
             resetState();
@@ -154,7 +142,6 @@ public class CAT {
         }
         return result;
     }
-
     private byte[] decode2(byte[] input) {
         if (origState != null) {
             resetState();
@@ -165,21 +152,18 @@ public class CAT {
         }
         return result;
     }
-
     public byte[] encode(byte[] input) {
         if (input.length > n * 3) {
             return encode1(input);
         }
         return encode2(input);
     }
-
     public byte[] decode(byte[] input) {
         if (input.length > n * 3) {
             return decode1(input);
         }
         return decode2(input);
     }
-
     private void resetState() {
         System.out.println("resetting state");
         state = new byte[origState.length];
@@ -188,14 +172,12 @@ public class CAT {
         }
         i = 0;
     }
-
     public static void print(byte[] b) {
         for (byte B : b) {
             System.out.print(B + ",");
         }
         System.out.println("lol");
     }
-
     public static void main(String[] args) throws IOException {
         BigInteger serverPrivKey = new BigInteger(256, new Random());
         ECPoint serverPubKey = ECPoint.base.multiply(serverPrivKey);
@@ -210,8 +192,12 @@ public class CAT {
                             @Override
                             public void run() {
                                 try {
-
                                     ECPoint clientPub = new ECPoint(socket.getInputStream());
+                                    if (!clientPub.verify()) {
+                                        System.out.println("Invalid");
+                                        socket.close();
+                                        return;
+                                    }
                                     ECPoint shared = clientPub.multiply(serverPrivKey);
                                     System.out.println("Shared: " + shared);
                                     System.out.println("ClientPub: " + clientPub);
@@ -221,7 +207,6 @@ public class CAT {
                                         String message = in.readUTF();
                                         String response = "Your message was " + message + ", lol. ";
                                         out.writeUTF(response);
-                                        break;
                                     }
                                 } catch (IOException ex) {
                                     Logger.getLogger(CAT.class.getName()).log(Level.SEVERE, null, ex);
@@ -237,7 +222,6 @@ public class CAT {
         }.start();
         other(serverPubKey);
     }
-
     public static void other(ECPoint serverPubKey) throws IOException {
         Socket socket = new Socket("localhost", 5021);
         BigInteger myPrivKey = new BigInteger(255, new Random());
@@ -248,11 +232,13 @@ public class CAT {
         myPubKey.write(socket.getOutputStream());
         DataInputStream in = new DataInputStream(new CatInputStream(socket.getInputStream(), new CAT(shared.toString())));
         DataOutputStream out = new DataOutputStream(new CatOutputStream(socket.getOutputStream(), new CAT(shared.toString())));
-        out.writeUTF(new String(new BigInteger(255, new Random()).toByteArray()));
-        System.out.println(in.readUTF());
+        Scanner scan = new Scanner(System.in);
+        while (true) {
+            System.out.print(">");
+            out.writeUTF(scan.nextLine());
+            System.out.println(in.readUTF());
+        }
     }
-
     public static void main1(String[] args) {
-
     }
 }
