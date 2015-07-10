@@ -13,7 +13,6 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,30 +54,28 @@ public class CAT {
         try {
             return MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("This platform doesn't support SHA-512");
         }
-        return null;
     }
     public byte encode(byte input) {
         byte result = (byte) (input ^ state[i]);
         state[i] = input;
-        if (i == n - 1) {
+        i++;
+        if (i == n) {
             i = 0;
             state = md.digest(state);
             md.reset();
-        } else {
-            i++;
         }
         return result;
     }
     public byte decode(byte input) {
         byte result = (byte) (input ^ state[i]);
         state[i] = result;
-        if (i == n - 1) {
+        i++;
+        if (i == n) {
             i = 0;
             state = md.digest(state);
             md.reset();
-        } else {
-            i++;
         }
         return result;
     }
@@ -153,13 +150,13 @@ public class CAT {
         return result;
     }
     public byte[] encode(byte[] input) {
-        if (input.length > n * 3) {
+        if (input.length > n * 3000) {
             return encode1(input);
         }
         return encode2(input);
     }
     public byte[] decode(byte[] input) {
-        if (input.length > n * 3) {
+        if (input.length > n * 3000) {
             return decode1(input);
         }
         return decode2(input);
@@ -193,12 +190,18 @@ public class CAT {
                             public void run() {
                                 try {
                                     ECPoint clientPub = new ECPoint(socket.getInputStream());
+                                    long bef = System.currentTimeMillis();
+                                    long desiredEndTime = bef + 40;
                                     if (!clientPub.verify()) {
                                         System.out.println("Invalid");
                                         socket.close();
                                         return;
                                     }
                                     ECPoint shared = clientPub.multiply(serverPrivKey);
+                                    while (System.currentTimeMillis() < desiredEndTime) {//Defeat timing attacks by making the initial handshake take 40ms no matter what
+                                        Thread.sleep(1);
+                                    }
+                                    System.out.println(desiredEndTime - System.currentTimeMillis());
                                     System.out.println("Shared: " + shared);
                                     System.out.println("ClientPub: " + clientPub);
                                     DataInputStream in = new DataInputStream(new CatInputStream(socket.getInputStream(), new CAT(shared.toString())));
@@ -208,7 +211,7 @@ public class CAT {
                                         String response = "Your message was " + message + ", lol. ";
                                         out.writeUTF(response);
                                     }
-                                } catch (IOException ex) {
+                                } catch (IOException | InterruptedException ex) {
                                     Logger.getLogger(CAT.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
@@ -224,7 +227,7 @@ public class CAT {
     }
     public static void other(ECPoint serverPubKey) throws IOException {
         Socket socket = new Socket("localhost", 5021);
-        BigInteger myPrivKey = new BigInteger(255, new Random());
+        BigInteger myPrivKey = new BigInteger(257, new Random());
         ECPoint myPubKey = ECPoint.base.multiply(myPrivKey);
         System.out.println("MyPub: " + myPubKey);
         ECPoint shared = serverPubKey.multiply(myPrivKey);
@@ -232,12 +235,8 @@ public class CAT {
         myPubKey.write(socket.getOutputStream());
         DataInputStream in = new DataInputStream(new CatInputStream(socket.getInputStream(), new CAT(shared.toString())));
         DataOutputStream out = new DataOutputStream(new CatOutputStream(socket.getOutputStream(), new CAT(shared.toString())));
-        Scanner scan = new Scanner(System.in);
-        while (true) {
-            System.out.print(">");
-            out.writeUTF(scan.nextLine());
-            System.out.println(in.readUTF());
-        }
+        out.writeUTF("nhoaeduihtaoeiuthaeodithnaoedthudaoehtnudaonethduitnhaoeduithaoedihtaoeiuthanoeduhtaoedihaoeduhtnoaeduhtnaoeidthnoeadiuhtnoadthidoaehtidhtoeaiuoetdhuaeo");
+        System.out.println(in.readUTF());
     }
     public static void main1(String[] args) {
     }
