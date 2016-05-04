@@ -3,7 +3,13 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +17,12 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JProgressBar;
+
 public class Mandelbrot extends JComponent implements MouseListener, MouseMotionListener {
     private static final long serialVersionUID = 1L;
     static JFrame frame;
@@ -52,8 +63,8 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     static boolean smooth = true;
     static BufferedImage export;
     static boolean exporting = false;
-    static boolean animated = false;
-    static final int[] iterationCombs = new int[] {100, 500, 1000, 5000, 10000};
+    static boolean animated = true;
+    static final int[] iterationCombs = new int[]{100, 500, 1000, 5000, 10000};
     public static void main(String[] args) throws Exception {
         M.addMouseListener(M);
         M.addMouseMotionListener(M);
@@ -73,7 +84,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         M.setFocusable(true);
         (frame).setContentPane(M);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 100, 10));
-        Smooth = new JComboBox<String>(new String[] {"Smooth", "Jagged"});
+        Smooth = new JComboBox<String>(new String[]{"Smooth", "Jagged"});
         Smooth.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -82,7 +93,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
             }
         });
         frame.add(Smooth);
-        orbitLimitCombo = new JComboBox<String>(new String[] {"0", "1", "2", "3", "4", "5"});
+        orbitLimitCombo = new JComboBox<String>(new String[]{"0", "1", "2", "3", "4", "5"});
         orbitLimitCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -194,11 +205,11 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         }
         long start = System.currentTimeMillis();
         julia = true && animated;
-        double startX = -1.309;
-        boolean radd = true;
-        double endX = 0.1295;
-        double startY = -0.1155;
-        double endY = -0.812;
+        double startX = -0.1123;
+        boolean radd = false;
+        double endX = -0.1123;
+        double startY = -1;
+        double endY = 1;
         double ccenterX = ((-1.14865) + (-1.1243)) / 2;
         double ccenterY = (-0.26515 + (-0.2159)) / 2;
         double rad = Math.sqrt((ccenterX - (-1.14865)) * (ccenterX - (-1.14865)) + (ccenterY - (-0.2159)) * (ccenterY - (-0.2159))) * 1.05;
@@ -238,7 +249,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
         {0.727115, -0.372422}, {0.71048, -0.253437}, {0.674181, -0.156488},
         {0.62725, -0.0844426}, {0.578885, -0.0370981}, {0.53748, -0.0113132},
         {0.509743, -0.0014387}, {0.5, 0.}};
-        boolean zach = true;
+        boolean zach = false;
         String name = radd ? "julia radius " + rad + " around " + ccenterX + "," + ccenterY : "julia_" + startX + "," + startY + "_to_" + endX + "," + endY;
         if (zach) {
             name = "julia zack's pointssss times 2 thirds";
@@ -549,6 +560,7 @@ public class Mandelbrot extends JComponent implements MouseListener, MouseMotion
     @Override
     public void mouseMoved(MouseEvent me) {
     }
+
     public static class redraw extends Thread {
         @Override
         public void run() {
